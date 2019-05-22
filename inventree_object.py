@@ -64,6 +64,39 @@ class Part(InventreeObject):
 
     URL = 'part'
 
+    @staticmethod
+    def get_part_list(api, **kwargs):
+        """ Return a list of Part objects, using the following filters:
+
+        Args:
+            api - InvenTree API object
+
+            category - Filter by part category ID
+            buildable - Can this part be built from other parts?
+            purchaseable - Can this part be purcahsed from suppliers?
+        """
+
+        params = {
+        }
+
+        for arg in ['category', 'buildable', 'purchaseable']:
+            if kwargs.get(arg, None):
+                params[arg] = kwargs[arg]
+
+        response = api.get(Part.URL, params=params, **kwargs)
+
+        parts = []
+
+        if response is None:
+            return parts
+
+        for data in response:
+            if data and 'pk' in data:
+                parts.append(Part(data=data, requester=api))
+
+        return parts
+
+
     def get_supplier_parts(self):
 
         response = self._requester.get(
@@ -73,6 +106,9 @@ class Part(InventreeObject):
             })
 
         parts = []
+
+        if response is None:
+            return parts
 
         for part in response:
             if 'pk' in part.keys():
@@ -85,6 +121,34 @@ class SupplierPart(InventreeObject):
     """ Class for maniuplating a SupplierPart object """
 
     URL = 'company/part'
+
+    @staticmethod
+    def get_supplier_part_list(api, **kwargs):
+        """ Return a list of supplier part, with the following optional filters:
+
+        Args:
+            part - Filter by base part ID
+            supplier - Filter by supplier ID
+        """
+
+        params = {}
+
+        for arg in ['part', 'supplier']:
+            if kwargs.get(arg, None):
+                params[arg] = kwargs[arg]
+
+        response = api.get('company/part/', params=params, **kwargs)
+
+        parts = []
+
+        if response is None:
+            return parts
+
+        for data in response:
+            if 'pk' in data:
+                parts.append(SupplierPart(data=data, requester=api))
+
+        return parts
 
     def get_price_breaks(self):
 
