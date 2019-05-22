@@ -112,9 +112,38 @@ class Part(InventreeObject):
 
         for part in response:
             if 'pk' in part.keys():
-                parts.append(SupplierPart(data=part, requester=self._requester))
+                parts.append(SupplierPart(data=part, api=self._api))
 
         return parts
+
+
+class Company(InventreeObject):
+    """ Class for manipulating a Company object """
+
+    URL = 'company'
+
+    @staticmethod
+    def get_company_list(api, **kwargs):
+        """ Return a list of Company objects """
+
+        params = {}
+
+        for arg in ['is_supplier', 'is_customer']:
+            if kwargs.get(arg, None):
+                params[arg] = kwargs[arg]
+
+        response = api.get(Company.URL, params=params, **kwargs)
+
+        companies = []
+
+        if response is None:
+            return companies
+
+        for data in response:
+            if 'pk' in data:
+                companies.append(Company(data=data, api=api))
+
+        return companies
 
     
 class SupplierPart(InventreeObject):
