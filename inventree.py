@@ -83,6 +83,9 @@ class InventreeRequester(object):
 
         return response
 
+    def delete(self, url, **kwargs):
+        response = self.request(url, method='delete', **kwargs)
+
     def get(self, url, **kwargs):
         """ Perform a GET request
 
