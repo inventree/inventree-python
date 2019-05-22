@@ -19,8 +19,8 @@ class InventreeRequester(object):
             base_url - Base API URL
             
         kwargs:
-            username - Login username
-            password - Login password
+            username - Login username (required)
+            password - Login password (required)
 
         """
 
@@ -32,6 +32,7 @@ class InventreeRequester(object):
         if self.username and self.password:
             self.auth = HTTPBasicAuth(self.username, self.password)
         else:
+            # TODO - Raise an exception if authentication not provided
             self.auth = None
 
     def request(self, url, **kwargs):
@@ -44,6 +45,7 @@ class InventreeRequester(object):
         methods = {
             'GET': requests.get,
             'POST': requests.post,
+            'PUT': requests.put,
             'DELETE': requests.delete,
         }
 
@@ -56,10 +58,15 @@ class InventreeRequester(object):
         try:
             response = methods[method](api_url, auth=self.auth)
         except requests.exceptions.ConnectionError:
-            logging.error('Connection refused - {url}'.format(url=api_url))
+            logging.error("Connection refused - '{url}'".format(url=api_url))
             return None
-            
+
         logging.info("Request: {method} {url} - {response}".format(method=method, url=api_url, response=response.status_code))
+
+        # Detect invalid response codes
+        # Anything 300+ is 'bad'
+        if response.status_code >= 300:
+            logging.warning('Bad response ({code})'.format(code=response.status_code))
 
         return response
 
@@ -75,12 +82,15 @@ class InventreeRequester(object):
 
         response = self.request(url, method='get')
 
+        # No response returned 
+        if response is None:
+            logging.error("No response received - '{url}'".format(url=url))
+            return None
+
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            print("Error decoding JSON response")
-            print(response)
-            print(response.text)
+            logging.error("Error decoding JSON response - '{url}'".format(url=url))
             return None
 
         return data
