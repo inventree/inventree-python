@@ -40,6 +40,9 @@ class InventreeRequester(object):
 
         api_url = os.path.join(self.base_url, url)
 
+        if not api_url.endswith('/'):
+            api_url += '/'
+
         method = kwargs.get('method', 'get')
 
         params = kwargs.get('params', {})
