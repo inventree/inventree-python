@@ -66,7 +66,13 @@ class InventreeRequester(object):
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logging.warning('Bad response ({code})'.format(code=response.status_code))
+            logging.warning("Bad response ({code}) - '{url}'".format(code=response.status_code, url=api_url))
+
+        ctype = response.headers.get('content-type')
+
+        if not ctype == 'application/json':
+            logging.error("'Response content-type is not JSON - '{url}' - '{f}'".format(url=api_url, f=ctype))
+            return None
 
         return response
 
