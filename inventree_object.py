@@ -6,12 +6,12 @@ class InventreeObject():
 
     URL = ""
 
-    def __init__(self, requester, pk=None, data={}):
+    def __init__(self, api, pk=None, data={}):
         """ Insantiate this InvenTree object.
 
         Args:
             pk - The ID (primary key) associated with this object on the server
-            requester - The request manager object
+            api - The request manager object
             data - JSON representation of the object
         """
 
@@ -21,7 +21,7 @@ class InventreeObject():
             pk = data['pk']
 
         self._url = "{url}/{pk}/".format(url=self.URL, pk=pk)
-        self._requester = requester
+        self._api = api
         self._data = data
 
         # If the data are not populated, fetch from server
@@ -30,19 +30,19 @@ class InventreeObject():
 
     def delete(self):
         """ Delete this object from the database """
-        if self._requester:
-            self._requester.delete(self._url)
+        if self._api:
+            self._api.delete(self._url)
 
     def save(self):
         """ Save this object to the database """
-        if self._requester:
+        if self._api:
             # TODO
             pass
 
     def reload(self):
         """ Reload object data from the database """
-        if self._requester:
-            data = self._requester.get(self._url)
+        if self._api:
+            data = self._api.get(self._url)
             if data is not None:
                 self._data = data
 
@@ -92,14 +92,14 @@ class Part(InventreeObject):
 
         for data in response:
             if data and 'pk' in data:
-                parts.append(Part(data=data, requester=api))
+                parts.append(Part(data=data, api=api))
 
         return parts
 
 
     def get_supplier_parts(self):
 
-        response = self._requester.get(
+        response = self._api.get(
             SupplierPart.URL,
             params={
                 'part': self['pk']
@@ -137,7 +137,7 @@ class SupplierPart(InventreeObject):
             if kwargs.get(arg, None):
                 params[arg] = kwargs[arg]
 
-        response = api.get('company/part/', params=params, **kwargs)
+        response = api.get(SupplierPart.URL, params=params, **kwargs)
 
         parts = []
 
@@ -146,13 +146,14 @@ class SupplierPart(InventreeObject):
 
         for data in response:
             if 'pk' in data:
-                parts.append(SupplierPart(data=data, requester=api))
+                parts.append(SupplierPart(data=data, api=api))
 
         return parts
 
     def get_price_breaks(self):
+        """ Get a list of price break objects for this SupplierPart """
 
-        response = self._requester.get(
+        response = self._api.get(
             SupplierPriceBreak.URL,
             params={
                 'part': self['pk']
@@ -162,7 +163,7 @@ class SupplierPart(InventreeObject):
 
         for brk in response:
             if 'pk' in brk.keys():
-                breaks.append(SupplierPriceBreak(self._requester, data=brk))
+                breaks.append(SupplierPriceBreak(self._api, data=brk))
 
         return breaks
 
