@@ -121,8 +121,34 @@ class Part(InventreeObject):
         return BomItem.list(self._api, part=self.pk)
 
 
+class StockLocation(InventreeObject):
+    """ Class representing the StockLocation database model """
+
+    URL = 'stock/location'
+    filters = ['parent']
+
+    def get_stock_items(self):
+        return StockItem.list(self._api, location=self.pk)
+
+
+class StockItem(InventreeObject):
+    """ Class representing the StockItem database model.
+    
+    Stock items can be filtered by:
+    
+    - location: Where the stock item is stored
+    - category: The category of the part this stock item points to
+    - supplier: Who supplied this stock item
+    - part: The part referenced by this stock item
+    - supplier_part: Matching SupplierPart object
+    """
+
+    URL = 'stock'
+    filters = ['location', 'category', 'supplier', 'part', 'supplier_part']
+
+
 class Company(InventreeObject):
-    """ Class for manipulating a Company object """
+    """ Class representing the Company database model """
 
     URL = 'company'
     FILTERS = ['is_supplier', 'is_customer']
@@ -132,7 +158,7 @@ class Company(InventreeObject):
 
 
 class SupplierPart(InventreeObject):
-    """ Class for maniuplating a SupplierPart object """
+    """ Class representing the SupplierPart database model """
 
     URL = 'company/part'
     FILTERS = ['part', 'supplier']
@@ -144,12 +170,14 @@ class SupplierPart(InventreeObject):
 
 
 class SupplierPriceBreak(InventreeObject):
+    """ Class representing the SupplierPriceBreak database model """
 
     URL = 'company/price-break/'
     FILTERS = ['part']
 
 
 class BomItem(InventreeObject):
+    """ Class representing the BomItem database model """
 
     URL = 'bom'
     FILTERS = ['part', 'sub_part']
