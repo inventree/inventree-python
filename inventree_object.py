@@ -37,6 +37,15 @@ class InventreeObject():
         return self['pk']
 
     @classmethod
+    def create(cls, api, data, **kwargs):
+        """ Create a new database object in this class. """
+
+        # Ensure the pk value is None so an existing object is not updated
+        del data['pk']
+
+        api.post(cls.URL, data)
+
+    @classmethod
     def list(cls, api, **kwargs):
         """ Return a list of all items in this class on the database.
 
@@ -74,8 +83,7 @@ class InventreeObject():
     def save(self):
         """ Save this object to the database """
         if self._api:
-            # TODO
-            pass
+            self._api.put(self._url, self._data)
 
     def reload(self):
         """ Reload object data from the database """
@@ -97,21 +105,67 @@ class InventreeObject():
             raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
 
 
+class PartCategory(InventreeObject):
+    """ Class representing the PartCategory database model """
+
+    URL = 'part/category'
+    FILTERS = ['parent']
+
+    def get_parts(self):
+        return Part.list(self._api, category=self.pk)
+    
+
 class Part(InventreeObject):
-    """ Class for manipulating a Part object """
+    """ Class representing the Part database model """
 
     URL = 'part'
     FILTERS = ['category', 'buildable', 'purchaseable']
 
     def get_supplier_parts(self):
+        """ Return the supplier parts associated with this part """
         return SupplierPart.list(self._api, part=self.pk)
 
     def get_bom_items(self):
+        """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk)
+
+    def get_builds(self):
+        """ Return the builds associated with this part """
+        return Build.list(self._api, part=self.pk)
+
+    def get_stock_items(self):
+        """ Return the stock items associated with this part """
+        return StockItem.list(self._api, part=self.pk)
+
+
+class StockLocation(InventreeObject):
+    """ Class representing the StockLocation database model """
+
+    URL = 'stock/location'
+    filters = ['parent']
+
+    def get_stock_items(self):
+        return StockItem.list(self._api, location=self.pk)
+
+
+class StockItem(InventreeObject):
+    """ Class representing the StockItem database model.
+    
+    Stock items can be filtered by:
+    
+    - location: Where the stock item is stored
+    - category: The category of the part this stock item points to
+    - supplier: Who supplied this stock item
+    - part: The part referenced by this stock item
+    - supplier_part: Matching SupplierPart object
+    """
+
+    URL = 'stock'
+    FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
 
 
 class Company(InventreeObject):
-    """ Class for manipulating a Company object """
+    """ Class representing the Company database model """
 
     URL = 'company'
     FILTERS = ['is_supplier', 'is_customer']
@@ -121,7 +175,7 @@ class Company(InventreeObject):
 
 
 class SupplierPart(InventreeObject):
-    """ Class for maniuplating a SupplierPart object """
+    """ Class representing the SupplierPart database model """
 
     URL = 'company/part'
     FILTERS = ['part', 'supplier']
@@ -133,12 +187,21 @@ class SupplierPart(InventreeObject):
 
 
 class SupplierPriceBreak(InventreeObject):
+    """ Class representing the SupplierPriceBreak database model """
 
     URL = 'company/price-break/'
     FILTERS = ['part']
 
 
 class BomItem(InventreeObject):
+    """ Class representing the BomItem database model """
 
     URL = 'bom'
     FILTERS = ['part', 'sub_part']
+
+
+class Build(InventreeObject):
+    """ Class representing the Build database model """
+
+    URL = 'build'
+    FILTERS = ['part']

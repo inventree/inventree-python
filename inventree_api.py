@@ -53,6 +53,10 @@ class InvenTreeAPI(object):
 
         params = kwargs.get('params', {})
 
+        json = kwargs.get('json', None)
+
+        headers = kwargs.get('headers', None)
+
         search_term = kwargs.get('search', None)
 
         if search_term is not None:
@@ -72,9 +76,20 @@ class InvenTreeAPI(object):
         method = method.upper()
 
         try:
-            response = methods[method](api_url, auth=self.auth, params=params)
+            response = methods[method](
+                api_url,
+                auth=self.auth,
+                params=params,
+                headers=headers,
+                json=json
+            )
+
         except requests.exceptions.ConnectionError:
             logging.error("Connection refused - '{url}'".format(url=api_url))
+            return None
+
+        if response is None:
+            logging.error("Null response - {method} '{url}'".format(method=method, url=api_url))
             return None
 
         logging.info("Request: {method} {url} - {response}".format(method=method, url=api_url, response=response.status_code))
@@ -82,7 +97,11 @@ class InvenTreeAPI(object):
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logging.warning("Bad response ({code}) - '{url}'".format(code=response.status_code, url=api_url))
+            logging.warning("Bad response ({code}) - {method} '{url}'".format(code=response.status_code, method=method, url=api_url))
+
+        # A delete request won't return JSON formatted data (ignore further checks)
+        if method == 'DELETE':
+            return response
 
         ctype = response.headers.get('content-type')
 
@@ -93,9 +112,68 @@ class InvenTreeAPI(object):
         return response
 
     def delete(self, url, **kwargs):
-        # response = self.request(url, method='delete', **kwargs)
-        # TODO
-        pass
+        """ Perform a DELETE request. Used to remove a record in the database.
+
+        """
+
+        headers = {'content-type': 'application/json'}
+
+        response = self.request(url, method='delete', headers=headers, **kwargs)
+
+        if response is None:
+            return False
+
+        print(response.status_code, response.text)
+
+    def post(self, url, data, **kwargs):
+        """ Perform a POST request. Used to create a new record in the database.
+
+        Args:
+            url - API endpoint URL
+            data - JSON data to create new object
+        """
+
+        headers = {'content-type': 'application/json'}
+
+        params = {
+            'format': 'json',
+        }
+
+        response = self.request(url, json=data, method='post', headers=headers, params=params, **kwargs)
+
+        if response is None:
+            return False
+
+        if response.status_code in [200, 201]:
+            return True
+        else:
+            logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            return False
+
+    def put(self, url, data, **kwargs):
+        """ Perform a PUT request. Used to update existing records in the database.
+
+        Args:
+            url - API endpoint URL
+            data - JSON data to PUT
+        """
+
+        headers = {'content-type': 'application/json'}
+
+        params = {
+            'format': 'json',
+        }
+
+        response = self.request(url, json=data, method='put', headers=headers, params=params, **kwargs)
+
+        if response is None:
+            return None
+        
+        if response.status_code == 200:
+            return True
+        else:
+            logging.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            return False
 
     def get(self, url, **kwargs):
         """ Perform a GET request
@@ -111,7 +189,6 @@ class InvenTreeAPI(object):
 
         # No response returned
         if response is None:
-            logging.error("No response received - '{url}'".format(url=url))
             return None
 
         try:
