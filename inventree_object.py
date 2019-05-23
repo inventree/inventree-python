@@ -74,8 +74,7 @@ class InventreeObject():
     def save(self):
         """ Save this object to the database """
         if self._api:
-            # TODO
-            pass
+            self._api.put(self._url, self._data)
 
     def reload(self):
         """ Reload object data from the database """
@@ -97,7 +96,6 @@ class InventreeObject():
             raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
 
 
-
 class PartCategory(InventreeObject):
     """ Class representing the PartCategory database model """
 
@@ -115,9 +113,11 @@ class Part(InventreeObject):
     FILTERS = ['category', 'buildable', 'purchaseable']
 
     def get_supplier_parts(self):
+        """ Return the supplier parts associated with this part """
         return SupplierPart.list(self._api, part=self.pk)
 
     def get_bom_items(self):
+        """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk)
 
     def get_builds(self):

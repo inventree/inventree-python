@@ -53,6 +53,10 @@ class InvenTreeAPI(object):
 
         params = kwargs.get('params', {})
 
+        json = kwargs.get('json', None)
+
+        headers = kwargs.get('headers', None)
+
         search_term = kwargs.get('search', None)
 
         if search_term is not None:
@@ -72,7 +76,13 @@ class InvenTreeAPI(object):
         method = method.upper()
 
         try:
-            response = methods[method](api_url, auth=self.auth, params=params)
+            response = methods[method](
+                api_url,
+                auth=self.auth,
+                params=params,
+                headers=headers,
+                json=json
+            )
         except requests.exceptions.ConnectionError:
             logging.error("Connection refused - '{url}'".format(url=api_url))
             return None
@@ -82,7 +92,7 @@ class InvenTreeAPI(object):
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logging.warning("Bad response ({code}) - '{url}'".format(code=response.status_code, url=api_url))
+            logging.warning("Bad response ({code}) - {method} '{url}'".format(code=response.status_code, method=method, url=api_url))
 
         ctype = response.headers.get('content-type')
 
@@ -96,6 +106,28 @@ class InvenTreeAPI(object):
         # response = self.request(url, method='delete', **kwargs)
         # TODO
         pass
+
+    def put(self, url, data, **kwargs):
+        """ Perform a PUT request. Used to update existing records in the database.
+
+        Args:
+            url - API endpoitn URL
+            data - JSON data to POST
+        """
+
+        headers = {'content-type' : 'application/json'}
+
+        params = {
+            'format': 'json',
+        }
+
+        response = self.request(url, json=data, method='put', headers=headers, params=params, **kwargs)
+
+        if response is None:
+            logging.error("No response received - PUT '{url}'".format(url=url))
+            return None
+        
+        return response
 
     def get(self, url, **kwargs):
         """ Perform a GET request
@@ -111,7 +143,7 @@ class InvenTreeAPI(object):
 
         # No response returned
         if response is None:
-            logging.error("No response received - '{url}'".format(url=url))
+            logging.error("No response received - GET '{url}'".format(url=url))
             return None
 
         try:
