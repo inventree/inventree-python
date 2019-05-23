@@ -120,6 +120,14 @@ class Part(InventreeObject):
     def get_bom_items(self):
         return BomItem.list(self._api, part=self.pk)
 
+    def get_builds(self):
+        """ Return the builds associated with this part """
+        return Build.list(self._api, part=self.pk)
+
+    def get_stock_items(self):
+        """ Return the stock items associated with this part """
+        return StockItem.list(self._api, part=self.pk)
+
 
 class StockLocation(InventreeObject):
     """ Class representing the StockLocation database model """
@@ -181,3 +189,10 @@ class BomItem(InventreeObject):
 
     URL = 'bom'
     FILTERS = ['part', 'sub_part']
+
+
+class Build(InventreeObject):
+    """ Class representing the Build database model """
+
+    URL = 'build'
+    FILTERS = ['part']
