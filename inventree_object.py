@@ -144,7 +144,7 @@ class StockItem(InventreeObject):
     """
 
     URL = 'stock'
-    filters = ['location', 'category', 'supplier', 'part', 'supplier_part']
+    FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
 
 
 class Company(InventreeObject):
