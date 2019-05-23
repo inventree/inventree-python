@@ -1,5 +1,5 @@
 from inventree_api import InvenTreeAPI
-from inventree_object import Part, BomItem
+from inventree_object import Part, PartCategory, BomItem
 
 """ User will need to provide a file called 'inventree_credentials.py'
 
@@ -16,6 +16,12 @@ api = InvenTreeAPI(INVENTREE_URL,
                    username=INVENTREE_USERNAME,
                    password=INVENTREE_PASSWORD)
 
+# List part categories
+for category in PartCategory.list(api):
+
+    parts = category.get_parts()
+
+    print(category['name'], '-', len(parts), 'parts')
 
 # List the parts in the database
 parts = Part.list(api)

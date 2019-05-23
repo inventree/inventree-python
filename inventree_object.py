@@ -97,8 +97,19 @@ class InventreeObject():
             raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
 
 
+
+class PartCategory(InventreeObject):
+    """ Class representing the PartCategory database model """
+
+    URL = 'part/category'
+    FILTERS = ['parent']
+
+    def get_parts(self):
+        return Part.list(self._api, category=self.pk)
+    
+
 class Part(InventreeObject):
-    """ Class for manipulating a Part object """
+    """ Class representing the Part database model """
 
     URL = 'part'
     FILTERS = ['category', 'buildable', 'purchaseable']
