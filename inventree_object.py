@@ -29,6 +29,11 @@ class InventreeObject():
         if len(self._data) == 0:
             self.reload()
 
+    @property
+    def pk(self):
+        """ Convenience method for accessing primary-key field """
+        return self['pk']
+
     @classmethod
     def list(cls, api, **kwargs):
         """ Return a list of all items in this class on the database.
@@ -97,10 +102,10 @@ class Part(InventreeObject):
     FILTERS = ['category', 'buildable', 'purchaseable']
 
     def get_supplier_parts(self):
-        return SupplierPart.list(self._api, part=self['pk'])
+        return SupplierPart.list(self._api, part=self.pk)
 
     def get_bom_items(self):
-        return BomItem.list(self._api, part=self['pk'])
+        return BomItem.list(self._api, part=self.pk)
 
 
 class Company(InventreeObject):
@@ -108,6 +113,9 @@ class Company(InventreeObject):
 
     URL = 'company'
     FILTERS = ['is_supplier', 'is_customer']
+
+    def get_supplier_parts(self):
+        return SupplierPart.list(self._api, part=self.pk)
 
 
 class SupplierPart(InventreeObject):
@@ -119,7 +127,7 @@ class SupplierPart(InventreeObject):
     def get_price_breaks(self):
         """ Get a list of price break objects for this SupplierPart """
 
-        return SupplierPriceBreak.list(self._api, part=self['pk'])
+        return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
 class SupplierPriceBreak(InventreeObject):
