@@ -37,6 +37,15 @@ class InventreeObject():
         return self['pk']
 
     @classmethod
+    def create(cls, api, data, **kwargs):
+        """ Create a new database object in this class. """
+
+        # Ensure the pk value is None so an existing object is not updated
+        del data['pk']
+
+        api.post(cls.URL, data)
+
+    @classmethod
     def list(cls, api, **kwargs):
         """ Return a list of all items in this class on the database.
 

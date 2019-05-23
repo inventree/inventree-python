@@ -107,12 +107,38 @@ class InvenTreeAPI(object):
         # TODO
         pass
 
+    def post(self, url, data, **kwargs):
+        """ Perform a POST request. Used to create a new record in the database.
+
+        Args:
+            url - API endpoint URL
+            data - JSON data to create new object
+        """
+
+        headers = {'content-type' : 'application/json'}
+
+        params = {
+            'format': 'json',
+        }
+
+        response = self.request(url, json=data, method='post', headers=headers, params=params, **kwargs)
+
+        if response is None:
+            logging.error("No response received - POST '{url}'".format(url=url))
+            return None
+
+        if response.status_code in [200, 201]:
+            return True
+        else:
+            logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            return False
+
     def put(self, url, data, **kwargs):
         """ Perform a PUT request. Used to update existing records in the database.
 
         Args:
-            url - API endpoitn URL
-            data - JSON data to POST
+            url - API endpoint URL
+            data - JSON data to PUT
         """
 
         headers = {'content-type' : 'application/json'}
