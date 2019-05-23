@@ -22,7 +22,7 @@ MY_PASSWORD = 'not_my_real_password'
 api = InvenTreeAPI('http://127.0.0.1:8000/api/', username=MY_USERNAME, password=MY_PASSWORD)
 
 # Access a single part, and get its BOM items directly
-part = Part(api, part=10)
+part = Part(api, pk=10)
 bom_items = part.get_bom_items()
 
 # Alternatively, BOM items can be requested directly from the database
