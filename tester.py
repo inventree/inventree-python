@@ -14,15 +14,13 @@ api = InvenTreeAPI(
         username=INVENTREE_USERNAME,
         password=INVENTREE_PASSWORD)
 
-part = Part(pk=29, api=api)
 
-boms = part.get_bom_items()
+# List the parts in the database
+parts = Part.list(api)
 
-for it in boms:
+print("Parts:", len(parts))
 
-    supplier_parts = SupplierPart.list(api, part=it['sub_part'])
+# List the BOM items in the databse
+items = BomItem.list(api)
 
-    print(it['quantity'], 'x', it['sub_part_detail']['full_name'])
-
-    for p in supplier_parts:
-        print(' -', p['supplier'], p['SKU'])
+print("BOM Items:", len(items))
