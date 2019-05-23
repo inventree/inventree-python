@@ -116,6 +116,25 @@ class Part(InventreeObject):
 
         return parts
 
+    def get_bom_items(self):
+
+        response = self._api.get(
+            BomItem.URL,
+            params={
+                'part': self['pk'],
+            })
+
+        parts = []
+
+        if response is None:
+            return parts
+
+        for part in response:
+            if 'pk' in part.keys():
+                parts.append(BomItem(data=part, api=self._api))
+
+        return parts
+
 
 class Company(InventreeObject):
     """ Class for manipulating a Company object """
@@ -200,3 +219,8 @@ class SupplierPart(InventreeObject):
 class SupplierPriceBreak(InventreeObject):
 
     URL = 'company/price-break/'
+
+
+class BomItem(InventreeObject):
+
+    URL = 'bom'
