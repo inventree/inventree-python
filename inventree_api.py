@@ -127,7 +127,11 @@ class InvenTreeAPI(object):
             logging.error("No response received - PUT '{url}'".format(url=url))
             return None
         
-        return response
+        if response.status_code == 200:
+            return True
+        else:
+            logging.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            return False
 
     def get(self, url, **kwargs):
         """ Perform a GET request
