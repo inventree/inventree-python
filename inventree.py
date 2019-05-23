@@ -10,7 +10,7 @@ class InventreeRequester(object):
 
     GET - Fetch data from the server
 
-    """ 
+    """
 
     def __init__(self, base_url, **kwargs):
         """ Initialize class with initial parameters
@@ -87,7 +87,9 @@ class InventreeRequester(object):
         return response
 
     def delete(self, url, **kwargs):
-        response = self.request(url, method='delete', **kwargs)
+        # response = self.request(url, method='delete', **kwargs)
+        # TODO
+        pass
 
     def get(self, url, **kwargs):
         """ Perform a GET request
@@ -101,7 +103,7 @@ class InventreeRequester(object):
 
         response = self.request(url, method='get', **kwargs)
 
-        # No response returned 
+        # No response returned
         if response is None:
             logging.error("No response received - '{url}'".format(url=url))
             return None
@@ -113,70 +115,3 @@ class InventreeRequester(object):
             return None
 
         return data
-
-    def get_part_list(self, **kwargs):
-        """ Return a list of parts with the following optional filters:
-        
-        Args:
-            category - Filter by part category ID
-            buildable - Can this part be built from other parts?
-            purchaseable - Can this part be purcahsed from suppliers?
-        """
-
-        params = {
-        }
-
-        for arg in ['category', 'buildable', 'purchaseable']:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
-
-        return self.get('part/', **kwargs)
-
-    def get_part(self, pk, **kwargs):
-        """ Return detail of a specific part. Part ID <pk> must be provided """
-
-        response = self.get('part/{pk}/'.format(pk=pk), **kwargs)
-
-        return response
-
-    def get_supplier_part_list(self, **kwargs):
-        """ Return a list of supplier part, with the following optional filters:
-
-        Args:
-            part - Filter by base part ID
-            supplier - Filter by supplier ID
-        """
-
-        params = {}
-
-        for arg in ['part', 'supplier']:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
-
-        response = self.get('company/part/', params=params, **kwargs)
-
-        return response
-
-    def get_supplier_part(self, pk, **kwargs):
-        """ Return detail of a single supplier part """
-
-        response = self.get('company/part/{pk}/'.format(pk=pk), **kwargs)
-
-        return response
-
-    def get_price_break_list(self, **kwargs):
-        """ Return a list of supplier price breaks, with the following optional filters:
-
-        Args:
-            part - Filter by supplier part ID
-        """
-
-        params = {}
-
-        for arg in ['part']:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
-
-        response = self.get('company/price-break/', params=params, **kwargs)
-
-        return response

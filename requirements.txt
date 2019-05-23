@@ -1,1 +1,2 @@
+requests==2.21.0                # Python HTTP for humans
 flake8==3.3.0                   # PEP checking

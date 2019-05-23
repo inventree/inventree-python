@@ -1,4 +1,6 @@
-import json
+""" This module provides class-based accessors for InvenTree database models,
+using the integrated REST API.
+"""
 
 
 class InventreeObject():
