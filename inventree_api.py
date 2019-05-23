@@ -116,7 +116,7 @@ class InvenTreeAPI(object):
 
         """
 
-        headers = {'content-type' : 'application/json'}
+        headers = {'content-type': 'application/json'}
 
         response = self.request(url, method='delete', headers=headers, **kwargs)
 
@@ -133,7 +133,7 @@ class InvenTreeAPI(object):
             data - JSON data to create new object
         """
 
-        headers = {'content-type' : 'application/json'}
+        headers = {'content-type': 'application/json'}
 
         params = {
             'format': 'json',
@@ -158,7 +158,7 @@ class InvenTreeAPI(object):
             data - JSON data to PUT
         """
 
-        headers = {'content-type' : 'application/json'}
+        headers = {'content-type': 'application/json'}
 
         params = {
             'format': 'json',
