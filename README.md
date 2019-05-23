@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/inventree/inventree-python.svg?branch=master)](https://travis-ci.org/inventree/inventree-python)
+
 ## InvenTree Python Interface
 
 Python library for communication with the [InvenTree parts management system](https:///github.com/inventree/inventree) using the integrated REST API.
