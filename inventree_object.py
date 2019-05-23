@@ -8,7 +8,7 @@ class InventreeObject():
     FILTERS = []
 
     def __init__(self, api, pk=None, data={}):
-        """ Insantiate this InvenTree object.
+        """ Instantiate this InvenTree object.
 
         Args:
             pk - The ID (primary key) associated with this object on the server
