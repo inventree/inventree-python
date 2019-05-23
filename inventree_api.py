@@ -83,8 +83,13 @@ class InvenTreeAPI(object):
                 headers=headers,
                 json=json
             )
+
         except requests.exceptions.ConnectionError:
             logging.error("Connection refused - '{url}'".format(url=api_url))
+            return None
+
+        if response is None:
+            logging.error("Null response - {method} '{url}'".format(method=method, url=api_url))
             return None
 
         logging.info("Request: {method} {url} - {response}".format(method=method, url=api_url, response=response.status_code))
@@ -93,6 +98,10 @@ class InvenTreeAPI(object):
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
             logging.warning("Bad response ({code}) - {method} '{url}'".format(code=response.status_code, method=method, url=api_url))
+
+        # A delete request won't return JSON formatted data (ignore further checks)
+        if method == 'DELETE':
+            return response
 
         ctype = response.headers.get('content-type')
 
@@ -103,9 +112,18 @@ class InvenTreeAPI(object):
         return response
 
     def delete(self, url, **kwargs):
-        # response = self.request(url, method='delete', **kwargs)
-        # TODO
-        pass
+        """ Perform a DELETE request. Used to remove a record in the database.
+
+        """
+
+        headers = {'content-type' : 'application/json'}
+
+        response = self.request(url, method='delete', headers=headers, **kwargs)
+
+        if response is None:
+            return False
+
+        print(response.status_code, response.text)
 
     def post(self, url, data, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
@@ -124,8 +142,7 @@ class InvenTreeAPI(object):
         response = self.request(url, json=data, method='post', headers=headers, params=params, **kwargs)
 
         if response is None:
-            logging.error("No response received - POST '{url}'".format(url=url))
-            return None
+            return False
 
         if response.status_code in [200, 201]:
             return True
@@ -150,7 +167,6 @@ class InvenTreeAPI(object):
         response = self.request(url, json=data, method='put', headers=headers, params=params, **kwargs)
 
         if response is None:
-            logging.error("No response received - PUT '{url}'".format(url=url))
             return None
         
         if response.status_code == 200:
@@ -173,7 +189,6 @@ class InvenTreeAPI(object):
 
         # No response returned
         if response is None:
-            logging.error("No response received - GET '{url}'".format(url=url))
             return None
 
         try:
