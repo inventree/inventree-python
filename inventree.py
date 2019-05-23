@@ -10,7 +10,7 @@ class InventreeRequester(object):
 
     GET - Fetch data from the server
 
-    """ 
+    """
 
     def __init__(self, base_url, **kwargs):
         """ Initialize class with initial parameters
@@ -87,7 +87,9 @@ class InventreeRequester(object):
         return response
 
     def delete(self, url, **kwargs):
-        response = self.request(url, method='delete', **kwargs)
+        # response = self.request(url, method='delete', **kwargs)
+        # TODO
+        pass
 
     def get(self, url, **kwargs):
         """ Perform a GET request
@@ -101,7 +103,7 @@ class InventreeRequester(object):
 
         response = self.request(url, method='get', **kwargs)
 
-        # No response returned 
+        # No response returned
         if response is None:
             logging.error("No response received - '{url}'".format(url=url))
             return None
