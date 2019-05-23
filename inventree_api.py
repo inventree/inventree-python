@@ -1,3 +1,9 @@
+"""
+The inventree_api module handles low level requests and authentication
+with the InvenTree database server.
+"""
+
+
 import requests
 from requests.auth import HTTPBasicAuth
 import os
@@ -5,7 +11,7 @@ import json
 import logging
 
 
-class InventreeRequester(object):
+class InvenTreeAPI(object):
     """ Basic class for performing Inventree API requests.
 
     GET - Fetch data from the server
