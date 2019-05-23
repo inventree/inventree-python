@@ -5,13 +5,14 @@ class InventreeObject():
     """ Base class for an InvenTree object """
 
     URL = ""
+    FILTERS = []
 
-    def __init__(self, requester, pk=None, data={}):
-        """ Insantiate this InvenTree object.
+    def __init__(self, api, pk=None, data={}):
+        """ Instantiate this InvenTree object.
 
         Args:
             pk - The ID (primary key) associated with this object on the server
-            requester - The request manager object
+            api - The request manager object
             data - JSON representation of the object
         """
 
@@ -21,28 +22,63 @@ class InventreeObject():
             pk = data['pk']
 
         self._url = "{url}/{pk}/".format(url=self.URL, pk=pk)
-        self._requester = requester
+        self._api = api
         self._data = data
 
         # If the data are not populated, fetch from server
         if len(self._data) == 0:
             self.reload()
 
+    @property
+    def pk(self):
+        """ Convenience method for accessing primary-key field """
+        return self['pk']
+
+    @classmethod
+    def list(cls, api, **kwargs):
+        """ Return a list of all items in this class on the database.
+
+        Requires:
+
+        URL - Base URL
+        FILTERS - List of available query filter params
+        """
+
+        # Dict of query params to send to the API
+        params = {}
+
+        for arg in cls.FILTERS:
+            if kwargs.get(arg, None):
+                params[arg] = kwargs[arg]
+
+        response = api.get(cls.URL, params=params, **kwargs)
+
+        if response is None:
+            return None
+
+        items = []
+
+        for data in response:
+            if 'pk' in data:
+                items.append(cls(data=data, api=api))
+
+        return items
+
     def delete(self):
         """ Delete this object from the database """
-        if self._requester:
-            self._requester.delete(self._url)
+        if self._api:
+            self._api.delete(self._url)
 
     def save(self):
         """ Save this object to the database """
-        if self._requester:
+        if self._api:
             # TODO
             pass
 
     def reload(self):
         """ Reload object data from the database """
-        if self._requester:
-            data = self._requester.get(self._url)
+        if self._api:
+            data = self._api.get(self._url)
             if data is not None:
                 self._data = data
 
@@ -63,110 +99,44 @@ class Part(InventreeObject):
     """ Class for manipulating a Part object """
 
     URL = 'part'
-
-    @staticmethod
-    def get_part_list(api, **kwargs):
-        """ Return a list of Part objects, using the following filters:
-
-        Args:
-            api - InvenTree API object
-
-            category - Filter by part category ID
-            buildable - Can this part be built from other parts?
-            purchaseable - Can this part be purcahsed from suppliers?
-        """
-
-        params = {
-        }
-
-        for arg in ['category', 'buildable', 'purchaseable']:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
-
-        response = api.get(Part.URL, params=params, **kwargs)
-
-        parts = []
-
-        if response is None:
-            return parts
-
-        for data in response:
-            if data and 'pk' in data:
-                parts.append(Part(data=data, requester=api))
-
-        return parts
-
+    FILTERS = ['category', 'buildable', 'purchaseable']
 
     def get_supplier_parts(self):
+        return SupplierPart.list(self._api, part=self.pk)
 
-        response = self._requester.get(
-            SupplierPart.URL,
-            params={
-                'part': self['pk']
-            })
+    def get_bom_items(self):
+        return BomItem.list(self._api, part=self.pk)
 
-        parts = []
 
-        if response is None:
-            return parts
+class Company(InventreeObject):
+    """ Class for manipulating a Company object """
 
-        for part in response:
-            if 'pk' in part.keys():
-                parts.append(SupplierPart(data=part, requester=self._requester))
+    URL = 'company'
+    FILTERS = ['is_supplier', 'is_customer']
 
-        return parts
+    def get_supplier_parts(self):
+        return SupplierPart.list(self._api, part=self.pk)
 
-    
+
 class SupplierPart(InventreeObject):
     """ Class for maniuplating a SupplierPart object """
 
     URL = 'company/part'
-
-    @staticmethod
-    def get_supplier_part_list(api, **kwargs):
-        """ Return a list of supplier part, with the following optional filters:
-
-        Args:
-            part - Filter by base part ID
-            supplier - Filter by supplier ID
-        """
-
-        params = {}
-
-        for arg in ['part', 'supplier']:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
-
-        response = api.get('company/part/', params=params, **kwargs)
-
-        parts = []
-
-        if response is None:
-            return parts
-
-        for data in response:
-            if 'pk' in data:
-                parts.append(SupplierPart(data=data, requester=api))
-
-        return parts
+    FILTERS = ['part', 'supplier']
 
     def get_price_breaks(self):
+        """ Get a list of price break objects for this SupplierPart """
 
-        response = self._requester.get(
-            SupplierPriceBreak.URL,
-            params={
-                'part': self['pk']
-            })
-
-        breaks = []
-
-        for brk in response:
-            if 'pk' in brk.keys():
-                breaks.append(SupplierPriceBreak(self._requester, data=brk))
-
-        return breaks
+        return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
 class SupplierPriceBreak(InventreeObject):
 
     URL = 'company/price-break/'
+    FILTERS = ['part']
+
+
+class BomItem(InventreeObject):
+
+    URL = 'bom'
+    FILTERS = ['part', 'sub_part']
