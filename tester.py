@@ -1,18 +1,11 @@
 from inventree_api import InvenTreeAPI
-from inventree_object import *
+from inventree_object import Part, BomItem
 
-from inventree_credentials import *
+from inventree_credentials import INVENTREE_URL, INVENTREE_USERNAME, INVENTREE_PASSWORD
 
-import sys
-
-def exit(msg):
-    print(msg)
-    sys.exit(1)
-
-api = InvenTreeAPI(
-        INVENTREE_URL,
-        username=INVENTREE_USERNAME,
-        password=INVENTREE_PASSWORD)
+api = InvenTreeAPI(INVENTREE_URL,
+                   username=INVENTREE_USERNAME,
+                   password=INVENTREE_PASSWORD)
 
 
 # List the parts in the database
