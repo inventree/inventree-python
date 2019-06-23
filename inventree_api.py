@@ -25,24 +25,53 @@ class InvenTreeAPI(object):
             base_url - Base API URL
             
         kwargs:
-            username - Login username (required)
-            password - Login password (required)
-
+            username - Login username
+            password - Login password
+            token - Authentication token (if provided, username/password are ignored)
+            use_token_auth - Use token authentication? (Default = True)
         """
+
+        if not base_url.endswith('/'):
+            base_url += '/'
 
         self.base_url = base_url
 
         self.username = kwargs.get('username', None)
         self.password = kwargs.get('password', None)
+        self.token = kwargs.get('token', None)
+        self.use_token_auth = kwargs.get('use_token_auth', True)
 
-        if self.username and self.password:
-            self.auth = HTTPBasicAuth(self.username, self.password)
+        if self.use_token_auth:
+            if not self.token:
+                self.requestToken()
         else:
-            # TODO - Raise an exception if authentication not provided
-            self.auth = None
+            # Basic authentication
+            self.auth = HTTPBasicAuth(self.username, self.password)
+
+    def requestToken(self):
+        """ Return authentication token from the server """
+
+        if not self.username or not self.password:
+            raise AttributeError('Supply username and password to request token')
+
+        print("Requesting auth token from server...")
+
+        # Request an auth token from the server
+        token_url = os.path.join(self.base_url, 'user/token/')
+        
+        reply = requests.post(token_url, json={
+            'username': self.username,
+            'password': self.password,
+        })
+
+        self.token = json.loads(reply.text)['token']
 
     def request(self, url, **kwargs):
         """ Perform a URL request to the Inventree API """
+
+        # Remove leading slash
+        if url.startswith('/'):
+            url = url[1:]
 
         api_url = os.path.join(self.base_url, url)
 
@@ -53,9 +82,9 @@ class InvenTreeAPI(object):
 
         params = kwargs.get('params', {})
 
-        json = kwargs.get('json', None)
+        json = kwargs.get('json', {})
 
-        headers = kwargs.get('headers', None)
+        headers = kwargs.get('headers', {})
 
         search_term = kwargs.get('search', None)
 
@@ -75,10 +104,16 @@ class InvenTreeAPI(object):
 
         method = method.upper()
 
+        if self.use_token_auth and self.token:
+            headers['Authentication'] = 'Token {t}'.format(t=self.token)
+            auth = None
+        else:
+            auth = self.auth
+
         try:
             response = methods[method](
                 api_url,
-                auth=self.auth,
+                auth=auth,
                 params=params,
                 headers=headers,
                 json=json
