@@ -58,18 +58,13 @@ class InvenTreeAPI(object):
 
         # Request an auth token from the server
         token_url = os.path.join(self.base_url, 'user/token/')
-        print(token_url)
-        reply = requests.post(token_url, json = {
+        
+        reply = requests.post(token_url, json={
             'username': self.username,
             'password': self.password,
         })
 
-        try:
-            self.token = json.loads(reply.text)['token']
-            print("... Success!")
-        except:
-            print("Could not retrieve token from server")
-            self.token = None      
+        self.token = json.loads(reply.text)['token']
 
     def request(self, url, **kwargs):
         """ Perform a URL request to the Inventree API """
@@ -111,9 +106,9 @@ class InvenTreeAPI(object):
 
         if self.use_token_auth and self.token:
             headers['Authentication'] = 'Token {t}'.format(t=self.token)
-            auth=None
+            auth = None
         else:
-            auth=self.auth
+            auth = self.auth
 
         try:
             response = methods[method](
