@@ -190,7 +190,7 @@ class SupplierPriceBreak(InventreeObject):
     """ Class representing the SupplierPriceBreak database model """
 
     URL = 'company/price-break/'
-    FILTERS = ['part']
+    FILTERS = ['part', 'currency']
 
 
 class BomItem(InventreeObject):
@@ -205,3 +205,9 @@ class Build(InventreeObject):
 
     URL = 'build'
     FILTERS = ['part']
+
+
+class Currency(InventreeObject):
+    """ Class representing the Currency database model """
+
+    URL = 'common/currency'

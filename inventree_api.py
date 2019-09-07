@@ -28,7 +28,8 @@ class InvenTreeAPI(object):
             username - Login username
             password - Login password
             token - Authentication token (if provided, username/password are ignored)
-            use_token_auth - Use token authentication? (Default = True)
+            use_token_auth - Use token authentication? (default = True)
+            verbose - Print extra debug messages (default = False)
         """
 
         if not base_url.endswith('/'):
@@ -40,13 +41,18 @@ class InvenTreeAPI(object):
         self.password = kwargs.get('password', None)
         self.token = kwargs.get('token', None)
         self.use_token_auth = kwargs.get('use_token_auth', True)
+        self.verbose = kwargs.get('verbose', False)
 
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
-        else:
-            # Basic authentication
-            self.auth = HTTPBasicAuth(self.username, self.password)
+        
+        # Basic authentication
+        self.auth = HTTPBasicAuth(self.username, self.password)
+
+    def debug(self, *args):
+        if self.verbose:
+            print(*args)
 
     def requestToken(self):
         """ Return authentication token from the server """
@@ -54,7 +60,7 @@ class InvenTreeAPI(object):
         if not self.username or not self.password:
             raise AttributeError('Supply username and password to request token')
 
-        print("Requesting auth token from server...")
+        self.debug("Requesting auth token from server...")
 
         # Request an auth token from the server
         token_url = os.path.join(self.base_url, 'user/token/')
@@ -65,6 +71,8 @@ class InvenTreeAPI(object):
         })
 
         self.token = json.loads(reply.text)['token']
+
+        self.debug("Token:", self.token)
 
     def request(self, url, **kwargs):
         """ Perform a URL request to the Inventree API """
@@ -105,10 +113,17 @@ class InvenTreeAPI(object):
         method = method.upper()
 
         if self.use_token_auth and self.token:
-            headers['Authentication'] = 'Token {t}'.format(t=self.token)
+            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
             auth = None
         else:
             auth = self.auth
+
+        self.debug("Sending Request:")
+        self.debug(" - URL:", method, api_url)
+        self.debug(" - auth:", auth)
+        self.debug(" - params:", params)
+        self.debug(" - headers:", headers)
+        self.debug(" - json:", json)
 
         try:
             response = methods[method](
