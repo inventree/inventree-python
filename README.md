@@ -12,7 +12,7 @@ Very little code is required to start using the Python InvenTree interface.
 
 A minimal example to list all the BOM items required to make a Part is as follows:
 
-```
+```python
 from inventree_api import InvenTreeAPI
 from inventree_object import Part, BomItem, SupplierPart
 
