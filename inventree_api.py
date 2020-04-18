@@ -49,7 +49,6 @@ class InvenTreeAPI(object):
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
-        
 
     def debug(self, *args):
         if self.verbose:
