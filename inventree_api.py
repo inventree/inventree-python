@@ -43,12 +43,13 @@ class InvenTreeAPI(object):
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
 
+        # Basic authentication
+        self.auth = HTTPBasicAuth(self.username, self.password)
+        
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
         
-        # Basic authentication
-        self.auth = HTTPBasicAuth(self.username, self.password)
 
     def debug(self, *args):
         if self.verbose:
@@ -65,10 +66,7 @@ class InvenTreeAPI(object):
         # Request an auth token from the server
         token_url = os.path.join(self.base_url, 'user/token/')
         
-        reply = requests.post(token_url, json={
-            'username': self.username,
-            'password': self.password,
-        })
+        reply = requests.get(token_url, auth=self.auth)
 
         self.token = json.loads(reply.text)['token']
 
