@@ -212,6 +212,7 @@ class Currency(InventreeObject):
 
     URL = 'common/currency'
     
+    
 class Parameter(InventreeObject):
     """class representing the Parameter database model """
     
@@ -219,8 +220,7 @@ class Parameter(InventreeObject):
     FILTERS = ['part']
 
     def getunits(self):
-         """ Get the dimension and units for this parameter """
-         
+         """ Get the dimension and units for this parameter """         
          return [element for element in ParameterTemplate.list(self._api) if element['pk']==self._data['template']] 
     
     
@@ -228,4 +228,3 @@ class ParameterTemplate(InventreeObject):
     """ class representing the Parameter Template database model"""
     
     URL = 'part/parameter/template'  
-       
