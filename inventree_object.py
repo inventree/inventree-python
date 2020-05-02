@@ -221,10 +221,10 @@ class Parameter(InventreeObject):
 
     def getunits(self):
          """ Get the dimension and units for this parameter """         
-         return [element for element in ParameterTemplate.list(self._api) if element['pk']==self._data['template']] 
+        return [element for element in ParameterTemplate.list(self._api) if element['pk'] == self._data['template']]
     
     
 class ParameterTemplate(InventreeObject):
     """ class representing the Parameter Template database model"""
     
-    URL = 'part/parameter/template'  
+    URL = 'part/parameter/template'
