@@ -7,7 +7,7 @@ class StockLocation(base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
-    filters = ['parent']
+    FILTERS = ['parent']
 
     def get_stock_items(self):
         return StockItem.list(self._api, location=self.pk)
