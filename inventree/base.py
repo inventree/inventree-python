@@ -44,7 +44,8 @@ class InventreeObject():
         """ Create a new database object in this class. """
 
         # Ensure the pk value is None so an existing object is not updated
-        del data['pk']
+        if 'pk' in data.keys():
+            data.pop('pk')
 
         api.post(cls.URL, data)
 
@@ -134,7 +135,10 @@ class Attachment(InventreeObject):
         }
 
         # Send the file off to the server
-        api.post(cls.URL, data, files=files)
+        if api.post(cls.URL, data, files=files):
+            logging.info("Uploaded attachment file: '{f}'".format(f=f))
+        else:
+            logging.warning("File upload failed")
 
 
 class Currency(InventreeObject):

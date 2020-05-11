@@ -7,7 +7,7 @@ class StockLocation(base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
-    filters = ['parent']
+    FILTERS = ['parent']
 
     def get_stock_items(self):
         return StockItem.list(self._api, location=self.pk)
@@ -29,8 +29,15 @@ class StockItem(base.InventreeObject):
     FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
 
 
-class StocKItemAttachment(base.Attachment):
+class StockItemAttachment(base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
     FILTERS = ['stock_item']
+
+
+class StockItemTracking(base.InventreeObject):
+    """ Class representing a StockItem tracking object """
+
+    URL = 'stock/track'
+    FILTERS = ['item', 'user']
