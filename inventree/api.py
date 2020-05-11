@@ -56,6 +56,15 @@ class InvenTreeAPI(object):
         if self.verbose:
             print(*args)
 
+    def clean_url(self, url):
+
+        url = os.path.join(self.base_url, url)
+
+        if not url.endswith('/'):
+            url += '/'
+
+        return url
+
     def requestToken(self):
         """ Return authentication token from the server """
 
@@ -174,21 +183,26 @@ class InvenTreeAPI(object):
 
         print(response.status_code, response.text)
 
-    def post(self, url, data, **kwargs):
+    def post(self, url, data, files=None, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
 
         Args:
             url - API endpoint URL
             data - JSON data to create new object
+            files - Dict of file attachments
         """
 
-        headers = {'content-type': 'application/json'}
+        url = self.clean_url(url)
 
-        params = {
-            'format': 'json',
-        }
+        headers = {}
 
-        response = self.request(url, json=data, method='post', headers=headers, params=params, **kwargs)
+        if self.use_token_auth and self.token:
+            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
+            auth = None
+        else:
+            auth = self.auth
+
+        response = requests.post(url, data=data, headers=headers, auth=auth, files=files, **kwargs)
 
         if response is None:
             return False
@@ -197,6 +211,7 @@ class InvenTreeAPI(object):
             return True
         else:
             logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            logging.error(response.text)
             return False
 
     def put(self, url, data, **kwargs):

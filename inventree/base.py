@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+import logging
 
 INVENTREE_PYTHON_VERSION = "0.0.1"
 
@@ -109,8 +111,30 @@ class InventreeObject():
 class Attachment(InventreeObject):
     """ Class representing a file attachment object """
 
-    # TODO - Add base level upload functionality
-    URL = ""
+    @classmethod
+    def upload(cls, api, filename, comment, **kwargs):
+        """
+        Upload a file attachment.
+        Ref: https://2.python-requests.org/en/master/user/quickstart/#post-a-multipart-encoded-file
+        """
+
+        if not os.path.exists(filename):
+            logging.error("File does not exist: '{f}'".format(f=filename))
+            return
+
+        f = os.path.basename(filename)
+
+        data = kwargs
+
+        # File comment must be provided
+        data['comment'] = comment
+
+        files = {
+            'attachment': (f, open(filename, 'rb')),
+        }
+
+        # Send the file off to the server
+        api.post(cls.URL, data, files=files)
 
 
 class Currency(InventreeObject):
