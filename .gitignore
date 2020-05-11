@@ -4,3 +4,6 @@ inventree_credentials.py
 
 # General python stuff
 *.pyc
+dist
+build
+inventree.egg-info
