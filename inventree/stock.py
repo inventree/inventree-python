@@ -27,3 +27,10 @@ class StockItem(base.InventreeObject):
 
     URL = 'stock'
     FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
+
+
+class StocKItemAttachment(base.Attachment):
+    """ Class representing a file attachment for a StockItem """
+
+    URL = 'stock/attachment'
+    FILTERS = ['stock_item']

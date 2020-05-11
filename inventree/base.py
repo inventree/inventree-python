@@ -3,6 +3,7 @@
 
 INVENTREE_PYTHON_VERSION = "0.0.1"
 
+
 class InventreeObject():
     """ Base class for an InvenTree object """
 
@@ -103,6 +104,13 @@ class InventreeObject():
             self._data[name] = value
         else:
             raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
+
+
+class Attachment(InventreeObject):
+    """ Class representing a file attachment object """
+
+    # TODO - Add base level upload functionality
+    URL = ""
 
 
 class Currency(InventreeObject):

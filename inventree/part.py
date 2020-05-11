@@ -40,6 +40,13 @@ class Part(base.InventreeObject):
         return stock.StockItem.list(self._api, part=self.pk)
 
 
+class PartAttachment(base.Attachment):
+    """ Class representing a file attachment for a Part """
+
+    URL = 'part/attachment'
+    FILTERS = ['part']
+    
+
 class BomItem(base.InventreeObject):
     """ Class representing the BomItem database model """
 

@@ -9,4 +9,3 @@ class Build(base.InventreeObject):
 
     URL = 'build'
     FILTERS = ['part']
-
