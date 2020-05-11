@@ -1,6 +1,9 @@
-""" This module provides class-based accessors for InvenTree database models,
-using the integrated REST API.
-"""
+# -*- coding: utf-8 -*-
+
+import os
+import logging
+
+INVENTREE_PYTHON_VERSION = "0.0.1"
 
 
 class InventreeObject():
@@ -105,106 +108,33 @@ class InventreeObject():
             raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
 
 
-class PartCategory(InventreeObject):
-    """ Class representing the PartCategory database model """
+class Attachment(InventreeObject):
+    """ Class representing a file attachment object """
 
-    URL = 'part/category'
-    FILTERS = ['parent']
+    @classmethod
+    def upload(cls, api, filename, comment, **kwargs):
+        """
+        Upload a file attachment.
+        Ref: https://2.python-requests.org/en/master/user/quickstart/#post-a-multipart-encoded-file
+        """
 
-    def get_parts(self):
-        return Part.list(self._api, category=self.pk)
-    
+        if not os.path.exists(filename):
+            logging.error("File does not exist: '{f}'".format(f=filename))
+            return
 
-class Part(InventreeObject):
-    """ Class representing the Part database model """
+        f = os.path.basename(filename)
 
-    URL = 'part'
-    FILTERS = ['category', 'buildable', 'purchaseable']
+        data = kwargs
 
-    def get_supplier_parts(self):
-        """ Return the supplier parts associated with this part """
-        return SupplierPart.list(self._api, part=self.pk)
+        # File comment must be provided
+        data['comment'] = comment
 
-    def get_bom_items(self):
-        """ Return the items required to make this part """
-        return BomItem.list(self._api, part=self.pk)
+        files = {
+            'attachment': (f, open(filename, 'rb')),
+        }
 
-    def get_builds(self):
-        """ Return the builds associated with this part """
-        return Build.list(self._api, part=self.pk)
-
-    def get_stock_items(self):
-        """ Return the stock items associated with this part """
-        return StockItem.list(self._api, part=self.pk)
-
-
-class StockLocation(InventreeObject):
-    """ Class representing the StockLocation database model """
-
-    URL = 'stock/location'
-    filters = ['parent']
-
-    def get_stock_items(self):
-        return StockItem.list(self._api, location=self.pk)
-
-
-class StockItem(InventreeObject):
-    """ Class representing the StockItem database model.
-    
-    Stock items can be filtered by:
-    
-    - location: Where the stock item is stored
-    - category: The category of the part this stock item points to
-    - supplier: Who supplied this stock item
-    - part: The part referenced by this stock item
-    - supplier_part: Matching SupplierPart object
-    """
-
-    URL = 'stock'
-    FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
-
-
-class Company(InventreeObject):
-    """ Class representing the Company database model """
-
-    URL = 'company'
-    FILTERS = ['is_supplier', 'is_customer']
-
-    def get_supplier_parts(self):
-        return SupplierPart.list(self._api, part=self.pk)
-
-
-class SupplierPart(InventreeObject):
-    """ Class representing the SupplierPart database model """
-
-    URL = 'company/part'
-    FILTERS = ['part', 'supplier']
-
-    def get_price_breaks(self):
-        """ Get a list of price break objects for this SupplierPart """
-
-        return SupplierPriceBreak.list(self._api, part=self.pk)
-
-
-class SupplierPriceBreak(InventreeObject):
-    """ Class representing the SupplierPriceBreak database model """
-
-    URL = 'company/price-break/'
-    FILTERS = ['part', 'currency']
-
-
-class BomItem(InventreeObject):
-    """ Class representing the BomItem database model """
-
-    URL = 'bom'
-    FILTERS = ['part', 'sub_part']
-
-
-class Build(InventreeObject):
-    """ Class representing the Build database model """
-
-    URL = 'build'
-    FILTERS = ['part']
+        # Send the file off to the server
+        api.post(cls.URL, data, files=files)
 
 
 class Currency(InventreeObject):
