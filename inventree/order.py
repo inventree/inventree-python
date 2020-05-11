@@ -71,4 +71,4 @@ class SalesOrderLineItem(base.InventreeObject):
             n=self['quantity'],
             part=self['part'],
             ref=self['order']
-        ) 
+        )
