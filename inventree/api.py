@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 The inventree_api module handles low level requests and authentication
 with the InvenTree database server.
