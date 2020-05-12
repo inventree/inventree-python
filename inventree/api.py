@@ -85,7 +85,7 @@ class InvenTreeAPI(object):
             ))
             return None
 
-        if not 'token' in data.keys():
+        if 'token' not in data.keys():
             logging.error("Token not returned by server: {detail}".format(
                 detail=str(reply.text)
             ))
