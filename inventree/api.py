@@ -113,7 +113,6 @@ class InvenTreeAPI(object):
 
         return True
 
-
     def requestToken(self):
         """ Return authentication token from the server """
 
