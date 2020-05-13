@@ -37,7 +37,16 @@ class InvenTreeAPI(object):
         if not base_url.endswith('/'):
             base_url += '/'
 
+        # Server address *must* end with /api/
+        if not base_url.endswith('/api/'):
+            base_url = os.path.join(base_url, 'api')
+
+        if not base_url.endswith('/'):
+            base_url += '/'
+
         self.base_url = base_url
+
+        logging.info("Connecting to server: " + str(self.base_url))
 
         self.username = kwargs.get('username', None)
         self.password = kwargs.get('password', None)
@@ -45,16 +54,15 @@ class InvenTreeAPI(object):
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
 
+        # Check if the server is there
+        self.testServer()
+
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
         
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
-
-    def debug(self, *args):
-        if self.verbose:
-            print(*args)
 
     def clean_url(self, url):
 
@@ -65,22 +73,79 @@ class InvenTreeAPI(object):
 
         return url
 
+    def testServer(self):
+        """
+        Check to see if the server is present.
+        The InvenTree server provides a simple endpoint at /api/
+        which contains some simple data (and does not require authentication)
+        """
+
+        self.server_details = None
+
+        logging.info("Checking InvenTree server connection...")
+
+        try:
+            response = requests.get(self.base_url)
+        except requests.exceptions.ConnectionError:
+            logging.error("Server connection refused - check server address")
+            return False
+
+        if not response.status_code == 200:
+            logging.error("Error code from server: {code} - {detail}".format(
+                code=response.status_code,
+                detail=response.text
+            ))
+
+            return False
+
+        # Record server details
+        self.server_details = json.loads(response.text)
+
+        logging.info("InvenTree server details: " + str(response.text))
+
+        # The details provided by the server should include some specific data:
+        server_name = str(self.server_details.get('server', ''))
+
+        if not server_name.lower() == 'inventree':
+            logging.warning("Server returned strange response (expected 'InvenTree', found '{name}')".format(
+                name=server_name
+            ))
+
+        return True
+
     def requestToken(self):
         """ Return authentication token from the server """
 
         if not self.username or not self.password:
             raise AttributeError('Supply username and password to request token')
 
-        self.debug("Requesting auth token from server...")
+        logging.info("Requesting auth token from server...")
 
         # Request an auth token from the server
         token_url = os.path.join(self.base_url, 'user/token/')
         
         reply = requests.get(token_url, auth=self.auth)
 
+        data = json.loads(reply.text)
+
+        if not reply.status_code == 200:
+            logging.error("Error requesting token: {code} - {detail}".format(
+                code=reply.status_code,
+                detail=str(reply.text)
+            ))
+            return None
+
+        if 'token' not in data.keys():
+            logging.error("Token not returned by server: {detail}".format(
+                detail=str(reply.text)
+            ))
+            return None
+
         self.token = json.loads(reply.text)['token']
 
-        self.debug("Token:", self.token)
+        logging.info("Authentication token: " + self.token)
+
+        return self.token
 
     def request(self, url, **kwargs):
         """ Perform a URL request to the Inventree API """
@@ -126,12 +191,12 @@ class InvenTreeAPI(object):
         else:
             auth = self.auth
 
-        self.debug("Sending Request:")
-        self.debug(" - URL:", method, api_url)
-        self.debug(" - auth:", auth)
-        self.debug(" - params:", params)
-        self.debug(" - headers:", headers)
-        self.debug(" - json:", json)
+        logging.debug("Sending Request:")
+        logging.debug(" - URL:", method, api_url)
+        logging.debug(" - auth:", auth)
+        logging.debug(" - params:", params)
+        logging.debug(" - headers:", headers)
+        logging.debug(" - json:", json)
 
         try:
             response = methods[method](
@@ -155,7 +220,10 @@ class InvenTreeAPI(object):
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logging.warning("Bad response ({code}) - {method} '{url}'".format(code=response.status_code, method=method, url=api_url))
+            logging.warning("Bad response ({code}) - {method} '{url}' - {detail}".format(
+                code=response.status_code, method=method, url=api_url,
+                detail=str(response.text)
+            ))
 
         # A delete request won't return JSON formatted data (ignore further checks)
         if method == 'DELETE':
