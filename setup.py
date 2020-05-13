@@ -4,7 +4,8 @@ import setuptools
 
 from inventree.base import INVENTREE_PYTHON_VERSION
 
-long_description = "Python interface for InvenTree inventory management system"
+with open('README.md', encoding='utf-8') as f:
+    long_description = f.read()
 
 
 setuptools.setup(
@@ -19,6 +20,8 @@ setuptools.setup(
     description="Python interface for InvenTree inventory management system",
 
     long_description=long_description,
+
+    long_description_content_type='text/markdown',
 
     keywords="bom, bill of materials, stock, inventory, management, barcode",
 
