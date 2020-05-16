@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import os
+import logging
+
 from inventree import base
 
 
@@ -41,3 +44,55 @@ class StockItemTracking(base.InventreeObject):
 
     URL = 'stock/track'
     FILTERS = ['item', 'user']
+
+
+class StockItemTestResult(base.InventreeObject):
+    """ Class representing a StockItemTestResult object """
+
+    URL = 'stock/test'
+    FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
+
+    @classmethod
+    def upload_result(cls, api, stock_item, test, result, **kwargs):
+        """
+        Upload a test result.
+
+        args:
+            api: Authenticated InvenTree API object
+            stock_item: pk of the StockItem object to upload the test result against
+            test: Name of the test (string)
+            result: Test result (boolean)
+
+        kwargs:
+            attachment: Optionally attach a file to the test result
+            notes: Add extra notes
+            value: Add a "value" to the test (e.g. an actual measurement made during the test)
+        """
+
+        attachment = kwargs.get('attachment', None)
+
+        files = {}
+
+        if attachment:
+            if os.path.exists(attachment):
+                f = os.path.basename(attachment)
+                files['attachment'] = (f, open(attachment, 'rb'))
+            else:
+                logging.error("File does not exist: '{f}'".format(f=attachment))
+
+        notes = kwargs.get('notes', '')
+        value = kwargs.get('value', '')
+
+        data = {
+            'stock_item': stock_item,
+            'test': test,
+            'result': result,
+            'notes': notes,
+            'value': value,
+        }
+
+        # Send the data to the serever
+        if api.post(cls.URL, data, files=files):
+            logging.info("Uploaded test result: '{test}'".format(test=test))
+        else:
+            logging.warning("Test upload failed")
