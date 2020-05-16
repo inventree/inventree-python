@@ -31,6 +31,21 @@ class StockItem(base.InventreeObject):
     URL = 'stock'
     FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
 
+    def getAttachments(self):
+        return StockItemAttachment.list(
+            self._api,
+            stock_item=self.pk
+        )
+
+    def getTestResults(self, **kwargs):
+
+        kwargs['stock_item'] = self.pk
+
+        return StockItemTestResult.list(
+            self._api,
+            **kwargs
+        )
+
 
 class StockItemAttachment(base.Attachment):
     """ Class representing a file attachment for a StockItem """
