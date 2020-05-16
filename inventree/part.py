@@ -21,7 +21,21 @@ class Part(base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
-    FILTERS = ['category', 'buildable', 'purchaseable']
+    FILTERS = [
+        'category',
+        'cascade',
+        'has_stock',
+        'low_stock',
+        'is_template',
+        'variant_of',
+        'assemply',
+        'component',
+        'trackable',
+        'salable',
+        'active',
+        'buildable',
+        'purchaseable',
+    ]
 
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
