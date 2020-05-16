@@ -17,7 +17,7 @@ class PurchaseOrder(base.InventreeObject):
     def __repr__(self):
         return "Purchase Order #{ref}".format(ref=self.pk)
 
-    def get_line_items(self):
+    def getLineItems(self):
         """ Return the line items associated with this order """
         return PurchaseOrderLineItem.list(self._api, order=self.pk)
 
@@ -52,7 +52,7 @@ class SalesOrder(base.InventreeObject):
     def __repr__(self):
         return "Sales Order #{ref}".format(ref=self.pk)
 
-    def get_line_items(self):
+    def getLineItems(self):
         """ Return the line items associated with this order """
         return SalesOrderLineItem.list(self._api, order=self.pk)
 

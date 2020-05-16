@@ -13,7 +13,7 @@ class PartCategory(base.InventreeObject):
     URL = 'part/category'
     FILTERS = ['parent']
 
-    def get_parts(self):
+    def getParts(self):
         return Part.list(self._api, category=self.pk)
     
 

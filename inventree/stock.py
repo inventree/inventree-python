@@ -12,7 +12,7 @@ class StockLocation(base.InventreeObject):
     URL = 'stock/location'
     FILTERS = ['parent']
 
-    def get_stock_items(self):
+    def getStockItems(self):
         return StockItem.list(self._api, location=self.pk)
 
 
