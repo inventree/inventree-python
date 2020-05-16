@@ -23,21 +23,25 @@ class Part(base.InventreeObject):
     URL = 'part'
     FILTERS = ['category', 'buildable', 'purchaseable']
 
-    def get_supplier_parts(self):
+    def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
         return company.SupplierPart.list(self._api, part=self.pk)
 
-    def get_bom_items(self):
+    def getBomItems(self):
         """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk)
 
-    def get_builds(self):
+    def getBuilds(self):
         """ Return the builds associated with this part """
         return build.Build.list(self._api, part=self.pk)
 
-    def get_stock_items(self):
+    def getStockItems(self):
         """ Return the stock items associated with this part """
         return stock.StockItem.list(self._api, part=self.pk)
+
+    def getAttachments(self):
+        """ Return attachments associated with this part """
+        return PartAttachment.list(self._api, part=self.pk)
 
 
 class PartAttachment(base.Attachment):
