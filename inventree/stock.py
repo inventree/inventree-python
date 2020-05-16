@@ -29,7 +29,28 @@ class StockItem(base.InventreeObject):
     """
 
     URL = 'stock'
-    FILTERS = ['location', 'category', 'supplier', 'part', 'supplier_part']
+    FILTERS = [
+        'location',
+        'category',
+        'cascade',
+        'supplier',
+        'part',
+        'supplier_part'
+        'build',
+        'build_order',
+        'belongs_to',
+        'sales_order',
+        'customer',
+        'serialized',
+        'serial_number',
+        'allocated',
+        'active',
+        'ancestor',
+        'status',
+        'company',
+        'supplier',
+        'manufacturer',
+    ]
 
     def getAttachments(self):
         return StockItemAttachment.list(
