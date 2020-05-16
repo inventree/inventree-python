@@ -9,17 +9,20 @@ class Company(base.InventreeObject):
     URL = 'company'
     FILTERS = ['is_supplier', 'is_customer']
 
-    def get_supplier_parts(self):
-        return SupplierPart.list(self._api, part=self.pk)
+    def getSuppliedParts(self):
+        return SupplierPart.list(self._api, supplier=self.pk)
+
+    def getManufacturedParts(self):
+        return SupplierPart.list(self._api, manufacturer=self.pk)
 
 
 class SupplierPart(base.InventreeObject):
     """ Class representing the SupplierPart database model """
 
     URL = 'company/part'
-    FILTERS = ['part', 'supplier']
+    FILTERS = ['part', 'supplier', 'manufacturer']
 
-    def get_price_breaks(self):
+    def getPriceBreaks(self):
         """ Get a list of price break objects for this SupplierPart """
 
         return SupplierPriceBreak.list(self._api, part=self.pk)
