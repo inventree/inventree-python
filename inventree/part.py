@@ -37,6 +37,10 @@ class Part(base.InventreeObject):
         'purchaseable',
     ]
 
+    def getTestTemplates(self):
+        """ Return all test templates associated with this part """
+        return PartTestTemplate.list(self._api, part=self.pk)
+
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
         return company.SupplierPart.list(self._api, part=self.pk)
@@ -63,6 +67,13 @@ class PartAttachment(base.Attachment):
 
     URL = 'part/attachment'
     FILTERS = ['part']
+
+
+class PartTestTemplate(base.InventreeObject):
+    """ Class representing a test template for a Part """
+
+    URL = 'part/test-template'
+    FILTERS = ['part', 'required']
     
 
 class BomItem(base.InventreeObject):
