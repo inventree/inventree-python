@@ -15,6 +15,9 @@ class PartCategory(base.InventreeObject):
 
     def getParts(self):
         return Part.list(self._api, category=self.pk)
+
+    def getChildCategories(self):
+        return PartCategory.list(self._api, parent=self.pk)
     
 
 class Part(base.InventreeObject):
@@ -48,6 +51,10 @@ class Part(base.InventreeObject):
     def getBomItems(self):
         """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk)
+
+    def isUsedIn(self):
+        """ Return a list of all the parts this part is used in """
+        return BomItem.list(self._api, sub_part=self.pk)
 
     def getBuilds(self):
         """ Return the builds associated with this part """
