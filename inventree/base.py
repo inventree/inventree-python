@@ -3,7 +3,7 @@
 import os
 import logging
 
-INVENTREE_PYTHON_VERSION = "0.0.5"
+INVENTREE_PYTHON_VERSION = "0.0.6"
 
 
 class InventreeObject():
