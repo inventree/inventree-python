@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 
 from inventree import base
 from inventree import stock
@@ -15,6 +16,9 @@ class PartCategory(base.InventreeObject):
 
     def getParts(self):
         return Part.list(self._api, category=self.pk)
+
+    def getChildCategories(self):
+        return PartCategory.list(self._api, parent=self.pk)
     
 
 class Part(base.InventreeObject):
@@ -37,6 +41,10 @@ class Part(base.InventreeObject):
         'purchaseable',
     ]
 
+    def getTestTemplates(self):
+        """ Return all test templates associated with this part """
+        return PartTestTemplate.list(self._api, part=self.pk)
+
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
         return company.SupplierPart.list(self._api, part=self.pk)
@@ -44,6 +52,10 @@ class Part(base.InventreeObject):
     def getBomItems(self):
         """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk)
+
+    def isUsedIn(self):
+        """ Return a list of all the parts this part is used in """
+        return BomItem.list(self._api, sub_part=self.pk)
 
     def getBuilds(self):
         """ Return the builds associated with this part """
@@ -63,6 +75,28 @@ class PartAttachment(base.Attachment):
 
     URL = 'part/attachment'
     FILTERS = ['part']
+
+
+class PartTestTemplate(base.InventreeObject):
+    """ Class representing a test template for a Part """
+
+    URL = 'part/test-template'
+    FILTERS = ['part', 'required']
+
+    @classmethod
+    def generateTestKey(cls, test_name):
+        """ Generate a 'key' for this test """
+
+        key = test_name.strip().lower()
+        key = key.replace(' ', '')
+
+        # Remove any characters that cannot be used to represent a variable
+        key = re.sub(r'[^a-zA-Z0-9]', '', key)
+
+        return key
+
+    def getTestKey(self):
+        return PartTestTemplate.generateTestKey(self.test_name)
     
 
 class BomItem(base.InventreeObject):
