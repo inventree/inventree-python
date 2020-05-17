@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from inventree import base
+from inventree import part
 
 
 class PurchaseOrder(base.InventreeObject):
@@ -38,6 +39,12 @@ class PurchaseOrderLineItem(base.InventreeObject):
             ref=self.order
         )
 
+    def getPart(self):
+        return part.Part(self._api, self.part)
+
+    def getOrder(self):
+        return PurchaseOrder(self._api, self.order)
+
 
 class SalesOrder(base.InventreeObject):
     """ Class respresenting the SalesOrder database model """
@@ -72,3 +79,9 @@ class SalesOrderLineItem(base.InventreeObject):
             part=self.part,
             ref=self.order,
         )
+
+    def getPart(self):
+        return part.Part(self._api, self.part)
+
+    def getOrder(self):
+        return SalesOrder(self._api, self.order)
