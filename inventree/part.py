@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 
 from inventree import base
 from inventree import stock
@@ -81,6 +82,21 @@ class PartTestTemplate(base.InventreeObject):
 
     URL = 'part/test-template'
     FILTERS = ['part', 'required']
+
+    @classmethod
+    def generateTestKey(cls, test_name):
+        """ Generate a 'key' for this test """
+
+        key = test_name.strip().lower()
+        key = key.replace(' ', '')
+
+        # Remove any characters that cannot be used to represent a variable
+        key = re.sub(r'[^a-zA-Z0-9]', '', key)
+
+        return key
+
+    def getTestKey(self):
+        return PartTestTemplate.generateTestKey(self.test_name)
     
 
 class BomItem(base.InventreeObject):

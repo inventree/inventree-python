@@ -66,13 +66,9 @@ class StockItem(base.InventreeObject):
         )
 
     def getTestResults(self, **kwargs):
+        """ Return all the test results associated with this StockItem """
 
-        kwargs['stock_item'] = self.pk
-
-        return StockItemTestResult.list(
-            self._api,
-            **kwargs
-        )
+        return StockItemTestResult.list(self._api, stock_item=self.pk)
 
 
 class StockItemAttachment(base.Attachment):
@@ -94,6 +90,9 @@ class StockItemTestResult(base.InventreeObject):
 
     URL = 'stock/test'
     FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
+
+    def getTestKey(self):
+        return part.PartTestTemplate.generateTestKey(self.test)
 
     @classmethod
     def upload_result(cls, api, stock_item, test, result, **kwargs):
