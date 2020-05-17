@@ -33,9 +33,9 @@ class PurchaseOrderLineItem(base.InventreeObject):
 
     def __repr__(self):
         return "{n} x part #{part} for order #{ref}".format(
-            n=self['quantity'],
-            part=self['part'],
-            ref=self['order']
+            n=self.quantity,
+            part=self.part,
+            ref=self.order
         )
 
 
@@ -68,7 +68,7 @@ class SalesOrderLineItem(base.InventreeObject):
 
     def __repr__(self):
         return "{n} x part #{part} for order #{ref}".format(
-            n=self['quantity'],
-            part=self['part'],
-            ref=self['order']
+            n=self.quantity,
+            part=self.part,
+            ref=self.order,
         )

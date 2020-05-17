@@ -4,6 +4,7 @@ import os
 import logging
 
 from inventree import base
+from inventree import part
 
 
 class StockLocation(base.InventreeObject):
@@ -52,7 +53,13 @@ class StockItem(base.InventreeObject):
         'manufacturer',
     ]
 
+    def getPart(self):
+        """ Return the base Part object associated with this StockItem """
+        return part.Part(self._api, self.part)
+
     def getAttachments(self):
+        """ Return all file attachments for this StockItem """
+
         return StockItemAttachment.list(
             self._api,
             stock_item=self.pk
