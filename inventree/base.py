@@ -64,7 +64,7 @@ class InventreeObject():
 
         for arg in cls.FILTERS:
             if kwargs.get(arg, None):
-                params[arg] = kwargs[arg]
+                params[arg] = kwargs.pop(arg)
 
         response = api.get(cls.URL, params=params, **kwargs)
 
@@ -95,6 +95,12 @@ class InventreeObject():
             data = self._api.get(self._url)
             if data is not None:
                 self._data = data
+
+    def __getattr__(self, name):
+        if name in self._data.keys():
+            return self._data[name]
+        else:
+            return super().__getattr__(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():

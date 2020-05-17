@@ -4,6 +4,7 @@ import os
 import logging
 
 from inventree import base
+from inventree import part
 
 
 class StockLocation(base.InventreeObject):
@@ -52,20 +53,22 @@ class StockItem(base.InventreeObject):
         'manufacturer',
     ]
 
+    def getPart(self):
+        """ Return the base Part object associated with this StockItem """
+        return part.Part(self._api, self.part)
+
     def getAttachments(self):
+        """ Return all file attachments for this StockItem """
+
         return StockItemAttachment.list(
             self._api,
             stock_item=self.pk
         )
 
     def getTestResults(self, **kwargs):
+        """ Return all the test results associated with this StockItem """
 
-        kwargs['stock_item'] = self.pk
-
-        return StockItemTestResult.list(
-            self._api,
-            **kwargs
-        )
+        return StockItemTestResult.list(self._api, stock_item=self.pk)
 
 
 class StockItemAttachment(base.Attachment):
@@ -87,6 +90,9 @@ class StockItemTestResult(base.InventreeObject):
 
     URL = 'stock/test'
     FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
+
+    def getTestKey(self):
+        return part.PartTestTemplate.generateTestKey(self.test)
 
     @classmethod
     def upload_result(cls, api, stock_item, test, result, **kwargs):
