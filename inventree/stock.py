@@ -73,6 +73,11 @@ class StockItem(base.InventreeObject):
 
         return StockItemTestResult.list(self._api, stock_item=self.pk)
 
+    def uploadTestResult(self, test_name, test_result, **kwargs):
+        """ Upload a test result against this StockItem """
+
+        StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
+
 
 class StockItemAttachment(base.Attachment):
     """ Class representing a file attachment for a StockItem """
