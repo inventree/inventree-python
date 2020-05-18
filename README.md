@@ -11,7 +11,9 @@ This library provides a class-based interface for interacting with the database.
 
 The InvenTree python library can be easily installed using PIP:
 
-`pip install inventree`
+```
+pip install inventree
+```
 
 ## Documentation
 
