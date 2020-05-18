@@ -12,6 +12,9 @@ class InventreeObject():
     URL = ""
     FILTERS = []
 
+    # Special filters
+    FILTERS_EXTRA = ['search', 'order']
+
     def __init__(self, api, pk=None, data={}):
         """ Instantiate this InvenTree object.
 
@@ -62,7 +65,9 @@ class InventreeObject():
         # Dict of query params to send to the API
         params = {}
 
-        for arg in cls.FILTERS:
+        allowed = cls.FILTERS + cls.FILTERS_EXTRA
+
+        for arg in allowed:
             if kwargs.get(arg, None):
                 params[arg] = kwargs.pop(arg)
 

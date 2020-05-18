@@ -36,6 +36,7 @@ class StockItem(base.InventreeObject):
         'cascade',
         'supplier',
         'part',
+        'IPN',
         'supplier_part'
         'build',
         'build_order',
@@ -50,7 +51,9 @@ class StockItem(base.InventreeObject):
         'status',
         'company',
         'supplier',
-        'manufacturer',
+        'manufacturer'
+        'serialized',
+        'serial',
     ]
 
     def getPart(self):
