@@ -36,6 +36,7 @@ class StockItem(base.InventreeObject):
         'cascade',
         'supplier',
         'part',
+        'IPN',
         'supplier_part'
         'build',
         'build_order',
@@ -50,7 +51,9 @@ class StockItem(base.InventreeObject):
         'status',
         'company',
         'supplier',
-        'manufacturer',
+        'manufacturer'
+        'serialized',
+        'serial',
     ]
 
     def getPart(self):
@@ -65,10 +68,22 @@ class StockItem(base.InventreeObject):
             stock_item=self.pk
         )
 
+    def uploadAttachment(self, filename, comment, **kwargs):
+        """ Upload a file attachment against this StockItem """
+
+        kwargs['stock_item'] = self.pk
+
+        StockItemAttachment.upload(self._api, filename, comment, **kwargs)
+
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
 
         return StockItemTestResult.list(self._api, stock_item=self.pk)
+
+    def uploadTestResult(self, test_name, test_result, **kwargs):
+        """ Upload a test result against this StockItem """
+
+        StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
 
 
 class StockItemAttachment(base.Attachment):
