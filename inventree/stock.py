@@ -68,6 +68,13 @@ class StockItem(base.InventreeObject):
             stock_item=self.pk
         )
 
+    def uploadAttachment(self, filename, comment, **kwargs):
+        """ Upload a file attachment against this StockItem """
+
+        kwargs['stock_item'] = self.pk
+
+        StockItemAttachment.upload(self._api, filename, comment, **kwargs)
+
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
 
