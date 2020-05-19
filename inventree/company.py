@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from inventree import base
+import inventree.base
 
 
-class Company(base.InventreeObject):
+class Company(inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
     URL = 'company'
@@ -16,7 +16,7 @@ class Company(base.InventreeObject):
         return SupplierPart.list(self._api, manufacturer=self.pk)
 
 
-class SupplierPart(base.InventreeObject):
+class SupplierPart(inventree.base.InventreeObject):
     """ Class representing the SupplierPart database model """
 
     URL = 'company/part'
@@ -28,7 +28,7 @@ class SupplierPart(base.InventreeObject):
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-class SupplierPriceBreak(base.InventreeObject):
+class SupplierPriceBreak(inventree.base.InventreeObject):
     """ Class representing the SupplierPriceBreak database model """
 
     URL = 'company/price-break/'

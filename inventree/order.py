@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from inventree import base
-from inventree import part
+import inventree.base
+import inventree.part
 
 
-class PurchaseOrder(base.InventreeObject):
+class PurchaseOrder(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
@@ -23,7 +23,7 @@ class PurchaseOrder(base.InventreeObject):
         return PurchaseOrderLineItem.list(self._api, order=self.pk)
 
 
-class PurchaseOrderLineItem(base.InventreeObject):
+class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
 
     URL = 'order/po-line/'
@@ -40,13 +40,13 @@ class PurchaseOrderLineItem(base.InventreeObject):
         )
 
     def getPart(self):
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getOrder(self):
         return PurchaseOrder(self._api, self.order)
 
 
-class SalesOrder(base.InventreeObject):
+class SalesOrder(inventree.base.InventreeObject):
     """ Class respresenting the SalesOrder database model """
 
     URL = 'order/so'
@@ -64,7 +64,7 @@ class SalesOrder(base.InventreeObject):
         return SalesOrderLineItem.list(self._api, order=self.pk)
 
 
-class SalesOrderLineItem(base.InventreeObject):
+class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
     URL = 'order/so-line/'
@@ -81,7 +81,7 @@ class SalesOrderLineItem(base.InventreeObject):
         )
 
     def getPart(self):
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getOrder(self):
         return SalesOrder(self._api, self.order)

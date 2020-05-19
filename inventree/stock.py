@@ -3,11 +3,11 @@
 import os
 import logging
 
-from inventree import base
-from inventree import part
+import inventree.base
+import inventree.part
 
 
-class StockLocation(base.InventreeObject):
+class StockLocation(inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -17,7 +17,7 @@ class StockLocation(base.InventreeObject):
         return StockItem.list(self._api, location=self.pk)
 
 
-class StockItem(base.InventreeObject):
+class StockItem(inventree.base.InventreeObject):
     """ Class representing the StockItem database model.
     
     Stock items can be filtered by:
@@ -58,7 +58,7 @@ class StockItem(base.InventreeObject):
 
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getAttachments(self):
         """ Return all file attachments for this StockItem """
@@ -83,31 +83,31 @@ class StockItem(base.InventreeObject):
     def uploadTestResult(self, test_name, test_result, **kwargs):
         """ Upload a test result against this StockItem """
 
-        StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
+        return StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
 
 
-class StockItemAttachment(base.Attachment):
+class StockItemAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
     FILTERS = ['stock_item']
 
 
-class StockItemTracking(base.InventreeObject):
+class StockItemTracking(inventree.base.InventreeObject):
     """ Class representing a StockItem tracking object """
 
     URL = 'stock/track'
     FILTERS = ['item', 'user']
 
 
-class StockItemTestResult(base.InventreeObject):
+class StockItemTestResult(inventree.base.InventreeObject):
     """ Class representing a StockItemTestResult object """
 
     URL = 'stock/test'
     FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
 
     def getTestKey(self):
-        return part.PartTestTemplate.generateTestKey(self.test)
+        return inventree.part.PartTestTemplate.generateTestKey(self.test)
 
     @classmethod
     def upload_result(cls, api, stock_item, test, result, **kwargs):
@@ -130,10 +130,13 @@ class StockItemTestResult(base.InventreeObject):
 
         files = {}
 
+        fo = None
+
         if attachment:
             if os.path.exists(attachment):
                 f = os.path.basename(attachment)
-                files['attachment'] = (f, open(attachment, 'rb'))
+                fo = open(attachment, 'rb')
+                files['attachment'] = (f, fo)
             else:
                 logging.error("File does not exist: '{f}'".format(f=attachment))
 
@@ -151,5 +154,11 @@ class StockItemTestResult(base.InventreeObject):
         # Send the data to the serever
         if api.post(cls.URL, data, files=files):
             logging.info("Uploaded test result: '{test}'".format(test=test))
+            return True
         else:
             logging.warning("Test upload failed")
+            return False
+
+        # Ensure the file attachment is closed after use
+        if fo:
+            fo.close()
