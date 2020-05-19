@@ -2,10 +2,18 @@
 
 import unittest
 
-from inventree.base import INVENTREE_PYTHON_VERSION
+import sys
+sys.path.append(".")
+
+from inventree import base
 from inventree import api
 from inventree import part
 from inventree import stock
+
+
+SERVER = "http://127.0.0.1:8000"
+USERNAME = "admin"
+PASSWORD = "password"
 
 
 class LoginTests(unittest.TestCase):
@@ -17,7 +25,7 @@ class LoginTests(unittest.TestCase):
             a = api.InvenTreeAPI("http://127.0.0.1:1234", username="admin", password="password")
 
         # Attempt connection with invalid credentials
-        a = api.InvenTreeAPI("http://127.0.0.1:8000", username="abcde", password="********")
+        a = api.InvenTreeAPI(SERVER, username="abcde", password="********")
 
         self.assertIsNotNone(a.server_details)
         self.assertIsNone(a.token)
@@ -27,9 +35,6 @@ class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        SERVER = "http://127.0.0.1:8000"
-        USERNAME = "admin"
-        PASSWORD = "password"
 
         self.api = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD)
 
@@ -156,5 +161,5 @@ class WidgetTest(InvenTreeTestCase):
         self.assertEqual(len(results), 4)
 
 if __name__  == '__main__':
-    print("Running InvenTree Python Unit Tests: Version " + INVENTREE_PYTHON_VERSION)
+    print("Running InvenTree Python Unit Tests: Version " + base.INVENTREE_PYTHON_VERSION)
     unittest.main()
