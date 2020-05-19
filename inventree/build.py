@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from inventree import base
+import inventree.base
 
 
-class Build(base.InventreeObject):
+class Build(inventree.base.InventreeObject):
     """ Class representing the Build database model """
 
     URL = 'build'
