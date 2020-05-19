@@ -16,7 +16,7 @@ before_install:
 
 script:
     # Install inventree to system python
-    - python setup.py bdist sdist_wheel
+    - python setup.py sdist bdist_wheel
     - pip install dist/inventree-*.tar.gz
     # Run unit tests
     - coverage run test/test_api.py
