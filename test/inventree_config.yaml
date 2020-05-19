@@ -1,0 +1,25 @@
+# Database configuration for testing inventree-python module
+
+database:
+  # Example configuration - sqlite (default)
+  ENGINE: django.db.backends.sqlite3
+  NAME: '../inventree_unit_test_db.sqlite3' 
+  
+language: en-US
+
+# Set debug to False to run in production mode
+debug: True
+
+# Allowed hosts (see ALLOWED_HOSTS in Django settings documentation)
+# A list of strings representing the host/domain names that this Django site can serve.
+# Default behaviour is to allow all hosts (THIS IS NOT SECURE!)
+allowed_hosts:
+  - '*'
+
+cors:
+  # CORS_ORIGIN_ALLOW_ALL - If True, the whitelist will not be used and all origins will be accepted.
+  allow_all: True
+
+media_root: '../test_inventree_media'
+
+static_root: '../test_inventree_static'

@@ -5,7 +5,11 @@ python:
     - 3.5
 
 before_install:
+    - sudo apt-get install python3-dev g++ make
     - pip install -U -r requirements.txt
+    - git clone --depth 1 https://github.com/inventree/inventree ./inventree
+    - cd inventree && make install
+    - cp test/inventree_config.yaml inventree/InvenTree/config.yaml
 
 script:
     - flake8 .
