@@ -1,5 +1,5 @@
 
-[![PyPi version](https://pypip.in/v/inventree/badge.png)](https://pypi.org/project/inventree/) [![Build Status](https://travis-ci.org/inventree/inventree-python.svg?branch=master)](https://travis-ci.org/inventree/inventree-python)
+[![PyPi version](https://pypip.in/v/inventree/badge.png)](https://pypi.org/project/inventree/) [![Build Status](https://travis-ci.org/inventree/inventree-python.svg?branch=master)](https://travis-ci.org/inventree/inventree-python) [![Coverage Status](https://coveralls.io/repos/github/inventree/inventree-python/badge.svg?branch=master)](https://coveralls.io/github/inventree/inventree-python?branch=master)
 
 ## InvenTree Python Interface
 
