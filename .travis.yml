@@ -15,7 +15,12 @@ before_install:
     - python manage.py loaddata ../../test/test_data.json
 
 script:
+    # Install inventree to system python
     - python setup.py bdist sdist_wheel
     - pip install dist/inventree-*.tar.gz
-    - python test/test_api.py
+    # Run unit tests
+    - coverage run test/test_api.py
     - flake8 .
+
+after_success:
+    coveralls
