@@ -8,6 +8,21 @@ from inventree import part
 from inventree import stock
 
 
+class LoginTests(unittest.TestCase):
+
+    def test_failed_logins(self):
+
+        # Attempt connection where no server exists
+        with self.assertRaises(Exception):
+            a = api.InvenTreeAPI("http://127.0.0.1:1234", username="admin", password="password")
+
+        # Attempt connection with invalid credentials
+        a = api.InvenTreeAPI("http://127.0.0.1:8000", username="abcde", password="********")
+
+        self.assertIsNotNone(a.server_details)
+        self.assertIsNone(a.token)
+
+
 class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):

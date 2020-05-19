@@ -10,7 +10,6 @@ addons:
 
 before_install:
     - sudo apt-get install python3-dev python3-pip python3-venv python3-wheel g++ make
-    - pip install --upgrade pip
     - git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
     - cd inventree_server && make install && cd ..
     - cp ./test/inventree_config.yaml ./inventree_server/InvenTree/config.yaml
@@ -23,7 +22,7 @@ before_install:
 script:
     # Install inventree to system python
     - pip install -U -r requirements.txt
-    - pip install wheel
+    - pip install -- upgrade pip wheel setuptools
     - python setup.py sdist bdist_wheel
     - pip install dist/inventree-*.tar.gz
     # Run unit tests
