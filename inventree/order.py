@@ -40,7 +40,7 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         )
 
     def getPart(self):
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getOrder(self):
         return PurchaseOrder(self._api, self.order)
@@ -81,7 +81,7 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         )
 
     def getPart(self):
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getOrder(self):
         return SalesOrder(self._api, self.order)

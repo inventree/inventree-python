@@ -25,7 +25,7 @@ before_install:
 script:
     # Install inventree to system python
     - pip install -U -r requirements.txt
-    - pip install -- upgrade pip wheel setuptools
+    - pip install --upgrade pip wheel setuptools
     - python setup.py bdist_wheel --universal
     - pip install dist/inventree-*.tar.gz
     # Run unit tests
