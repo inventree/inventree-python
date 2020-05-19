@@ -47,6 +47,10 @@ class Part(base.InventreeObject):
         'purchaseable',
     ]
 
+    def getCategory(self):
+        """ Return the part category associated with this part """
+        return PartCategory(self._api, self.category)
+
     def getTestTemplates(self):
         """ Return all test templates associated with this part """
         return PartTestTemplate.list(self._api, part=self.pk)
