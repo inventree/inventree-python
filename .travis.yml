@@ -7,9 +7,10 @@ python:
 before_install:
     - sudo apt-get install python3-dev g++ make
     - pip install -U -r requirements.txt
-    - git clone --depth 1 https://github.com/inventree/inventree ./inventree
-    - cd inventree && make install
-    - cp test/inventree_config.yaml inventree/InvenTree/config.yaml
+    - git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
+    - cd inventree_server && make install
+    - cp test/inventree_config.yaml inventree_server/InvenTree/config.yaml
+    - cd inventree_server && make migrate
 
 script:
     - flake8 .
