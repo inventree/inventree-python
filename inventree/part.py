@@ -17,6 +17,12 @@ class PartCategory(base.InventreeObject):
     def getParts(self):
         return Part.list(self._api, category=self.pk)
 
+    def getParentCategory(self):
+        if self.parent:
+            return PartCategory(self._api, self.parent)
+        else:
+            return None
+
     def getChildCategories(self):
         return PartCategory.list(self._api, parent=self.pk)
     
