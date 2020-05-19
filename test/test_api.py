@@ -31,6 +31,19 @@ class LoginTests(unittest.TestCase):
         self.assertIsNone(a.token)
 
 
+class Unauthenticated(unittest.TestCase):
+    """
+    Test that we cannot access the data if we are not authenticated.
+    """
+
+    def setUp(self):
+        self.api = api.InvenTreeAPI(SERVER, username="hello", password="world")
+
+    def test_read_parts(self):
+        parts = part.Part.list(self.api)
+
+        self.assertEqual(len(parts), 0)
+
 class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):
