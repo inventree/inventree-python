@@ -4,8 +4,13 @@ language: python
 python:
     - 3.7
 
+addons:
+  apt:
+    update: true
+
 before_install:
     - sudo apt-get install python3-dev g++ make
+    - pip install wheel
     - pip install -U -r requirements.txt
     - git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
     - cd inventree_server && make install && cd ..
