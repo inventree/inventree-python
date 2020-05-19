@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 from inventree import base
 
 
