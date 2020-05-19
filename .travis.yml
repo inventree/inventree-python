@@ -13,4 +13,6 @@ before_install:
     - cd inventree_server && make migrate && cd ..
 
 script:
+    - python setup.py bdist sdist_wheel
+    - pip install dist/inventree-*.tar.gz
     - flake8 .
