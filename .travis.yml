@@ -9,7 +9,7 @@ addons:
     update: true
 
 before_install:
-    - sudo apt-get install python3-dev g++ make
+    - sudo apt-get install python3-dev python3-pip python3-venv python3-wheel g++ make
     - pip install -U -r requirements.txt
     - git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
     - cd inventree_server && make install && cd ..
