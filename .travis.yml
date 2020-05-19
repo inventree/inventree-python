@@ -11,8 +11,11 @@ before_install:
     - cd inventree_server && make install && cd ..
     - cp ./test/inventree_config.yaml ./inventree_server/InvenTree/config.yaml
     - cd inventree_server && make migrate && cd ..
+    - cd inventree_server/InvenTree
+    - python manage.py loaddata ../../test/test_data.json
 
 script:
     - python setup.py bdist sdist_wheel
     - pip install dist/inventree-*.tar.gz
+    - python test/test_api.py
     - flake8 .
