@@ -112,9 +112,10 @@ class WidgetTest(InvenTreeTestCase):
         self.assertIn('firmware', keys)
         self.assertIn('weight', keys)
         self.assertIn('paint', keys)
-        
-    def test_item(self):
 
+
+    def test_add_result(self):
+        
         # Look for a particular serial number
         item = stock.StockItem.list(self.api, IPN="W001", serial=10)
         self.assertEqual(len(item), 1)
@@ -122,6 +123,22 @@ class WidgetTest(InvenTreeTestCase):
 
         tests = item.getTestResults()
         self.assertEqual(len(tests), 1)
+
+        # Upload a test result against 'firmware' (should fail the first time)
+        args = {
+            'attachment': 'test/attachment.txt',
+            'value': '0x123456',
+        }
+
+        result = item.uploadTestResult('firmware', False, **args)
+
+        self.assertTrue(result)
+
+        item.uploadTestResult('paint', True)
+        item.uploadTestResult('extra test', False, value='some data')
+
+        results = item.getTestResults()
+        self.assertEqual(len(results), 4)
 
 if __name__  == '__main__':
     print("Running InvenTree Python Unit Tests: Version " + INVENTREE_PYTHON_VERSION)
