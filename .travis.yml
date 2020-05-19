@@ -13,6 +13,8 @@ before_install:
     - cd inventree_server && make migrate && cd ..
     - cd inventree_server/InvenTree
     - python manage.py loaddata ../../test/test_data.json
+    # Run a development server in the background...
+    - python manage.py runserver 127.0.0.1:8000 &
 
 script:
     # Install inventree to system python
