@@ -159,6 +159,10 @@ class TestCreate(InvenTreeTestCase):
         self.assertIsNotNone(p)
         self.assertEqual(p.category, c.pk)
 
+        C = p.getCategory()
+        self.assertEqual(C.pk, c.pk)
+        self.assertEqual(C.name, 'My custom category')
+
         s = stock.StockItem.create(self.api, {
             'part': p.pk,
             'quantity': 45,
@@ -168,6 +172,11 @@ class TestCreate(InvenTreeTestCase):
 
         self.assertIsNotNone(s)
         self.assertEqual(s.part, p.pk)
+
+        P = s.getPart()
+        self.assertEqual(P.pk, p.pk)
+        self.assertEqual(P.name, 'ACME Widget')
+
 
 
 class WidgetTest(InvenTreeTestCase):
