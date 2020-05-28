@@ -50,7 +50,13 @@ class InventreeObject():
         if 'pk' in data.keys():
             data.pop('pk')
 
-        api.post(cls.URL, data)
+        response = api.post(cls.URL, data)
+        
+        if response is None:
+            logging.error("Error creating new object")
+            return None
+
+        return cls(api, data=response)
 
     @classmethod
     def list(cls, api, **kwargs):

@@ -273,14 +273,19 @@ class InvenTreeAPI(object):
         response = requests.post(url, data=data, headers=headers, auth=auth, files=files, **kwargs)
 
         if response is None:
-            return False
+            return None
 
-        if response.status_code in [200, 201]:
-            return True
-        else:
+        if response.status_code not in [200, 201]:
             logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
             logging.error(response.text)
-            return False
+        
+        try:
+            data = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            logging.error("Error decoding JSON response - '{url}'".format(url=url))
+            return None
+
+        return data
 
     def put(self, url, data, **kwargs):
         """ Perform a PUT request. Used to update existing records in the database.
@@ -301,11 +306,17 @@ class InvenTreeAPI(object):
         if response is None:
             return None
         
-        if response.status_code == 200:
-            return True
-        else:
+        if response.status_code not in [200, 201]:
             logging.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
-            return False
+            return None
+
+        try:
+            data = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            logging.error("Error decoding JSON response - '{url}'".format(url=url))
+            return None
+
+        return data
 
     def get(self, url, **kwargs):
         """ Perform a GET request
