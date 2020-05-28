@@ -27,7 +27,7 @@ class InventreeObject():
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
         if pk is None:
-            pk = data['pk']
+            pk = data.get('pk', None)
 
         self._url = "{url}/{pk}/".format(url=self.URL, pk=pk)
         self._api = api
@@ -40,7 +40,7 @@ class InventreeObject():
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
-        return self['pk']
+        return self._data.get('pk', None)
 
     @classmethod
     def create(cls, api, data, **kwargs):
