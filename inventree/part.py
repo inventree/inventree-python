@@ -38,7 +38,7 @@ class Part(inventree.base.InventreeObject):
         'low_stock',
         'is_template',
         'variant_of',
-        'assemply',
+        'assembly',
         'component',
         'trackable',
         'salable',

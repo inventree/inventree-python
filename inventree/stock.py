@@ -130,13 +130,12 @@ class StockItemTestResult(inventree.base.InventreeObject):
 
         files = {}
 
-        fo = None
-
         if attachment:
             if os.path.exists(attachment):
                 f = os.path.basename(attachment)
                 fo = open(attachment, 'rb')
                 files['attachment'] = (f, fo)
+                fo.close()
             else:
                 logging.error("File does not exist: '{f}'".format(f=attachment))
 
@@ -158,7 +157,3 @@ class StockItemTestResult(inventree.base.InventreeObject):
         else:
             logging.warning("Test upload failed")
             return False
-
-        # Ensure the file attachment is closed after use
-        if fo:
-            fo.close()
