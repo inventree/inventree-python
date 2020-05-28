@@ -18,7 +18,7 @@ before_install:
     - cd inventree_server/InvenTree
     - python manage.py loaddata ../../test/test_data.json
     # Run a development server in the background...
-    - python manage.py runserver 127.0.0.1:8000 &
+    - python manage.py runserver 127.0.0.1:8000
     # Ensure the server has enough time to launch...
     - sleep 60
     # Ensure we are back in the original dir
