@@ -119,7 +119,11 @@ class PartTest(InvenTreeTestCase):
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)
 
+
 class StockTest(InvenTreeTestCase):
+    """
+    Test alternative ways of getting StockItem objects.
+    """
 
     def test_stock(self):
 
