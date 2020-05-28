@@ -119,7 +119,11 @@ class PartTest(InvenTreeTestCase):
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)
 
+
 class StockTest(InvenTreeTestCase):
+    """
+    Test alternative ways of getting StockItem objects.
+    """
 
     def test_stock(self):
 
@@ -129,6 +133,55 @@ class StockTest(InvenTreeTestCase):
         s = part.Part(self.api, 1).getStockItems()
         self.assertEqual(len(s), 2)
         
+
+class TestCreate(InvenTreeTestCase):
+    """
+    Test that objects can be created via the API
+    """
+
+    def test_create_stuff(self):
+
+        # Create a custom category
+        c = part.PartCategory.create(self.api, {
+            'parent': None,
+            'name': 'My custom category',
+            'description': 'A part category',
+        })
+
+        self.assertIsNotNone(c)
+        self.assertIsNotNone(c.pk)
+
+        p = part.Part.create(self.api, {
+            'name': 'ACME Widget',
+            'description': 'A simple widget created via the API',
+            'category': c.pk,
+            'ipn': 'ACME-0001',
+            'virtual': False,
+            'active': True
+        })
+
+        self.assertIsNotNone(p)
+        self.assertEqual(p.category, c.pk)
+
+        C = p.getCategory()
+        self.assertEqual(C.pk, c.pk)
+        self.assertEqual(C.name, 'My custom category')
+
+        s = stock.StockItem.create(self.api, {
+            'part': p.pk,
+            'quantity': 45,
+            'notes': 'This is a note',
+
+        })
+
+        self.assertIsNotNone(s)
+        self.assertEqual(s.part, p.pk)
+
+        P = s.getPart()
+        self.assertEqual(P.pk, p.pk)
+        self.assertEqual(P.name, 'ACME Widget')
+
+
 
 class WidgetTest(InvenTreeTestCase):
 
