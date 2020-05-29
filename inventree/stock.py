@@ -130,12 +130,13 @@ class StockItemTestResult(inventree.base.InventreeObject):
 
         files = {}
 
+        fo = None
+
         if attachment:
             if os.path.exists(attachment):
                 f = os.path.basename(attachment)
                 fo = open(attachment, 'rb')
                 files['attachment'] = (f, fo)
-                fo.close()
             else:
                 logging.error("File does not exist: '{f}'".format(f=attachment))
 
@@ -153,7 +154,13 @@ class StockItemTestResult(inventree.base.InventreeObject):
         # Send the data to the serever
         if api.post(cls.URL, data, files=files):
             logging.info("Uploaded test result: '{test}'".format(test=test))
-            return True
+            ret = True
         else:
             logging.warning("Test upload failed")
-            return False
+            ret = False
+
+        # Ensure the file attachment is closed after use
+        if fo:
+            fo.close()
+
+        return ret
