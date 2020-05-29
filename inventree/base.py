@@ -3,7 +3,7 @@
 import os
 import logging
 
-INVENTREE_PYTHON_VERSION = "0.0.6"
+INVENTREE_PYTHON_VERSION = "0.0.9"
 
 
 class InventreeObject():
@@ -11,6 +11,9 @@ class InventreeObject():
 
     URL = ""
     FILTERS = []
+
+    # Special filters
+    FILTERS_EXTRA = ['search', 'order']
 
     def __init__(self, api, pk=None, data={}):
         """ Instantiate this InvenTree object.
@@ -24,7 +27,7 @@ class InventreeObject():
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
         if pk is None:
-            pk = data['pk']
+            pk = data.get('pk', None)
 
         self._url = "{url}/{pk}/".format(url=self.URL, pk=pk)
         self._api = api
@@ -37,7 +40,7 @@ class InventreeObject():
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
-        return self['pk']
+        return self._data.get('pk', None)
 
     @classmethod
     def create(cls, api, data, **kwargs):
@@ -47,7 +50,13 @@ class InventreeObject():
         if 'pk' in data.keys():
             data.pop('pk')
 
-        api.post(cls.URL, data)
+        response = api.post(cls.URL, data)
+        
+        if response is None:
+            logging.error("Error creating new object")
+            return None
+
+        return cls(api, data=response)
 
     @classmethod
     def list(cls, api, **kwargs):
@@ -62,7 +71,9 @@ class InventreeObject():
         # Dict of query params to send to the API
         params = {}
 
-        for arg in cls.FILTERS:
+        allowed = cls.FILTERS + cls.FILTERS_EXTRA
+
+        for arg in allowed:
             if kwargs.get(arg, None):
                 params[arg] = kwargs.pop(arg)
 

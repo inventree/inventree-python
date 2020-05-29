@@ -2,13 +2,13 @@
 
 import re
 
-from inventree import base
-from inventree import stock
-from inventree import company
-from inventree import build
+import inventree.base
+import inventree.stock
+import inventree.company
+import inventree.build
 
 
-class PartCategory(base.InventreeObject):
+class PartCategory(inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
     URL = 'part/category'
@@ -17,11 +17,17 @@ class PartCategory(base.InventreeObject):
     def getParts(self):
         return Part.list(self._api, category=self.pk)
 
+    def getParentCategory(self):
+        if self.parent:
+            return PartCategory(self._api, self.parent)
+        else:
+            return None
+
     def getChildCategories(self):
         return PartCategory.list(self._api, parent=self.pk)
     
 
-class Part(base.InventreeObject):
+class Part(inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
@@ -41,13 +47,17 @@ class Part(base.InventreeObject):
         'purchaseable',
     ]
 
+    def getCategory(self):
+        """ Return the part category associated with this part """
+        return PartCategory(self._api, self.category)
+
     def getTestTemplates(self):
         """ Return all test templates associated with this part """
         return PartTestTemplate.list(self._api, part=self.pk)
 
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
-        return company.SupplierPart.list(self._api, part=self.pk)
+        return inventree.company.SupplierPart.list(self._api, part=self.pk)
 
     def getBomItems(self):
         """ Return the items required to make this part """
@@ -59,25 +69,25 @@ class Part(base.InventreeObject):
 
     def getBuilds(self):
         """ Return the builds associated with this part """
-        return build.Build.list(self._api, part=self.pk)
+        return inventree.build.Build.list(self._api, part=self.pk)
 
     def getStockItems(self):
         """ Return the stock items associated with this part """
-        return stock.StockItem.list(self._api, part=self.pk)
+        return inventree.stock.StockItem.list(self._api, part=self.pk)
 
     def getAttachments(self):
         """ Return attachments associated with this part """
         return PartAttachment.list(self._api, part=self.pk)
 
 
-class PartAttachment(base.Attachment):
+class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """
 
     URL = 'part/attachment'
     FILTERS = ['part']
 
 
-class PartTestTemplate(base.InventreeObject):
+class PartTestTemplate(inventree.base.InventreeObject):
     """ Class representing a test template for a Part """
 
     URL = 'part/test-template'
@@ -99,7 +109,7 @@ class PartTestTemplate(base.InventreeObject):
         return PartTestTemplate.generateTestKey(self.test_name)
     
 
-class BomItem(base.InventreeObject):
+class BomItem(inventree.base.InventreeObject):
     """ Class representing the BomItem database model """
 
     URL = 'bom'

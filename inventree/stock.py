@@ -3,11 +3,11 @@
 import os
 import logging
 
-from inventree import base
-from inventree import part
+import inventree.base
+import inventree.part
 
 
-class StockLocation(base.InventreeObject):
+class StockLocation(inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -17,7 +17,7 @@ class StockLocation(base.InventreeObject):
         return StockItem.list(self._api, location=self.pk)
 
 
-class StockItem(base.InventreeObject):
+class StockItem(inventree.base.InventreeObject):
     """ Class representing the StockItem database model.
     
     Stock items can be filtered by:
@@ -36,6 +36,7 @@ class StockItem(base.InventreeObject):
         'cascade',
         'supplier',
         'part',
+        'IPN',
         'supplier_part'
         'build',
         'build_order',
@@ -50,12 +51,14 @@ class StockItem(base.InventreeObject):
         'status',
         'company',
         'supplier',
-        'manufacturer',
+        'manufacturer'
+        'serialized',
+        'serial',
     ]
 
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
-        return part.Part(self._api, self.part)
+        return inventree.part.Part(self._api, self.part)
 
     def getAttachments(self):
         """ Return all file attachments for this StockItem """
@@ -65,34 +68,46 @@ class StockItem(base.InventreeObject):
             stock_item=self.pk
         )
 
+    def uploadAttachment(self, filename, comment, **kwargs):
+        """ Upload a file attachment against this StockItem """
+
+        kwargs['stock_item'] = self.pk
+
+        StockItemAttachment.upload(self._api, filename, comment, **kwargs)
+
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
 
         return StockItemTestResult.list(self._api, stock_item=self.pk)
 
+    def uploadTestResult(self, test_name, test_result, **kwargs):
+        """ Upload a test result against this StockItem """
 
-class StockItemAttachment(base.Attachment):
+        return StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
+
+
+class StockItemAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
     FILTERS = ['stock_item']
 
 
-class StockItemTracking(base.InventreeObject):
+class StockItemTracking(inventree.base.InventreeObject):
     """ Class representing a StockItem tracking object """
 
     URL = 'stock/track'
     FILTERS = ['item', 'user']
 
 
-class StockItemTestResult(base.InventreeObject):
+class StockItemTestResult(inventree.base.InventreeObject):
     """ Class representing a StockItemTestResult object """
 
     URL = 'stock/test'
     FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
 
     def getTestKey(self):
-        return part.PartTestTemplate.generateTestKey(self.test)
+        return inventree.part.PartTestTemplate.generateTestKey(self.test)
 
     @classmethod
     def upload_result(cls, api, stock_item, test, result, **kwargs):
@@ -115,10 +130,13 @@ class StockItemTestResult(base.InventreeObject):
 
         files = {}
 
+        fo = None
+
         if attachment:
             if os.path.exists(attachment):
                 f = os.path.basename(attachment)
-                files['attachment'] = (f, open(attachment, 'rb'))
+                fo = open(attachment, 'rb')
+                files['attachment'] = (f, fo)
             else:
                 logging.error("File does not exist: '{f}'".format(f=attachment))
 
@@ -136,5 +154,11 @@ class StockItemTestResult(base.InventreeObject):
         # Send the data to the serever
         if api.post(cls.URL, data, files=files):
             logging.info("Uploaded test result: '{test}'".format(test=test))
+            return True
         else:
             logging.warning("Test upload failed")
+            return False
+
+        # Ensure the file attachment is closed after use
+        if fo:
+            fo.close()

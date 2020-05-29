@@ -1,11 +1,40 @@
 dist: xenial
 
 language: python
+
 python:
-    - 3.5
+    - 3.7
+
+addons:
+  apt:
+    update: true
 
 before_install:
-    - pip install -U -r requirements.txt
+    - sudo apt-get install python3-dev python3-pip python3-venv python3-wheel g++ make
+    - git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
+    - cd inventree_server && make install && cd ..
+    - cp ./test/inventree_config.yaml ./inventree_server/InvenTree/config.yaml
+    - cd inventree_server && make migrate && cd ..
+    - cd inventree_server/InvenTree
+    - python manage.py loaddata ../../test/test_data.json
+    - cd ../../
 
 script:
+    # Ensure we are back in the original dir
+    # Install inventree to system python
+    - pip install -U -r requirements.txt
+    - cd inventree_server/InvenTree
+    # Run a development server in the background...
+    - python manage.py runserver 127.0.0.1:8000 &
+    # Ensure the server has enough time to launch...
+    - sleep 60
+    - cd ../../
+    # Run unit tests
+    - coverage run test/test_api.py
+    # Ensure that the module can be installed
+    - pip install --upgrade pip wheel setuptools
+    - python setup.py bdist_wheel --universal
     - flake8 .
+
+after_success:
+    coveralls
