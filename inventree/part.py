@@ -79,6 +79,10 @@ class Part(inventree.base.InventreeObject):
         """ Return attachments associated with this part """
         return PartAttachment.list(self._api, part=self.pk)
 
+    def getParameters(self):
+        """ Return parameters associated with this part """
+        return inventree.base.Parameter.list(self._api, part=self.pk)
+
 
 class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """
