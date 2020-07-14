@@ -12,7 +12,6 @@ class PartCategory(inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
     URL = 'part/category'
-    FILTERS = ['parent']
 
     def getParts(self):
         return Part.list(self._api, category=self.pk)
@@ -31,21 +30,6 @@ class Part(inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
-    FILTERS = [
-        'category',
-        'cascade',
-        'has_stock',
-        'low_stock',
-        'is_template',
-        'variant_of',
-        'assembly',
-        'component',
-        'trackable',
-        'salable',
-        'active',
-        'buildable',
-        'purchaseable',
-    ]
 
     def getCategory(self):
         """ Return the part category associated with this part """
@@ -88,14 +72,12 @@ class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """
 
     URL = 'part/attachment'
-    FILTERS = ['part']
 
 
 class PartTestTemplate(inventree.base.InventreeObject):
     """ Class representing a test template for a Part """
 
     URL = 'part/test-template'
-    FILTERS = ['part', 'required']
 
     @classmethod
     def generateTestKey(cls, test_name):
@@ -117,4 +99,3 @@ class BomItem(inventree.base.InventreeObject):
     """ Class representing the BomItem database model """
 
     URL = 'bom'
-    FILTERS = ['part', 'sub_part']
