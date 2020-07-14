@@ -10,10 +10,6 @@ class InventreeObject():
     """ Base class for an InvenTree object """
 
     URL = ""
-    FILTERS = []
-
-    # Special filters
-    FILTERS_EXTRA = ['search', 'order']
 
     def __init__(self, api, pk=None, data={}):
         """ Instantiate this InvenTree object.
@@ -65,17 +61,10 @@ class InventreeObject():
         Requires:
 
         URL - Base URL
-        FILTERS - List of available query filter params
         """
 
         # Dict of query params to send to the API
-        params = {}
-
-        allowed = cls.FILTERS + cls.FILTERS_EXTRA
-
-        for arg in allowed:
-            if kwargs.get(arg, None):
-                params[arg] = kwargs.pop(arg)
+        params = kwargs
 
         response = api.get(cls.URL, params=params, **kwargs)
 
@@ -167,7 +156,6 @@ class Currency(InventreeObject):
 class Parameter(InventreeObject):
     """class representing the Parameter database model """
     URL = 'part/parameter'
-    FILTERS = ['part']
 
     def getunits(self):
         """ Get the dimension and units for this parameter """
