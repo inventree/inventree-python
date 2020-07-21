@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+import logging
 import re
 
 import inventree.base
@@ -67,11 +69,95 @@ class Part(inventree.base.InventreeObject):
         """ Return parameters associated with this part """
         return inventree.base.Parameter.list(self._api, part=self.pk)
 
+    def upload_image(self, image):
+        """ Upload an image against this Part """
+        return PartThumb.upload_thumbnail(self._api, self.pk, image)
+
+
+class PartThumb(inventree.base.InventreeObject):
+    """ Class representing the Part database model """
+
+    URL = 'part/thumbs'
+
+    @classmethod
+    def upload_thumbnail(cls, api, part, image):
+        """
+        Upload a Part thumbnail
+
+        image: Attach an image
+        """
+        files = {}
+        fo = None
+
+        if image:
+            if os.path.exists(image):
+                f = os.path.basename(image)
+                fo = open(image, 'rb')
+                files['image'] = (f, fo)
+            else:
+                logging.error("File does not exist: '{f}'".format(f=image))
+
+        data = {
+            'image': os.path.basename(image),
+        }
+
+        # Send the data to the server
+        url = f'{cls.URL}/{part}/'
+        if api.put_image(url, data, files=files):
+            logging.info("Uploaded thumbnail: '{f}'".format(f=image))
+            return True
+        else:
+            logging.warning("Thumbnail upload failed")
+            return False
+
 
 class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """
 
     URL = 'part/attachment'
+
+    @classmethod
+    def upload_attachment(cls, api, part, **kwargs):
+        """
+        Upload a Part attachment
+
+        args:
+            api: Authenticated InvenTree API object
+            part: pk of the Part object to upload the attachment to
+
+        kwargs:
+            attachment: Attach a file
+            comment: Add comment
+        """
+        attachment = kwargs.get('attachment', None)
+
+        files = {}
+
+        fo = None
+
+        if attachment:
+            if os.path.exists(attachment):
+                f = os.path.basename(attachment)
+                fo = open(attachment, 'rb')
+                files['attachment'] = (f, fo)
+            else:
+                logging.error("File does not exist: '{f}'".format(f=attachment))
+
+        comment = kwargs.get('comment', '')
+
+        data = {
+            'part': part,
+            'attachment': os.path.basename(attachment),
+            'comment': comment,
+        }
+
+        # Send the data to the server
+        if api.post(cls.URL, data, files=files):
+            logging.info("Uploaded attachment: '{f}'".format(f=attachment))
+            ret = True
+        else:
+            logging.warning("Attachment upload failed")
+            ret = False
 
 
 class PartTestTemplate(inventree.base.InventreeObject):

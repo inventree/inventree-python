@@ -318,6 +318,23 @@ class InvenTreeAPI(object):
 
         return data
 
+    def put_image(self, url, data, files):
+        headers = {}
+
+        if self.use_token_auth and self.token:
+            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
+            auth = None
+        else:
+            auth = self.auth
+
+        url = self.clean_url(url)
+        response = requests.put(url, data=data, files=files, headers=headers, auth=auth)
+
+        if response.status_code not in [200, 201]:
+            return None
+
+        return data
+
     def get(self, url, **kwargs):
         """ Perform a GET request
 
