@@ -8,12 +8,6 @@ class PurchaseOrder(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
-    FILTERS = [
-        'status',
-        'part',
-        'supplier_part',
-        'supplier',
-    ]
 
     def __repr__(self):
         return "Purchase Order #{ref}".format(ref=self.pk)
@@ -27,10 +21,6 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
 
     URL = 'order/po-line/'
-    FILTERS = [
-        'order',
-        'part',
-    ]
 
     def __repr__(self):
         return "{n} x part #{part} for order #{ref}".format(
@@ -50,11 +40,6 @@ class SalesOrder(inventree.base.InventreeObject):
     """ Class respresenting the SalesOrder database model """
 
     URL = 'order/so'
-    FILTERS = [
-        'status',
-        'part',
-        'customer',
-    ]
 
     def __repr__(self):
         return "Sales Order #{ref}".format(ref=self.pk)
@@ -68,10 +53,6 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
     URL = 'order/so-line/'
-    FILTERS = [
-        'order',
-        'part'
-    ]
 
     def __repr__(self):
         return "{n} x part #{part} for order #{ref}".format(

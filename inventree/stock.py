@@ -11,7 +11,6 @@ class StockLocation(inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
-    FILTERS = ['parent']
 
     def getStockItems(self):
         return StockItem.list(self._api, location=self.pk)
@@ -30,31 +29,6 @@ class StockItem(inventree.base.InventreeObject):
     """
 
     URL = 'stock'
-    FILTERS = [
-        'location',
-        'category',
-        'cascade',
-        'supplier',
-        'part',
-        'IPN',
-        'supplier_part'
-        'build',
-        'build_order',
-        'belongs_to',
-        'sales_order',
-        'customer',
-        'serialized',
-        'serial_number',
-        'allocated',
-        'active',
-        'ancestor',
-        'status',
-        'company',
-        'supplier',
-        'manufacturer'
-        'serialized',
-        'serial',
-    ]
 
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
@@ -90,21 +64,18 @@ class StockItemAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
-    FILTERS = ['stock_item']
 
 
 class StockItemTracking(inventree.base.InventreeObject):
     """ Class representing a StockItem tracking object """
 
     URL = 'stock/track'
-    FILTERS = ['item', 'user']
 
 
 class StockItemTestResult(inventree.base.InventreeObject):
     """ Class representing a StockItemTestResult object """
 
     URL = 'stock/test'
-    FILTERS = ['stock_item', 'test', 'result', 'value', 'user']
 
     def getTestKey(self):
         return inventree.part.PartTestTemplate.generateTestKey(self.test)
@@ -154,11 +125,13 @@ class StockItemTestResult(inventree.base.InventreeObject):
         # Send the data to the serever
         if api.post(cls.URL, data, files=files):
             logging.info("Uploaded test result: '{test}'".format(test=test))
-            return True
+            ret = True
         else:
             logging.warning("Test upload failed")
-            return False
+            ret = False
 
         # Ensure the file attachment is closed after use
         if fo:
             fo.close()
+
+        return ret
