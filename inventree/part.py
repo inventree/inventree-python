@@ -159,6 +159,8 @@ class PartAttachment(inventree.base.Attachment):
             logging.warning("Attachment upload failed")
             ret = False
 
+        return ret
+
 
 class PartTestTemplate(inventree.base.InventreeObject):
     """ Class representing a test template for a Part """
