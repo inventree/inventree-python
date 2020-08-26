@@ -249,7 +249,7 @@ class InvenTreeAPI(object):
         if response is None:
             return False
 
-        print(response.status_code, response.text)
+        logging.debug(response.status_code, response.text)
 
     def post(self, url, data, files=None, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
