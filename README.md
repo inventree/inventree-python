@@ -17,4 +17,4 @@ pip install inventree
 
 ## Documentation
 
-Refer to the [InvenTree documentation](https://inventree.github.io/docs/extend/python)
+Refer to the [InvenTree documentation](https://inventree.readthedocs.io/en/latest/extend/python/)
