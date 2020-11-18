@@ -21,9 +21,9 @@ before_install:
     - cd ../../
 
 script:
-    # Ensure we are back in the original dir
     # Install inventree to system python
     - pip install -U -r requirements.txt
+    # Ensure we are back in the original dir
     - cd inventree_server/InvenTree
     # Run a development server in the background...
     - python manage.py runserver 127.0.0.1:8000 &
