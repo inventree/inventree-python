@@ -31,7 +31,7 @@ script:
     - sleep 60
     - cd ../../
     # Run unit tests
-    - coverage run test/test_api.py
+    - coverage run -m unittest discover -s test/
     # Ensure that the module can be installed
     - pip install --upgrade pip wheel setuptools
     - python setup.py bdist_wheel --universal
