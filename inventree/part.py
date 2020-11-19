@@ -26,7 +26,21 @@ class PartCategory(inventree.base.InventreeObject):
 
     def getChildCategories(self):
         return PartCategory.list(self._api, parent=self.pk)
+
+    def get_category_parameter_templates(self, fetch_parent=True):
+        """
+            fetch_parent: enable to fetch templates for parent categories
+        """
+        return CategoryParameterTemplate.list(self._api,
+                                              category=self.pk,
+                                              fetch_parent=fetch_parent)
     
+
+class CategoryParameterTemplate(inventree.base.InventreeObject):
+    """ Class representing the PartCategoryParameterTemplate database model """
+
+    URL = 'part/category/parameters'
+
 
 class Part(inventree.base.InventreeObject):
     """ Class representing the Part database model """
