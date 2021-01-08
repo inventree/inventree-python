@@ -34,6 +34,18 @@ class StockItem(inventree.base.InventreeObject):
         """ Return the base Part object associated with this StockItem """
         return inventree.part.Part(self._api, self.part)
 
+    def getLocation(self):
+        """
+        Return the StockLocation associated with this StockItem
+        
+        Returns None if there is no linked StockItem
+        """
+
+        if self.location is None:
+            return None
+
+        return StockLocation(self._api, self.location)
+
     def getAttachments(self):
         """ Return all file attachments for this StockItem """
 
