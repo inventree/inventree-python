@@ -144,8 +144,7 @@ class StockTest(InvenTreeTestCase):
         # Get the Part reference
         prt = item.getPart()
 
-        self.assertEqual(type(part), part.Part)
-
+        self.assertEqual(type(prt), part.Part)
         self.assertEqual(prt.pk, 1)
 
         # Get the Location reference
