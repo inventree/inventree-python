@@ -136,7 +136,7 @@ class StockTest(InvenTreeTestCase):
         
     def test_get_stock_item(self):
 
-        item = stock.StockItem(self.pk=1)
+        item = stock.StockItem(self.api, pk=1)
 
         self.assertEqual(item.pk, 1)
         self.assertEqual(item.location, 4)
