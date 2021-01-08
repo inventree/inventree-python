@@ -12,8 +12,25 @@ class StockLocation(inventree.base.InventreeObject):
 
     URL = 'stock/location'
 
-    def getStockItems(self):
-        return StockItem.list(self._api, location=self.pk)
+    def getStockItems(self, **kwargs):
+        return StockItem.list(self._api, location=self.pk, **kwargs)
+
+    def getParentLocation(self):
+        """
+        Return the parent stock location
+        (or None if no parent is available)
+        """
+
+        if self.parent is None:
+            return None
+        
+        return StockLocation(self.api, self.parent)
+
+    def getChildLocations(self, **kwargs):
+        """
+        Return all the child locations under this location
+        """
+        return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
 class StockItem(inventree.base.InventreeObject):

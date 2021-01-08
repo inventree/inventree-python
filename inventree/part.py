@@ -15,8 +15,8 @@ class PartCategory(inventree.base.InventreeObject):
 
     URL = 'part/category'
 
-    def getParts(self):
-        return Part.list(self._api, category=self.pk)
+    def getParts(self, **kwargs):
+        return Part.list(self._api, category=self.pk, **kwargs)
 
     def getParentCategory(self):
         if self.parent:
@@ -24,8 +24,8 @@ class PartCategory(inventree.base.InventreeObject):
         else:
             return None
 
-    def getChildCategories(self):
-        return PartCategory.list(self._api, parent=self.pk)
+    def getChildCategories(self, **kwargs):
+        return PartCategory.list(self._api, parent=self.pk, **kwargs)
 
     def get_category_parameter_templates(self, fetch_parent=True):
         """
@@ -67,9 +67,9 @@ class Part(inventree.base.InventreeObject):
         """ Return a list of all the parts this part is used in """
         return BomItem.list(self._api, sub_part=self.pk)
 
-    def getBuilds(self):
+    def getBuilds(self, **kwargs):
         """ Return the builds associated with this part """
-        return inventree.build.Build.list(self._api, part=self.pk)
+        return inventree.build.Build.list(self._api, part=self.pk, **kwargs)
 
     def getStockItems(self):
         """ Return the stock items associated with this part """

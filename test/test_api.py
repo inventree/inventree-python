@@ -47,8 +47,9 @@ class Unauthenticated(unittest.TestCase):
 class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):
-
-
+        """
+        Test case setup functions
+        """
         self.api = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD)
 
 
@@ -63,7 +64,6 @@ class InvenTreeAPITest(InvenTreeTestCase):
         details = self.api.server_details
         self.assertIn('server', details)
         self.assertIn('instance', details)
-
 
 
 class PartTest(InvenTreeTestCase):
@@ -133,6 +133,78 @@ class StockTest(InvenTreeTestCase):
         s = part.Part(self.api, 1).getStockItems()
         self.assertEqual(len(s), 2)
         
+    def test_get_stock_item(self):
+
+        item = stock.StockItem(pk=1)
+
+        self.assertEqual(item.pk, 1)
+        self.assertEqual(item.location, 4)
+
+        # Get the Part reference
+        part = item.getPart()
+
+        self.assertEqual(type(part), part.Part)
+
+        self.assertEqual(part.pk, 1)
+
+        # Get the Location reference
+        location = item.getLocation()
+
+        self.assertEqual(type(location), stock.StockLocation)
+        self.assertEqual(location.pk, 4)
+        self.assertEqual(location.name, "Electronic Component Storage")
+
+
+class StockLocationTest(InvenTreeTestCase):
+    """
+    Tests for the StockLocation model
+    """
+
+    def test_location_list(self):
+        locs = stock.StockLocation.list(self.api)
+        self.assertEqual(len(locs), 4)
+
+        for loc in locs:
+            self.assertEqual(type(loc), stock.StockLocation)
+
+    def test_location_stock(self):
+
+        location = stock.StockLocation(self.api, pk=4)
+
+        self.assertEqual(location.pk, 4)
+        self.assertEqual(location.description, "Storage for electronic components")
+
+        items = location.getStockItems()
+
+        self.assertEqual(len(items), 3)
+
+        items = location.getStockItems(part=1)
+        self.assertEqual(len(items), 2)
+
+        items = location.getStockItems(part=5)
+        self.assertEqual(len(items), 1)
+
+    def test_location_parent(self):
+        """
+        Return the Parent location
+        """
+
+        location = stock.StockLocation(self.api, pk=4)
+        self.assertEqual(location.parent, 1)
+
+        parent = location.getParentLocation()
+
+        self.assertEqual(type(parent), stock.StockLocation)
+        self.assertEqual(parent.pk, 1)
+        self.assertIsNone(parent.parent)
+        self.assertIsNone(parent.getParentLocation())
+
+        children = parent.getChildLocations()
+        self.assertEqual(len(children), 2)
+
+        for child in children:
+            self.assertEqual(type(child), stock.StockLocation)
+            self.assertEqual(child.parent, parent.pk)
 
 class TestCreate(InvenTreeTestCase):
     """
@@ -180,7 +252,6 @@ class TestCreate(InvenTreeTestCase):
         P = s.getPart()
         self.assertEqual(P.pk, p.pk)
         self.assertEqual(P.name, 'ACME Widget')
-
 
 
 class WidgetTest(InvenTreeTestCase):
