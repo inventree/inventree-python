@@ -144,14 +144,14 @@ class StockTest(InvenTreeTestCase):
         # Get the Part reference
         part = item.getPart()
 
-        self.assertEqual(type(part), part.Part)
+        self.assertEqual(type(part), inventree.part.Part)
 
         self.assertEqual(part.pk, 1)
 
         # Get the Location reference
         location = item.getLocation()
 
-        self.assertEqual(type(location), stock.StockLocation)
+        self.assertEqual(type(location), inventree.stock.StockLocation)
         self.assertEqual(location.pk, 4)
         self.assertEqual(location.name, "Electronic Component Storage")
 
@@ -166,7 +166,7 @@ class StockLocationTest(InvenTreeTestCase):
         self.assertEqual(len(locs), 4)
 
         for loc in locs:
-            self.assertEqual(type(loc), stock.StockLocation)
+            self.assertEqual(type(loc), inventree.stock.StockLocation)
 
     def test_location_stock(self):
 
@@ -195,7 +195,7 @@ class StockLocationTest(InvenTreeTestCase):
 
         parent = location.getParentLocation()
 
-        self.assertEqual(type(parent), stock.StockLocation)
+        self.assertEqual(type(parent), inventree.stock.StockLocation)
         self.assertEqual(parent.pk, 1)
         self.assertIsNone(parent.parent)
         self.assertIsNone(parent.getParentLocation())
@@ -204,7 +204,7 @@ class StockLocationTest(InvenTreeTestCase):
         self.assertEqual(len(children), 2)
 
         for child in children:
-            self.assertEqual(type(child), stock.StockLocation)
+            self.assertEqual(type(child), inventree.stock.StockLocation)
             self.assertEqual(child.parent, parent.pk)
 
 
