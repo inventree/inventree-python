@@ -5,10 +5,10 @@ import unittest
 import sys
 sys.path.append(".")
 
-from inventree import base
-from inventree import api
-from inventree import part
-from inventree import stock
+from inventree import base  # noqa: E402
+from inventree import api  # noqa: E402
+from inventree import part  # noqa: E402
+from inventree import stock  # noqa: E402
 
 
 SERVER = "http://127.0.0.1:8000"
@@ -44,11 +44,13 @@ class Unauthenticated(unittest.TestCase):
 
         self.assertEqual(len(parts), 0)
 
+
 class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):
-
-
+        """
+        Test case setup functions
+        """
         self.api = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD)
 
 
@@ -63,7 +65,6 @@ class InvenTreeAPITest(InvenTreeTestCase):
         details = self.api.server_details
         self.assertIn('server', details)
         self.assertIn('instance', details)
-
 
 
 class PartTest(InvenTreeTestCase):
@@ -133,6 +134,78 @@ class StockTest(InvenTreeTestCase):
         s = part.Part(self.api, 1).getStockItems()
         self.assertEqual(len(s), 2)
         
+    def test_get_stock_item(self):
+
+        item = stock.StockItem(self.api, pk=1)
+
+        self.assertEqual(item.pk, 1)
+        self.assertEqual(item.location, 4)
+
+        # Get the Part reference
+        prt = item.getPart()
+
+        self.assertEqual(type(prt), part.Part)
+        self.assertEqual(prt.pk, 1)
+
+        # Get the Location reference
+        location = item.getLocation()
+
+        self.assertEqual(type(location), stock.StockLocation)
+        self.assertEqual(location.pk, 4)
+        self.assertEqual(location.name, "Electronic Component Storage")
+
+
+class StockLocationTest(InvenTreeTestCase):
+    """
+    Tests for the StockLocation model
+    """
+
+    def test_location_list(self):
+        locs = stock.StockLocation.list(self.api)
+        self.assertEqual(len(locs), 4)
+
+        for loc in locs:
+            self.assertEqual(type(loc), stock.StockLocation)
+
+    def test_location_stock(self):
+
+        location = stock.StockLocation(self.api, pk=4)
+
+        self.assertEqual(location.pk, 4)
+        self.assertEqual(location.description, "Storage for electronic components")
+
+        items = location.getStockItems()
+
+        self.assertEqual(len(items), 3)
+
+        items = location.getStockItems(part=1)
+        self.assertEqual(len(items), 2)
+
+        items = location.getStockItems(part=5)
+        self.assertEqual(len(items), 1)
+
+    def test_location_parent(self):
+        """
+        Return the Parent location
+        """
+
+        location = stock.StockLocation(self.api, pk=4)
+        self.assertEqual(location.parent, 1)
+
+        parent = location.getParentLocation()
+
+        self.assertEqual(type(parent), stock.StockLocation)
+        self.assertEqual(parent.pk, 1)
+        self.assertIsNone(parent.parent)
+        self.assertIsNone(parent.getParentLocation())
+
+        children = parent.getChildLocations()
+        self.assertEqual(len(children), 2)
+
+        for child in children:
+            self.assertEqual(type(child), stock.StockLocation)
+            self.assertEqual(child.parent, parent.pk)
+
 
 class TestCreate(InvenTreeTestCase):
     """
@@ -163,9 +236,9 @@ class TestCreate(InvenTreeTestCase):
         self.assertIsNotNone(p)
         self.assertEqual(p.category, c.pk)
 
-        C = p.getCategory()
-        self.assertEqual(C.pk, c.pk)
-        self.assertEqual(C.name, 'My custom category')
+        cat = p.getCategory()
+        self.assertEqual(cat.pk, c.pk)
+        self.assertEqual(cat.name, 'My custom category')
 
         s = stock.StockItem.create(self.api, {
             'part': p.pk,
@@ -177,10 +250,9 @@ class TestCreate(InvenTreeTestCase):
         self.assertIsNotNone(s)
         self.assertEqual(s.part, p.pk)
 
-        P = s.getPart()
-        self.assertEqual(P.pk, p.pk)
-        self.assertEqual(P.name, 'ACME Widget')
-
+        prt = s.getPart()
+        self.assertEqual(prt.pk, p.pk)
+        self.assertEqual(prt.name, 'ACME Widget')
 
 
 class WidgetTest(InvenTreeTestCase):
@@ -198,7 +270,6 @@ class WidgetTest(InvenTreeTestCase):
         self.assertIn('firmware', keys)
         self.assertIn('weight', keys)
         self.assertIn('paint', keys)
-
 
     def test_add_result(self):
         
@@ -226,6 +297,7 @@ class WidgetTest(InvenTreeTestCase):
         results = item.getTestResults()
         self.assertEqual(len(results), 4)
 
-if __name__  == '__main__':
+
+if __name__ == '__main__':
     print("Running InvenTree Python Unit Tests: Version " + base.INVENTREE_PYTHON_VERSION)
     unittest.main()

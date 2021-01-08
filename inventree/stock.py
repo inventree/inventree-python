@@ -12,8 +12,25 @@ class StockLocation(inventree.base.InventreeObject):
 
     URL = 'stock/location'
 
-    def getStockItems(self):
-        return StockItem.list(self._api, location=self.pk)
+    def getStockItems(self, **kwargs):
+        return StockItem.list(self._api, location=self.pk, **kwargs)
+
+    def getParentLocation(self):
+        """
+        Return the parent stock location
+        (or None if no parent is available)
+        """
+
+        if self.parent is None:
+            return None
+        
+        return StockLocation(self._api, pk=self.parent)
+
+    def getChildLocations(self, **kwargs):
+        """
+        Return all the child locations under this location
+        """
+        return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
 class StockItem(inventree.base.InventreeObject):
@@ -33,6 +50,18 @@ class StockItem(inventree.base.InventreeObject):
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
         return inventree.part.Part(self._api, self.part)
+
+    def getLocation(self):
+        """
+        Return the StockLocation associated with this StockItem
+        
+        Returns None if there is no linked StockItem
+        """
+
+        if self.location is None:
+            return None
+
+        return StockLocation(self._api, self.location)
 
     def getAttachments(self):
         """ Return all file attachments for this StockItem """

@@ -18,22 +18,6 @@
   }
 },
 {
-  "model": "sessions.session",
-  "pk": "0nnznmbij3s8scj130nv999wzygwguit",
-  "fields": {
-    "session_data": "ZjFmNmJjZWI0NDA3Y2MzZGYzOWVkNjExOGQwYzVjOGMxNWNhOGQyODp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiI4ZGRmNWE1ZjYyNjAzMTVkN2IyMzA5MmZhZTc0OWE1NTZiYjgwNWMxIn0=",
-    "expire_date": "2020-06-02T07:03:40.235Z"
-  }
-},
-{
-  "model": "sessions.session",
-  "pk": "22mtlnvb4kre19imzbm2w21xdjxnur4r",
-  "fields": {
-    "session_data": "ZjFmNmJjZWI0NDA3Y2MzZGYzOWVkNjExOGQwYzVjOGMxNWNhOGQyODp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiI4ZGRmNWE1ZjYyNjAzMTVkN2IyMzA5MmZhZTc0OWE1NTZiYjgwNWMxIn0=",
-    "expire_date": "2020-06-02T03:55:42.762Z"
-  }
-},
-{
   "model": "common.inventreesetting",
   "pk": 1,
   "fields": {
@@ -601,7 +585,7 @@
   "fields": {
     "name": "Factory",
     "description": "Factory floor",
-    "parent": null,
+    "parent": 1,
     "lft": 1,
     "rght": 2,
     "tree_id": 1,
