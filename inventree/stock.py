@@ -24,7 +24,7 @@ class StockLocation(inventree.base.InventreeObject):
         if self.parent is None:
             return None
         
-        return StockLocation(self.api, self.parent)
+        return StockLocation(self._api, pk=self.parent)
 
     def getChildLocations(self, **kwargs):
         """
