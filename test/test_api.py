@@ -44,6 +44,7 @@ class Unauthenticated(unittest.TestCase):
 
         self.assertEqual(len(parts), 0)
 
+
 class InvenTreeTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -206,6 +207,7 @@ class StockLocationTest(InvenTreeTestCase):
             self.assertEqual(type(child), stock.StockLocation)
             self.assertEqual(child.parent, parent.pk)
 
+
 class TestCreate(InvenTreeTestCase):
     """
     Test that objects can be created via the API
@@ -269,7 +271,6 @@ class WidgetTest(InvenTreeTestCase):
         self.assertIn('firmware', keys)
         self.assertIn('weight', keys)
         self.assertIn('paint', keys)
-
 
     def test_add_result(self):
         
