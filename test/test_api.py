@@ -5,10 +5,10 @@ import unittest
 import sys
 sys.path.append(".")
 
-from inventree import base
-from inventree import api
-from inventree import part
-from inventree import stock
+from inventree import base  # noqa: E402
+from inventree import api  # noqa: E402
+from inventree import part  # noqa: E402
+from inventree import stock  # noqa: E402
 
 
 SERVER = "http://127.0.0.1:8000"
@@ -136,7 +136,7 @@ class StockTest(InvenTreeTestCase):
         
     def test_get_stock_item(self):
 
-        item = stock.StockItem(pk=1)
+        item = stock.StockItem(self.pk=1)
 
         self.assertEqual(item.pk, 1)
         self.assertEqual(item.location, 4)
@@ -237,9 +237,9 @@ class TestCreate(InvenTreeTestCase):
         self.assertIsNotNone(p)
         self.assertEqual(p.category, c.pk)
 
-        C = p.getCategory()
-        self.assertEqual(C.pk, c.pk)
-        self.assertEqual(C.name, 'My custom category')
+        cat = p.getCategory()
+        self.assertEqual(cat.pk, c.pk)
+        self.assertEqual(cat.name, 'My custom category')
 
         s = stock.StockItem.create(self.api, {
             'part': p.pk,
@@ -251,9 +251,9 @@ class TestCreate(InvenTreeTestCase):
         self.assertIsNotNone(s)
         self.assertEqual(s.part, p.pk)
 
-        P = s.getPart()
-        self.assertEqual(P.pk, p.pk)
-        self.assertEqual(P.name, 'ACME Widget')
+        prt = s.getPart()
+        self.assertEqual(prt.pk, p.pk)
+        self.assertEqual(prt.name, 'ACME Widget')
 
 
 class WidgetTest(InvenTreeTestCase):
@@ -298,6 +298,7 @@ class WidgetTest(InvenTreeTestCase):
         results = item.getTestResults()
         self.assertEqual(len(results), 4)
 
-if __name__  == '__main__':
+
+if __name__ == '__main__':
     print("Running InvenTree Python Unit Tests: Version " + base.INVENTREE_PYTHON_VERSION)
     unittest.main()
