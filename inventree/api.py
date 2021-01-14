@@ -55,7 +55,8 @@ class InvenTreeAPI(object):
         self.verbose = kwargs.get('verbose', False)
 
         # Check if the server is there
-        self.testServer()
+        if not self.testServer():
+            raise ConnectionRefusedError("Could not connect to InvenTree server")
 
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
