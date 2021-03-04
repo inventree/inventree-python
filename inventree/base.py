@@ -66,7 +66,13 @@ class InventreeObject():
         # Dict of query params to send to the API
         params = kwargs
 
-        response = api.get(cls.URL, params=params, **kwargs)
+        # Check if custom URL is present in request arguments
+        if 'url' in kwargs:
+            url = kwargs.pop('url')
+        else:
+            url = cls.URL
+
+        response = api.get(url=url, params=params, **kwargs)
 
         if response is None:
             return None
