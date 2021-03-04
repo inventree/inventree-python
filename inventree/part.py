@@ -31,15 +31,12 @@ class PartCategory(inventree.base.InventreeObject):
         """
             fetch_parent: enable to fetch templates for parent categories
         """
-        return CategoryParameterTemplate.list(self._api,
-                                              category=self.pk,
-                                              fetch_parent=fetch_parent)
-    
 
-class CategoryParameterTemplate(inventree.base.InventreeObject):
-    """ Class representing the PartCategoryParameterTemplate database model """
+        parameters_url = f'part/category/{self.pk}/parameters'
 
-    URL = 'part/category/parameters'
+        return self.list(self._api,
+                         url=parameters_url,
+                         fetch_parent=fetch_parent)
 
 
 class Part(inventree.base.InventreeObject):
