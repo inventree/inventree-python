@@ -9,6 +9,7 @@ from inventree import base  # noqa: E402
 from inventree import api  # noqa: E402
 from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
+from inventree import company  # noqa: E402
 
 
 SERVER = "http://127.0.0.1:8000"
@@ -296,6 +297,39 @@ class WidgetTest(InvenTreeTestCase):
 
         results = item.getTestResults()
         self.assertEqual(len(results), 4)
+
+
+class CompanyTest(InvenTreeTestCase):
+    """
+    Test that Company related objects can be managed via the API
+    """
+
+    def test_company_create(self):
+        c = company.Company(self.api, {
+            'name': 'Company',
+        })
+
+        self.assertIsNotNone(c)
+
+    def test_manufacturer_part_create(self):
+        manufacturer = company.Company(self.api, 1)
+
+        manufacturer_part = company.ManufacturerPart(self.api, {
+            'manufacturer': manufacturer,
+            'MPN': 'MPN_TEST',
+        })
+
+        self.assertIsNotNone(manufacturer_part)
+
+    def test_supplier_part_create(self):
+        supplier = company.Company(self.api, 1)
+
+        supplier_part = company.SupplierPart(self.api, {
+            'manufacturer': supplier,
+            'SKU': 'SKU_TEST',
+        })
+
+        self.assertIsNotNone(supplier_part)
 
 
 if __name__ == '__main__':
