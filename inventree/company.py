@@ -12,7 +12,7 @@ class Company(inventree.base.InventreeObject):
         return SupplierPart.list(self._api, supplier=self.pk)
 
     def getManufacturedParts(self):
-        return SupplierPart.list(self._api, manufacturer=self.pk)
+        return ManufacturerPart.list(self._api, manufacturer=self.pk)
 
 
 class SupplierPart(inventree.base.InventreeObject):
@@ -24,6 +24,12 @@ class SupplierPart(inventree.base.InventreeObject):
         """ Get a list of price break objects for this SupplierPart """
 
         return SupplierPriceBreak.list(self._api, part=self.pk)
+
+
+class ManufacturerPart(inventree.base.InventreeObject):
+    """ Class representing the ManufacturerPart database model """
+
+    URL = 'company/part/manufacturer'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
