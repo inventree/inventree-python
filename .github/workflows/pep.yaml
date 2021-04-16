@@ -1,6 +1,6 @@
 name: Style Checks
 
-on ["push", "pull_request"]
+on: ["push", "pull_request"]
 
 jobs:
   style:
@@ -21,7 +21,7 @@ jobs:
       - name: Install Deps
         run: |
           pip install flake8==3.8.3
-          pip install pep8-name==0.11.1
+          pip install pep8-naming==0.11.1
       - name: Style Checks
         run: |
           flake8 .
