@@ -23,7 +23,7 @@ jobs:
           pip install -U -r requirements.txt
       - name: Start InvenTree Server
         run: |
-          apt-get install python3-dev python3-pip python3-venv python3-wheel g++
+          sudo apt-get install python3-dev python3-pip python3-venv python3-wheel g++
           pip3 install invoke
           git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
           cd inventree_server
