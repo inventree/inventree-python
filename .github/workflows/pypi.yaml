@@ -33,3 +33,5 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_REPOSITORY: inventree
+          TWINE_REPOSITORY_URL: https://pypi.org/legacy/
+  
