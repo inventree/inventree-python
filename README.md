@@ -1,5 +1,7 @@
-
-[![PyPi version](https://pypip.in/v/inventree/badge.png)](https://pypi.org/project/inventree/) [![Build Status](https://travis-ci.org/inventree/inventree-python.svg?branch=master)](https://travis-ci.org/inventree/inventree-python) [![Coverage Status](https://coveralls.io/repos/github/inventree/inventree-python/badge.svg?branch=master)](https://coveralls.io/github/inventree/inventree-python?branch=master)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/inventree/inventree-python/actions/workflows/ci.yaml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/inventree/inventree-python/badge.svg)](https://coveralls.io/github/inventree/InvenTree)
+![PEP](https://github.com/inventree/inventree-python/actions/workflows/style.yaml/badge.svg)
 
 ## InvenTree Python Interface
 
