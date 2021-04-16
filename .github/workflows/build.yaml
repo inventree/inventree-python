@@ -21,7 +21,7 @@ jobs:
       - name: Install Deps
         run: |
           pip install -U -r requirements.txt
-      - name: Style Checks
+      - name: Build Python Package
         run: |
           pip install --upgrade pip wheel setuptools
           python setup.py bdist_wheel --universal
