@@ -18,7 +18,7 @@ class Company(inventree.base.InventreeObject):
 class SupplierPart(inventree.base.InventreeObject):
     """ Class representing the SupplierPart database model """
 
-    URL = 'company/part'
+    URL = 'company/part/'
 
     def getPriceBreaks(self):
         """ Get a list of price break objects for this SupplierPart """
@@ -27,9 +27,26 @@ class SupplierPart(inventree.base.InventreeObject):
 
 
 class ManufacturerPart(inventree.base.InventreeObject):
-    """ Class representing the ManufacturerPart database model """
+    """
+    Class representing the ManufacturerPart database model
+    """
 
-    URL = 'company/part/manufacturer'
+    URL = 'company/part/manufacturer/'
+
+    def getParameters(self, **kwargs):
+        """
+        GET a list of all ManufacturerPartParameter objects for this ManufacturerPart
+        """
+
+        return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
+
+
+class ManufacturerPartParameter(inventree.base.InventreeObject):
+    """
+    Class representing the ManufacturerPartParameter database model.
+    """
+
+    URL = 'company/part/manufacturer/parameter/'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
