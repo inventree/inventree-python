@@ -307,7 +307,7 @@ class InvenTreeAPI(object):
             logging.error("Error decoding JSON response - '{url}'".format(url=url))
             return None
 
-        return data
+        return response
 
     def put(self, url, data, **kwargs):
         """ Perform a PUT request. Used to update existing records in the database.

@@ -52,7 +52,11 @@ class InventreeObject():
             logging.error("Error creating new object")
             return None
 
-        return cls(api, data=response)
+        if response.status_code not in [200, 201]:
+            logging.error(f"Error creating new object (server returned {response.status_code})")
+            return None
+
+        return cls(api, data=response.data)
 
     @classmethod
     def list(cls, api, **kwargs):
@@ -147,7 +151,9 @@ class Attachment(InventreeObject):
         }
 
         # Send the file off to the server
-        if api.post(cls.URL, data, files=files):
+        response = api.post(cls.URL, data, files=files)
+
+        if response and response.status_code in [200, 201]:
             logging.info("Uploaded attachment file: '{f}'".format(f=f))
         else:
             logging.warning("File upload failed")
