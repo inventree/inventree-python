@@ -20,6 +20,16 @@ class InvenTreeAPI(object):
 
     """
 
+    MIN_SUPPORTED_API_VERSION = 5
+
+    @staticmethod
+    def getMinApiVersion():
+        """
+        Return the minimum supported API version
+        """
+
+        return InvenTreeAPI.MIN_SUPPORTED_API_VERSION
+
     def __init__(self, base_url, **kwargs):
         """ Initialize class with initial parameters
 
@@ -111,6 +121,17 @@ class InvenTreeAPI(object):
             logging.warning("Server returned strange response (expected 'InvenTree', found '{name}')".format(
                 name=server_name
             ))
+
+
+        api_version = self.server_details.get('apiVersion', '1')
+
+        try:
+            api_version = int(api_version)
+        except:
+            raise ValueError(f"Server returned invalid API version: '{api_version}'")
+
+        if api_version < InvenTreeAPI.getMinApiVersion():
+            raise ValueError(f"Server API version ({api_version}) is older than minimum supported API version ({InvenTreeAPI.getMinApiVersion()})")
 
         return True
 

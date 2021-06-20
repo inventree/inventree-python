@@ -1,6 +1,8 @@
 # Don't track cred file!
 inventree_credentials.py
 
+# Test script
+test.py
 
 # General python stuff
 *.pyc
