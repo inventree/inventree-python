@@ -2,19 +2,20 @@
 
 import unittest
 
+import os
 import sys
-sys.path.append(".")
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree import base  # noqa: E402
 from inventree import api  # noqa: E402
 from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
-from inventree import company  # noqa: E402
 
 
-SERVER = "http://127.0.0.1:8000"
-USERNAME = "admin"
-PASSWORD = "password"
+SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:8000')
+USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'admin')
+PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'password')
 
 
 class LoginTests(unittest.TestCase):
@@ -66,146 +67,6 @@ class InvenTreeAPITest(InvenTreeTestCase):
         details = self.api.server_details
         self.assertIn('server', details)
         self.assertIn('instance', details)
-
-
-class PartTest(InvenTreeTestCase):
-    """
-    Test for PartCategory and Part objects.
-    """
-
-    def test_part_cats(self):
-
-        cats = part.Part.list(self.api)
-        self.assertEqual(len(cats), 8)
-
-    def test_elec(self):
-        electronics = part.PartCategory(self.api, 1)
-
-        # This is a top-level category, should not have a parent!
-        self.assertIsNone(electronics.getParentCategory())
-        self.assertEqual(electronics.name, "Electronics")
-
-        children = electronics.getChildCategories()
-        self.assertEqual(len(children), 1)
-        
-        passives = children[0]
-        self.assertEqual(passives.name, 'Passives')
-        
-        # Grab all child categories
-        children = part.PartCategory.list(self.api, parent=passives.pk)
-        self.assertEqual(len(children), 3)
-
-        children = passives.getChildCategories()
-        self.assertEqual(len(children), 3)
-        
-        parent = passives.getParentCategory()
-        self.assertEqual(parent.pk, 1)
-        self.assertEqual(parent.name, 'Electronics')
-        
-    def test_caps(self):
-
-        # Capacitors
-        capacitors = part.PartCategory(self.api, 6)
-        self.assertEqual(capacitors.name, "Capacitors")
-        parts = capacitors.getParts()
-        self.assertEqual(len(parts), 4)
-
-        for p in parts:
-            self.assertEqual(p.category, capacitors.pk)
-
-    def test_parts(self):
-
-        parts = part.Part.list(self.api)
-        self.assertEqual(len(parts), 8)
-
-        parts = part.Part.list(self.api, category=5)
-        self.assertEqual(len(parts), 3)
-
-
-class StockTest(InvenTreeTestCase):
-    """
-    Test alternative ways of getting StockItem objects.
-    """
-
-    def test_stock(self):
-
-        s = stock.StockItem.list(self.api, part=1)
-        self.assertEqual(len(s), 2)
-
-        s = part.Part(self.api, 1).getStockItems()
-        self.assertEqual(len(s), 2)
-        
-    def test_get_stock_item(self):
-
-        item = stock.StockItem(self.api, pk=1)
-
-        self.assertEqual(item.pk, 1)
-        self.assertEqual(item.location, 4)
-
-        # Get the Part reference
-        prt = item.getPart()
-
-        self.assertEqual(type(prt), part.Part)
-        self.assertEqual(prt.pk, 1)
-
-        # Get the Location reference
-        location = item.getLocation()
-
-        self.assertEqual(type(location), stock.StockLocation)
-        self.assertEqual(location.pk, 4)
-        self.assertEqual(location.name, "Electronic Component Storage")
-
-
-class StockLocationTest(InvenTreeTestCase):
-    """
-    Tests for the StockLocation model
-    """
-
-    def test_location_list(self):
-        locs = stock.StockLocation.list(self.api)
-        self.assertEqual(len(locs), 4)
-
-        for loc in locs:
-            self.assertEqual(type(loc), stock.StockLocation)
-
-    def test_location_stock(self):
-
-        location = stock.StockLocation(self.api, pk=4)
-
-        self.assertEqual(location.pk, 4)
-        self.assertEqual(location.description, "Storage for electronic components")
-
-        items = location.getStockItems()
-
-        self.assertEqual(len(items), 3)
-
-        items = location.getStockItems(part=1)
-        self.assertEqual(len(items), 2)
-
-        items = location.getStockItems(part=5)
-        self.assertEqual(len(items), 1)
-
-    def test_location_parent(self):
-        """
-        Return the Parent location
-        """
-
-        location = stock.StockLocation(self.api, pk=4)
-        self.assertEqual(location.parent, 1)
-
-        parent = location.getParentLocation()
-
-        self.assertEqual(type(parent), stock.StockLocation)
-        self.assertEqual(parent.pk, 1)
-        self.assertIsNone(parent.parent)
-        self.assertIsNone(parent.getParentLocation())
-
-        children = parent.getChildLocations()
-        self.assertEqual(len(children), 2)
-
-        for child in children:
-            self.assertEqual(type(child), stock.StockLocation)
-            self.assertEqual(child.parent, parent.pk)
 
 
 class TestCreate(InvenTreeTestCase):
@@ -297,39 +158,6 @@ class WidgetTest(InvenTreeTestCase):
 
         results = item.getTestResults()
         self.assertEqual(len(results), 4)
-
-
-class CompanyTest(InvenTreeTestCase):
-    """
-    Test that Company related objects can be managed via the API
-    """
-
-    def test_company_create(self):
-        c = company.Company(self.api, {
-            'name': 'Company',
-        })
-
-        self.assertIsNotNone(c)
-
-    def test_manufacturer_part_create(self):
-        manufacturer = company.Company(self.api, 1)
-
-        manufacturer_part = company.ManufacturerPart(self.api, {
-            'manufacturer': manufacturer,
-            'MPN': 'MPN_TEST',
-        })
-
-        self.assertIsNotNone(manufacturer_part)
-
-    def test_supplier_part_create(self):
-        supplier = company.Company(self.api, 1)
-
-        supplier_part = company.SupplierPart(self.api, {
-            'manufacturer': supplier,
-            'SKU': 'SKU_TEST',
-        })
-
-        self.assertIsNotNone(supplier_part)
 
 
 if __name__ == '__main__':

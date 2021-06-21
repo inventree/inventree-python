@@ -27,12 +27,29 @@ class SupplierPart(inventree.base.InventreeObject):
 
 
 class ManufacturerPart(inventree.base.InventreeObject):
-    """ Class representing the ManufacturerPart database model """
+    """
+    Class representing the ManufacturerPart database model
+    """
 
     URL = 'company/part/manufacturer'
+
+    def getParameters(self, **kwargs):
+        """
+        GET a list of all ManufacturerPartParameter objects for this ManufacturerPart
+        """
+
+        return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
+
+
+class ManufacturerPartParameter(inventree.base.InventreeObject):
+    """
+    Class representing the ManufacturerPartParameter database model.
+    """
+
+    URL = 'company/part/manufacturer/parameter'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
     """ Class representing the SupplierPriceBreak database model """
 
-    URL = 'company/price-break/'
+    URL = 'company/price-break'

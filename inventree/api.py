@@ -20,6 +20,16 @@ class InvenTreeAPI(object):
 
     """
 
+    MIN_SUPPORTED_API_VERSION = 5
+
+    @staticmethod
+    def getMinApiVersion():
+        """
+        Return the minimum supported API version
+        """
+
+        return InvenTreeAPI.MIN_SUPPORTED_API_VERSION
+
     def __init__(self, base_url, **kwargs):
         """ Initialize class with initial parameters
 
@@ -112,6 +122,16 @@ class InvenTreeAPI(object):
                 name=server_name
             ))
 
+        api_version = self.server_details.get('apiVersion', '1')
+
+        try:
+            api_version = int(api_version)
+        except ValueError:
+            raise ValueError(f"Server returned invalid API version: '{api_version}'")
+
+        if api_version < InvenTreeAPI.getMinApiVersion():
+            raise ValueError(f"Server API version ({api_version}) is older than minimum supported API version ({InvenTreeAPI.getMinApiVersion()})")
+
         return True
 
     def requestToken(self):
@@ -177,6 +197,7 @@ class InvenTreeAPI(object):
             'GET': requests.get,
             'POST': requests.post,
             'PUT': requests.put,
+            'PATCH': requests.patch,
             'DELETE': requests.delete,
         }
 
@@ -279,6 +300,7 @@ class InvenTreeAPI(object):
         if response.status_code not in [200, 201]:
             logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
             logging.error(response.text)
+            return None
         
         try:
             data = json.loads(response.text)

@@ -6,7 +6,7 @@ import logging
 INVENTREE_PYTHON_VERSION = "0.1.4"
 
 
-class InventreeObject():
+class InventreeObject(object):
     """ Base class for an InvenTree object """
 
     URL = ""
@@ -95,6 +95,9 @@ class InventreeObject():
         if self._api:
             self._api.put(self._url, self._data)
 
+        # Automatically re-load data from the serve
+        self.reload()
+
     def reload(self):
         """ Reload object data from the database """
         if self._api:
@@ -147,7 +150,9 @@ class Attachment(InventreeObject):
         }
 
         # Send the file off to the server
-        if api.post(cls.URL, data, files=files):
+        response = api.post(cls.URL, data, files=files)
+
+        if response and response.status_code in [200, 201]:
             logging.info("Uploaded attachment file: '{f}'".format(f=f))
         else:
             logging.warning("File upload failed")
