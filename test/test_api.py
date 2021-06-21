@@ -4,6 +4,7 @@ import unittest
 
 import os
 import sys
+
 sys.path.append(".")
 
 from inventree import base  # noqa: E402

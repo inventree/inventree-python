@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from inventree import company  # noqa: E402
+import os
+import sys
 
-from .test_api import InvenTreeTestCase
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+from inventree import company  # noqa: E402
+from test_api import InvenTreeTestCase  # noqa: E402
 
 
 class CompanyTest(InvenTreeTestCase):

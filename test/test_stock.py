@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
 from inventree import stock  # noqa: E402
 from inventree import part  # noqa: E402
 
-from .test_api import InvenTreeTestCase
+from test_api import InvenTreeTestCase  # noqa: E402
 
 
 class StockTest(InvenTreeTestCase):
