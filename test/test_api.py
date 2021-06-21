@@ -321,6 +321,46 @@ class CompanyTest(InvenTreeTestCase):
 
         self.assertIsNotNone(manufacturer_part)
 
+    def test_manufacturer_part_parameters(self):
+        """
+        Test that we can create, retrieve and edit ManufacturerPartParameter objects
+        """
+
+        # First, create a new ManufacturerPart
+        manufacturer = company.Company(self.api, pk=1)
+
+        part = company.ManufacturerPart.create(self.api, {
+            'manufacturer': manufacturer,
+            'MPN': 'XYX-123'
+        })
+
+        # Part should (initially) not have any parameters
+        self.assertEqual(len(part.getParameters(), 0))
+
+        # Now, let's create some!
+        for idx in range(10):
+
+            parameter = company.ManufacturerPartParameter.create(api, {
+                'manufacturer_part': part,
+                'name': f"param {idx}",
+                'value': f"{idx}",
+            })
+
+            self.assertIsNotNone(parameter)
+
+        # Now should have 10 unique parameters
+        self.assertEqual(len(part.getParameters(), 10))
+
+        # Attempt to create a duplicate parameter
+        parameter = company.ManufacturerPartParameter.create(api, {
+            'manufacturer_part': part,
+            'name': 'param 0',
+            'value': 'some value',
+        })
+
+        self.asserIsNone(parameter)
+        self.assertEqual(len(part.getParameters(), 10))
+
     def test_supplier_part_create(self):
         supplier = company.Company(self.api, 1)
 
