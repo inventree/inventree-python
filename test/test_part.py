@@ -22,7 +22,7 @@ class PartTest(InvenTreeTestCase):
 
         print("Categories:")
         for c in cats:
-            print(f" - {c}")
+            print(f" - {c} : {c.name}, {c.description}")
 
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
