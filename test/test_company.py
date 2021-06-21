@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import unittest
-
 from inventree import company  # noqa: E402
 
 from .test_api import InvenTreeTestCase
@@ -39,16 +37,16 @@ class CompanyTest(InvenTreeTestCase):
         # Create some 'manufactured parts'
         for i in range(3):
 
-            MPN = f"MPN_XYX-{i}_{c.pk}"
-            SKU = f"SKU_ABC-{i}_{c.pk}"
+            mpn = f"MPN_XYX-{i}_{c.pk}"
+            sku = f"SKU_ABC-{i}_{c.pk}"
 
             # Creating a unique SupplierPart should also create a ManufacturerPart
             company.SupplierPart.create(self.api, {
                 'supplier': c.pk,
                 'part': 1,
                 'manufacturer': c.pk,
-                'MPN': MPN,
-                'SKU': SKU,
+                'MPN': mpn,
+                'SKU': sku,
             })
 
         self.assertEqual(len(c.getManufacturedParts()), 3)

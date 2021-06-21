@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import unittest
-
 from inventree import stock  # noqa: E402
+from inventree import part  # noqa: E402
 
 from .test_api import InvenTreeTestCase
 
