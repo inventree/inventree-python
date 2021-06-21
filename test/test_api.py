@@ -5,7 +5,7 @@ import unittest
 import os
 import sys
 
-sys.path.append(".")
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree import base  # noqa: E402
 from inventree import api  # noqa: E402
