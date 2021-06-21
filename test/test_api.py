@@ -328,11 +328,10 @@ class CompanyTest(InvenTreeTestCase):
         """
 
         # First, create a new ManufacturerPart
-        manufacturer = company.Company(self.api, pk=1)
-
         part = company.ManufacturerPart.create(self.api, {
-            'manufacturer': manufacturer.pk,
-            'MPN': 'XYX-123'
+            'manufacturer': 1,
+            'part': 1,
+            'MPN': 'XYZ-123456789'
         })
 
         self.assertIsNotNone(part)
@@ -361,17 +360,21 @@ class CompanyTest(InvenTreeTestCase):
             'value': 'some value',
         })
 
-        self.asserIsNone(parameter)
+        self.assertIsNone(parameter)
         self.assertEqual(len(part.getParameters()), 10)
 
         # Test that we can edit a ManufacturerPartParameter
         parameter = part.getParameters()[0]
 
         self.assertEqual(parameter.value, '0')
+        print(parameter._data)
 
-        parameter.value = 'new value'
+        parameter['value'] = 'new value'
         parameter.save()
-        parameter.value = 'dummy value'
+
+        self.assertEqual(parameter.value, 'new value')
+
+        parameter['value'] = 'dummy value'
         parameter.reload()
 
         self.assertEqual(parameter.value, 'new value')

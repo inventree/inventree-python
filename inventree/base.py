@@ -6,7 +6,7 @@ import logging
 INVENTREE_PYTHON_VERSION = "0.1.4"
 
 
-class InventreeObject():
+class InventreeObject(object):
     """ Base class for an InvenTree object """
 
     URL = ""
@@ -94,6 +94,9 @@ class InventreeObject():
         """ Save this object to the database """
         if self._api:
             self._api.put(self._url, self._data)
+
+        # Automatically re-load data from the serve
+        self.reload()
 
     def reload(self):
         """ Reload object data from the database """

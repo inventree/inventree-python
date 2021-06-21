@@ -197,6 +197,7 @@ class InvenTreeAPI(object):
             'GET': requests.get,
             'POST': requests.post,
             'PUT': requests.put,
+            'PATCH': requests.patch,
             'DELETE': requests.delete,
         }
 
@@ -299,6 +300,7 @@ class InvenTreeAPI(object):
         if response.status_code not in [200, 201]:
             logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
             logging.error(response.text)
+            return None
         
         try:
             data = json.loads(response.text)
