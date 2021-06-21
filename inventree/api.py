@@ -122,12 +122,11 @@ class InvenTreeAPI(object):
                 name=server_name
             ))
 
-
         api_version = self.server_details.get('apiVersion', '1')
 
         try:
             api_version = int(api_version)
-        except:
+        except ValueError:
             raise ValueError(f"Server returned invalid API version: '{api_version}'")
 
         if api_version < InvenTreeAPI.getMinApiVersion():
