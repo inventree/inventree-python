@@ -52,11 +52,7 @@ class InventreeObject():
             logging.error("Error creating new object")
             return None
 
-        if response.status_code not in [200, 201]:
-            logging.error(f"Error creating new object (server returned {response.status_code})")
-            return None
-
-        return cls(api, data=response.data)
+        return cls(api, data=response)
 
     @classmethod
     def list(cls, api, **kwargs):

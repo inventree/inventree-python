@@ -2,6 +2,7 @@
 
 import unittest
 
+import os
 import sys
 sys.path.append(".")
 
@@ -12,9 +13,9 @@ from inventree import stock  # noqa: E402
 from inventree import company  # noqa: E402
 
 
-SERVER = "http://127.0.0.1:8000"
-USERNAME = "admin"
-PASSWORD = "password"
+SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:8000')
+USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'admin')
+PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'password')
 
 
 class LoginTests(unittest.TestCase):
@@ -330,18 +331,20 @@ class CompanyTest(InvenTreeTestCase):
         manufacturer = company.Company(self.api, pk=1)
 
         part = company.ManufacturerPart.create(self.api, {
-            'manufacturer': manufacturer,
+            'manufacturer': manufacturer.pk,
             'MPN': 'XYX-123'
         })
 
+        self.assertIsNotNone(part)
+
         # Part should (initially) not have any parameters
-        self.assertEqual(len(part.getParameters(), 0))
+        self.assertEqual(len(part.getParameters()), 0)
 
         # Now, let's create some!
         for idx in range(10):
 
-            parameter = company.ManufacturerPartParameter.create(api, {
-                'manufacturer_part': part,
+            parameter = company.ManufacturerPartParameter.create(self.api, {
+                'manufacturer_part': part.pk,
                 'name': f"param {idx}",
                 'value': f"{idx}",
             })
@@ -349,17 +352,17 @@ class CompanyTest(InvenTreeTestCase):
             self.assertIsNotNone(parameter)
 
         # Now should have 10 unique parameters
-        self.assertEqual(len(part.getParameters(), 10))
+        self.assertEqual(len(part.getParameters()), 10)
 
         # Attempt to create a duplicate parameter
-        parameter = company.ManufacturerPartParameter.create(api, {
-            'manufacturer_part': part,
+        parameter = company.ManufacturerPartParameter.create(self.api, {
+            'manufacturer_part': part.pk,
             'name': 'param 0',
             'value': 'some value',
         })
 
         self.asserIsNone(parameter)
-        self.assertEqual(len(part.getParameters(), 10))
+        self.assertEqual(len(part.getParameters()), 10)
 
         # Test that we can edit a ManufacturerPartParameter
         parameter = part.getParameters()[0]
@@ -374,16 +377,20 @@ class CompanyTest(InvenTreeTestCase):
         self.assertEqual(parameter.value, 'new value')
 
         # Test that the "list" function works correctly
-        results = company.ManufacturerPartParameter.list(api)
+        results = company.ManufacturerPartParameter.list(self.api)
         self.assertEqual(len(results), 10)
 
-        results = company.ManufacturerPartParameter.list(api, name='param 1')
+        results = company.ManufacturerPartParameter.list(self.api, name='param 1')
         self.assertEqual(len(results), 1)
 
-        results = company.ManufacturerPartParameter.list(api, manufacturer_part=part.pk)
+        results = company.ManufacturerPartParameter.list(self.api, manufacturer_part=part.pk)
         self.assertEqual(len(results), 10)
 
     def test_supplier_part_create(self):
+        """
+        Test that we can create SupplierPart objects via the API
+        """
+
         supplier = company.Company(self.api, 1)
 
         supplier_part = company.SupplierPart(self.api, {

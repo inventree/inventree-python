@@ -1,8 +1,11 @@
 # Don't track cred file!
 inventree_credentials.py
 
-# Test script
+# Temporary files
 test.py
+.coverage
+*.tmp.json
+*.json.tmp
 
 # General python stuff
 *.pyc
