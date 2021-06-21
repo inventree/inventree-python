@@ -361,6 +361,28 @@ class CompanyTest(InvenTreeTestCase):
         self.asserIsNone(parameter)
         self.assertEqual(len(part.getParameters(), 10))
 
+        # Test that we can edit a ManufacturerPartParameter
+        parameter = part.getParameters()[0]
+
+        self.assertEqual(parameter.value, '0')
+
+        parameter.value = 'new value'
+        parameter.save()
+        parameter.value = 'dummy value'
+        parameter.reload()
+
+        self.assertEqual(parameter.value, 'new value')
+
+        # Test that the "list" function works correctly
+        results = company.ManufacturerPartParameter.list(api)
+        self.assertEqual(len(results), 10)
+
+        results = company.ManufacturerPartParameter.list(api, name='param 1')
+        self.assertEqual(len(results), 1)
+
+        results = company.ManufacturerPartParameter.list(api, manufacturer_part=part.pk)
+        self.assertEqual(len(results), 10)
+
     def test_supplier_part_create(self):
         supplier = company.Company(self.api, 1)
 
