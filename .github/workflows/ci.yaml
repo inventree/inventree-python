@@ -33,7 +33,7 @@ jobs:
           invoke install
           cp ../test/inventree_config.yaml ./InvenTree/config.yaml
           invoke migrate
-          invoke import-records -f ../../test/test_data.json
+          invoke import-records -f ../test/test_data.json
           invoke server -a 127.0.0.1:8000 &
           sleep 60
       - name: Run Tests
