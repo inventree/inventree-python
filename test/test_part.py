@@ -18,7 +18,11 @@ class PartTest(InvenTreeTestCase):
     def test_part_cats(self):
 
         cats = part.Part.list(self.api)
-        self.assertEqual(len(cats), 8)
+        self.assertEqual(len(cats), 9)
+
+        print("Categories:")
+        for c in cats:
+            print(f" - {c}")
 
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
@@ -58,7 +62,7 @@ class PartTest(InvenTreeTestCase):
     def test_parts(self):
 
         parts = part.Part.list(self.api)
-        self.assertEqual(len(parts), 8)
+        self.assertEqual(len(parts), 9)
 
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)
