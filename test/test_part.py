@@ -20,10 +20,6 @@ class PartTest(InvenTreeTestCase):
         cats = part.Part.list(self.api)
         self.assertEqual(len(cats), 9)
 
-        print("Categories:")
-        for c in cats:
-            print(f" - {c} : {c.name}, {c.description}")
-
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
 
