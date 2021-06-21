@@ -367,7 +367,6 @@ class CompanyTest(InvenTreeTestCase):
         parameter = part.getParameters()[0]
 
         self.assertEqual(parameter.value, '0')
-        print(parameter._data)
 
         parameter['value'] = 'new value'
         parameter.save()
