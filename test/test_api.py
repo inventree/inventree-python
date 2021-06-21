@@ -10,7 +10,7 @@ from inventree import base  # noqa: E402
 from inventree import api  # noqa: E402
 from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
-from inventree import company  # noqa: E402
+
 
 
 SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:8000')
@@ -298,109 +298,6 @@ class WidgetTest(InvenTreeTestCase):
 
         results = item.getTestResults()
         self.assertEqual(len(results), 4)
-
-
-class CompanyTest(InvenTreeTestCase):
-    """
-    Test that Company related objects can be managed via the API
-    """
-
-    def test_company_create(self):
-        c = company.Company(self.api, {
-            'name': 'Company',
-        })
-
-        self.assertIsNotNone(c)
-
-    def test_manufacturer_part_create(self):
-        manufacturer = company.Company(self.api, 1)
-
-        manufacturer_part = company.ManufacturerPart(self.api, {
-            'manufacturer': manufacturer,
-            'MPN': 'MPN_TEST',
-        })
-
-        self.assertIsNotNone(manufacturer_part)
-
-    def test_manufacturer_part_parameters(self):
-        """
-        Test that we can create, retrieve and edit ManufacturerPartParameter objects
-        """
-
-        # First, create a new ManufacturerPart
-        part = company.ManufacturerPart.create(self.api, {
-            'manufacturer': 1,
-            'part': 1,
-            'MPN': 'XYZ-123456789'
-        })
-
-        self.assertIsNotNone(part)
-
-        # Part should (initially) not have any parameters
-        self.assertEqual(len(part.getParameters()), 0)
-
-        # Now, let's create some!
-        for idx in range(10):
-
-            parameter = company.ManufacturerPartParameter.create(self.api, {
-                'manufacturer_part': part.pk,
-                'name': f"param {idx}",
-                'value': f"{idx}",
-            })
-
-            self.assertIsNotNone(parameter)
-
-        # Now should have 10 unique parameters
-        self.assertEqual(len(part.getParameters()), 10)
-
-        # Attempt to create a duplicate parameter
-        parameter = company.ManufacturerPartParameter.create(self.api, {
-            'manufacturer_part': part.pk,
-            'name': 'param 0',
-            'value': 'some value',
-        })
-
-        self.assertIsNone(parameter)
-        self.assertEqual(len(part.getParameters()), 10)
-
-        # Test that we can edit a ManufacturerPartParameter
-        parameter = part.getParameters()[0]
-
-        self.assertEqual(parameter.value, '0')
-
-        parameter['value'] = 'new value'
-        parameter.save()
-
-        self.assertEqual(parameter.value, 'new value')
-
-        parameter['value'] = 'dummy value'
-        parameter.reload()
-
-        self.assertEqual(parameter.value, 'new value')
-
-        # Test that the "list" function works correctly
-        results = company.ManufacturerPartParameter.list(self.api)
-        self.assertEqual(len(results), 10)
-
-        results = company.ManufacturerPartParameter.list(self.api, name='param 1')
-        self.assertEqual(len(results), 1)
-
-        results = company.ManufacturerPartParameter.list(self.api, manufacturer_part=part.pk)
-        self.assertEqual(len(results), 10)
-
-    def test_supplier_part_create(self):
-        """
-        Test that we can create SupplierPart objects via the API
-        """
-
-        supplier = company.Company(self.api, 1)
-
-        supplier_part = company.SupplierPart(self.api, {
-            'manufacturer': supplier,
-            'SKU': 'SKU_TEST',
-        })
-
-        self.assertIsNotNone(supplier_part)
 
 
 if __name__ == '__main__':
