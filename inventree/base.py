@@ -2,8 +2,13 @@
 
 import os
 import logging
+import json
+
 
 INVENTREE_PYTHON_VERSION = "0.1.4"
+
+
+logger = logging.getLogger('inventree')
 
 
 class InventreeObject(object):
@@ -33,6 +38,42 @@ class InventreeObject(object):
         if len(self._data) == 0:
             self.reload()
 
+    @classmethod
+    def fields(cls, api):
+        """
+        Returns a list of available fields for this model.
+
+        Introspects the available fields using an OPTIONS request.
+        """
+
+        response = api.request(
+            cls.URL,
+            method='options',
+        )
+
+        if not response.status_code == 200:
+            logger.error(f"OPTIONS for '{cls.URL}' returned code {response.status_code}")
+            return {}
+
+        try:
+            data = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            logger.error(f"Error decoding JSON response for '{cls.URL}'")
+            return {}
+
+        actions = data.get('actions', {})
+        post = actions.get('POST', {})
+
+        return post
+
+    @classmethod
+    def fieldNames(cls, api):
+        """
+        Return a list of available field names for this model
+        """
+
+        return [k for k in cls.fields(api).keys()]
+
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
@@ -49,7 +90,7 @@ class InventreeObject(object):
         response = api.post(cls.URL, data)
         
         if response is None:
-            logging.error("Error creating new object")
+            logger.error("Error creating new object")
             return None
 
         return cls(api, data=response)
@@ -135,7 +176,7 @@ class Attachment(InventreeObject):
         """
 
         if not os.path.exists(filename):
-            logging.error("File does not exist: '{f}'".format(f=filename))
+            logger.error("File does not exist: '{f}'".format(f=filename))
             return
 
         f = os.path.basename(filename)
@@ -153,9 +194,9 @@ class Attachment(InventreeObject):
         response = api.post(cls.URL, data, files=files)
 
         if response and response.status_code in [200, 201]:
-            logging.info("Uploaded attachment file: '{f}'".format(f=f))
+            logger.info("Uploaded attachment file: '{f}'".format(f=f))
         else:
-            logging.warning("File upload failed")
+            logger.warning("File upload failed")
 
 
 class Currency(InventreeObject):

@@ -15,6 +15,18 @@ class PartTest(InvenTreeTestCase):
     Test for PartCategory and Part objects.
     """
 
+    def test_fields(self):
+        """
+        Test field names via OPTIONS request
+        """
+
+        field_names = part.Part.fieldNames(self.api)
+
+        self.assertIn('active', field_names)
+        self.assertIn('revision', field_names)
+        self.assertIn('full_name', field_names)
+        self.assertIn('IPN', field_names)
+
     def test_part_cats(self):
 
         cats = part.Part.list(self.api)

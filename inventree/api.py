@@ -13,11 +13,12 @@ import json
 import logging
 
 
+logger = logging.getLogger('inventree')
+
+
 class InvenTreeAPI(object):
-    """ Basic class for performing Inventree API requests.
-
-    GET - Fetch data from the server
-
+    """
+    Basic class for performing Inventree API requests.
     """
 
     MIN_SUPPORTED_API_VERSION = 5
@@ -56,7 +57,7 @@ class InvenTreeAPI(object):
 
         self.base_url = base_url
 
-        logging.info("Connecting to server: " + str(self.base_url))
+        logger.info("Connecting to server: " + str(self.base_url))
 
         self.username = kwargs.get('username', None)
         self.password = kwargs.get('password', None)
@@ -93,16 +94,16 @@ class InvenTreeAPI(object):
 
         self.server_details = None
 
-        logging.info("Checking InvenTree server connection...")
+        logger.info("Checking InvenTree server connection...")
 
         try:
             response = requests.get(self.base_url)
         except requests.exceptions.ConnectionError:
-            logging.error("Server connection refused - check server address")
+            logger.error("Server connection refused - check server address")
             return False
 
         if not response.status_code == 200:
-            logging.error("Error code from server: {code} - {detail}".format(
+            logger.error("Error code from server: {code} - {detail}".format(
                 code=response.status_code,
                 detail=response.text
             ))
@@ -112,13 +113,13 @@ class InvenTreeAPI(object):
         # Record server details
         self.server_details = json.loads(response.text)
 
-        logging.info("InvenTree server details: " + str(response.text))
+        logger.info("InvenTree server details: " + str(response.text))
 
         # The details provided by the server should include some specific data:
         server_name = str(self.server_details.get('server', ''))
 
         if not server_name.lower() == 'inventree':
-            logging.warning("Server returned strange response (expected 'InvenTree', found '{name}')".format(
+            logger.warning("Server returned strange response (expected 'InvenTree', found '{name}')".format(
                 name=server_name
             ))
 
@@ -140,7 +141,7 @@ class InvenTreeAPI(object):
         if not self.username or not self.password:
             raise AttributeError('Supply username and password to request token')
 
-        logging.info("Requesting auth token from server...")
+        logger.info("Requesting auth token from server...")
 
         # Request an auth token from the server
         token_url = os.path.join(self.base_url, 'user/token/')
@@ -150,21 +151,21 @@ class InvenTreeAPI(object):
         data = json.loads(reply.text)
 
         if not reply.status_code == 200:
-            logging.error("Error requesting token: {code} - {detail}".format(
+            logger.error("Error requesting token: {code} - {detail}".format(
                 code=reply.status_code,
                 detail=str(reply.text)
             ))
             return None
 
         if 'token' not in data.keys():
-            logging.error("Token not returned by server: {detail}".format(
+            logger.error("Token not returned by server: {detail}".format(
                 detail=str(reply.text)
             ))
             return None
 
         self.token = json.loads(reply.text)['token']
 
-        logging.info("Authentication token: " + self.token)
+        logger.info("Authentication token: " + self.token)
 
         return self.token
 
@@ -199,10 +200,11 @@ class InvenTreeAPI(object):
             'PUT': requests.put,
             'PATCH': requests.patch,
             'DELETE': requests.delete,
+            'OPTIONS': requests.options,
         }
 
         if method.upper() not in methods.keys():
-            logging.error("Unknown request method '{m}'".format(m=method))
+            logger.error("Unknown request method '{m}'".format(m=method))
             return None
 
         method = method.upper()
@@ -213,12 +215,12 @@ class InvenTreeAPI(object):
         else:
             auth = self.auth
 
-        logging.debug("Sending Request:")
-        logging.debug(" - URL:", method, api_url)
-        logging.debug(" - auth:", auth)
-        logging.debug(" - params:", params)
-        logging.debug(" - headers:", headers)
-        logging.debug(" - json:", json)
+        logger.debug("Sending Request:")
+        logger.debug(" - URL:", method, api_url)
+        logger.debug(" - auth:", auth)
+        logger.debug(" - params:", params)
+        logger.debug(" - headers:", headers)
+        logger.debug(" - json:", json)
 
         try:
             response = methods[method](
@@ -230,19 +232,19 @@ class InvenTreeAPI(object):
             )
 
         except requests.exceptions.ConnectionError:
-            logging.error("Connection refused - '{url}'".format(url=api_url))
+            logger.error("Connection refused - '{url}'".format(url=api_url))
             return None
 
         if response is None:
-            logging.error("Null response - {method} '{url}'".format(method=method, url=api_url))
+            logger.error("Null response - {method} '{url}'".format(method=method, url=api_url))
             return None
 
-        logging.info("Request: {method} {url} - {response}".format(method=method, url=api_url, response=response.status_code))
+        logger.info("Request: {method} {url} - {response}".format(method=method, url=api_url, response=response.status_code))
 
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logging.warning("Bad response ({code}) - {method} '{url}' - {detail}".format(
+            logger.warning("Bad response ({code}) - {method} '{url}' - {detail}".format(
                 code=response.status_code, method=method, url=api_url,
                 detail=str(response.text)
             ))
@@ -254,7 +256,7 @@ class InvenTreeAPI(object):
         ctype = response.headers.get('content-type')
 
         if not ctype == 'application/json':
-            logging.error("'Response content-type is not JSON - '{url}' - '{f}'".format(url=api_url, f=ctype))
+            logger.error("'Response content-type is not JSON - '{url}' - '{f}'".format(url=api_url, f=ctype))
             return None
 
         return response
@@ -271,7 +273,7 @@ class InvenTreeAPI(object):
         if response is None:
             return False
 
-        logging.debug(response.status_code, response.text)
+        logger.debug(response.status_code, response.text)
 
     def post(self, url, data, files=None, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
@@ -298,14 +300,14 @@ class InvenTreeAPI(object):
             return None
 
         if response.status_code not in [200, 201]:
-            logging.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
-            logging.error(response.text)
+            logger.error("POST request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            logger.error(response.text)
             return None
         
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logging.error("Error decoding JSON response - '{url}'".format(url=url))
+            logger.error("Error decoding JSON response - '{url}'".format(url=url))
             return None
 
         return data
@@ -330,13 +332,13 @@ class InvenTreeAPI(object):
             return None
         
         if response.status_code not in [200, 201]:
-            logging.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            logger.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
             return None
 
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logging.error("Error decoding JSON response - '{url}'".format(url=url))
+            logger.error("Error decoding JSON response - '{url}'".format(url=url))
             return None
 
         return data
@@ -377,7 +379,7 @@ class InvenTreeAPI(object):
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logging.error("Error decoding JSON response - '{url}'".format(url=url))
+            logger.error("Error decoding JSON response - '{url}'".format(url=url))
             return None
 
         return data
