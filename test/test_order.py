@@ -202,6 +202,8 @@ class SOTest(InvenTreeTestCase):
 
                 self.assertEqual(line.quantity, idx)
 
+                self.assertEqual(line.getPart().pk, p.pk)
+
                 self.assertEqual(line.getOrder().pk, sales_order.pk)
 
                 self.assertEqual(len(sales_order.getLineItems()), idx + 1)
