@@ -28,9 +28,17 @@ class PartTest(InvenTreeTestCase):
         self.assertIn('IPN', field_names)
 
     def test_part_cats(self):
+        """
+        Tests for category filtering
+        """
 
-        cats = part.Part.list(self.api)
+        # All categories
+        cats = part.PartCategory.list(self.api)
         self.assertEqual(len(cats), 9)
+
+        # Filtered
+        cats = part.Part.list(self.api, parent=1)
+        print(len(cats))
 
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
@@ -70,7 +78,7 @@ class PartTest(InvenTreeTestCase):
     def test_parts(self):
 
         parts = part.Part.list(self.api)
-        self.assertEqual(len(parts), 9)
+        self.assertEqual(len(parts), 19)
 
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)

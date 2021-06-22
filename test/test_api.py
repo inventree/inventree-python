@@ -68,6 +68,12 @@ class InvenTreeAPITest(InvenTreeTestCase):
         self.assertIn('server', details)
         self.assertIn('instance', details)
 
+        self.assertIn('apiVersion', details)
+        
+        api_version = int(details['apiVerision'])
+
+        self.assertTrue(api_version >= self.api.getMinApiVersion())
+
 
 class TestCreate(InvenTreeTestCase):
     """
