@@ -2,6 +2,7 @@
 
 import inventree.base
 import inventree.part
+import inventree.company
 
 
 class PurchaseOrder(inventree.base.InventreeObject):
@@ -9,12 +10,18 @@ class PurchaseOrder(inventree.base.InventreeObject):
 
     URL = 'order/po'
 
-    def __repr__(self):
-        return "Purchase Order #{ref}".format(ref=self.pk)
-
-    def getLineItems(self):
+    def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
-        return PurchaseOrderLineItem.list(self._api, order=self.pk)
+        return PurchaseOrderLineItem.list(self._api, order=self.pk, **kwargs)
+
+    def addLineItem(self, **kwargs):
+        """
+        Create (and return) new PurchaseOrderLineItem object against this PurchaseOrder
+        """
+
+        kwargs['order'] = self.pk
+
+        return PurchaseOrderLineItem.create(self._api, data=kwargs)
 
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
@@ -22,17 +29,22 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
 
     URL = 'order/po-line/'
 
-    def __repr__(self):
-        return "{n} x part #{part} for order #{ref}".format(
-            n=self.quantity,
-            part=self.part,
-            ref=self.order
-        )
+    def getSupplierPart(self):
+        """
+        Return the SupplierPart associated with this PurchaseOrderLineItem
+        """
+        return inventree.company.SupplierPart(self._api, self.part)
 
     def getPart(self):
-        return inventree.part.Part(self._api, self.part)
+        """
+        Return the Part referenced by the associated SupplierPart
+        """
+        return inventree.part.Part(self._api, self.getSupplierPart().part)
 
     def getOrder(self):
+        """
+        Return the PurchaseOrder to which this PurchaseOrderLineItem belongs
+        """
         return PurchaseOrder(self._api, self.order)
 
 
@@ -41,12 +53,18 @@ class SalesOrder(inventree.base.InventreeObject):
 
     URL = 'order/so'
 
-    def __repr__(self):
-        return "Sales Order #{ref}".format(ref=self.pk)
-
-    def getLineItems(self):
+    def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
-        return SalesOrderLineItem.list(self._api, order=self.pk)
+        return SalesOrderLineItem.list(self._api, order=self.pk, **kwargs)
+
+    def addLineItem(self, **kwargs):
+        """
+        Create (and return) new SalesOrderLineItem object against this SalesOrder
+        """
+
+        kwargs['order'] = self.pk
+
+        return SalesOrderLineItem.create(self._api, data=kwargs)
 
 
 class SalesOrderLineItem(inventree.base.InventreeObject):
@@ -54,15 +72,14 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
 
     URL = 'order/so-line/'
 
-    def __repr__(self):
-        return "{n} x part #{part} for order #{ref}".format(
-            n=self.quantity,
-            part=self.part,
-            ref=self.order,
-        )
-
     def getPart(self):
+        """
+        Return the Part object referenced by this SalesOrderLineItem
+        """
         return inventree.part.Part(self._api, self.part)
 
     def getOrder(self):
+        """
+        Return the SalesOrder to which this SalesOrderLineItem belongs
+        """
         return SalesOrder(self._api, self.order)

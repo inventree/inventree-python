@@ -15,10 +15,30 @@ class PartTest(InvenTreeTestCase):
     Test for PartCategory and Part objects.
     """
 
-    def test_part_cats(self):
+    def test_fields(self):
+        """
+        Test field names via OPTIONS request
+        """
 
-        cats = part.Part.list(self.api)
+        field_names = part.Part.fieldNames(self.api)
+
+        self.assertIn('active', field_names)
+        self.assertIn('revision', field_names)
+        self.assertIn('full_name', field_names)
+        self.assertIn('IPN', field_names)
+
+    def test_part_cats(self):
+        """
+        Tests for category filtering
+        """
+
+        # All categories
+        cats = part.PartCategory.list(self.api)
         self.assertEqual(len(cats), 9)
+
+        # Filtered
+        cats = part.Part.list(self.api, parent=1)
+        print(len(cats))
 
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
@@ -58,7 +78,7 @@ class PartTest(InvenTreeTestCase):
     def test_parts(self):
 
         parts = part.Part.list(self.api)
-        self.assertEqual(len(parts), 9)
+        self.assertEqual(len(parts), 19)
 
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)

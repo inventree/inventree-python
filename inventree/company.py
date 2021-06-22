@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import inventree.base
+import inventree.order
 
 
 class Company(inventree.base.InventreeObject):
@@ -8,11 +9,53 @@ class Company(inventree.base.InventreeObject):
 
     URL = 'company'
 
-    def getSuppliedParts(self):
-        return SupplierPart.list(self._api, supplier=self.pk)
+    def getSuppliedParts(self, **kwargs):
+        """
+        Return list of SupplierPart objects supplied by this Company
+        """
+        return SupplierPart.list(self._api, supplier=self.pk, **kwargs)
 
-    def getManufacturedParts(self):
-        return ManufacturerPart.list(self._api, manufacturer=self.pk)
+    def getManufacturedParts(self, **kwargs):
+        """
+        Return list of ManufacturerPart objects manufactured by this Company
+        """
+        return ManufacturerPart.list(self._api, manufacturer=self.pk, **kwargs)
+
+    def getPurchaseOrders(self, **kwargs):
+        """
+        Return list of PurchaseOrder objects associated with this company
+        """
+        return inventree.order.PurchaseOrder.list(self._api, supplier=self.pk)
+
+    def createPurchaseOrder(self, **kwargs):
+        """
+        Create (and return) a new PurchaseOrder against this company
+        """
+
+        kwargs['supplier'] = self.pk
+
+        return inventree.order.PurchaseOrder.create(
+            self._api,
+            data=kwargs
+        )
+
+    def getSalesOrders(self, **kwargs):
+        """
+        Return list of SalesOrder objects associated with this company
+        """
+        return inventree.order.SalesOrder.list(self._api, customer=self.pk)
+
+    def createSalesOrder(self, **kwargs):
+        """
+        Create (and return) a new SalesOrder against this company
+        """
+
+        kwargs['customer'] = self.pk
+
+        return inventree.order.SalesOrder.create(
+            self._api,
+            data=kwargs
+        )
 
 
 class SupplierPart(inventree.base.InventreeObject):

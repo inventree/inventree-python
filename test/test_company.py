@@ -14,6 +14,23 @@ class CompanyTest(InvenTreeTestCase):
     Test that Company related objects can be managed via the API
     """
 
+    def test_fields(self):
+        """
+        Test field names via OPTIONS request
+        """
+
+        field_names = company.Company.fieldNames(self.api)
+
+        for field in [
+            'url',
+            'name',
+            'image',
+            'is_customer',
+            'is_manufacturer',
+            'is_supplier'
+        ]:
+            self.assertIn(field, field_names)
+
     def test_company_create(self):
         c = company.Company(self.api, {
             'name': 'Company',
