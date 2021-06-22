@@ -108,6 +108,8 @@ class POTest(InvenTreeTestCase):
 
             line = po.addLineItem(part=sp.pk, quantity=idx)
 
+            self.assertEqual(line.getOrder().pk, po.pk)
+
             self.assertIsNotNone(line)
 
             # Assert that a new line item has been created
@@ -199,5 +201,7 @@ class SOTest(InvenTreeTestCase):
                 line = sales_order.addLineItem(part=p.pk, quantity=idx)
 
                 self.assertEqual(line.quantity, idx)
+
+                self.assertEqual(line.getOrder().pk, sales_order.pk)
 
                 self.assertEqual(len(sales_order.getLineItems()), idx + 1)

@@ -10,9 +10,6 @@ class PurchaseOrder(inventree.base.InventreeObject):
 
     URL = 'order/po'
 
-    def __repr__(self):
-        return "Purchase Order #{ref}".format(ref=self.pk)
-
     def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
         return PurchaseOrderLineItem.list(self._api, order=self.pk, **kwargs)
@@ -31,13 +28,6 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
 
     URL = 'order/po-line/'
-
-    def __repr__(self):
-        return "{n} x part #{part} for order #{ref}".format(
-            n=self.quantity,
-            part=self.part,
-            ref=self.order
-        )
 
     def getSupplierPart(self):
         """
@@ -63,9 +53,6 @@ class SalesOrder(inventree.base.InventreeObject):
 
     URL = 'order/so'
 
-    def __repr__(self):
-        return "Sales Order #{ref}".format(ref=self.pk)
-
     def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
         return SalesOrderLineItem.list(self._api, order=self.pk, **kwargs)
@@ -84,13 +71,6 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
     URL = 'order/so-line/'
-
-    def __repr__(self):
-        return "{n} x part #{part} for order #{ref}".format(
-            n=self.quantity,
-            part=self.part,
-            ref=self.order,
-        )
 
     def getPart(self):
         """
