@@ -5,7 +5,7 @@ import logging
 import json
 
 
-INVENTREE_PYTHON_VERSION = "0.1.4"
+INVENTREE_PYTHON_VERSION = "0.2.4 pre"
 
 
 logger = logging.getLogger('inventree')
@@ -15,6 +15,14 @@ class InventreeObject(object):
     """ Base class for an InvenTree object """
 
     URL = ""
+
+    def __str__(self):
+        """
+        Simple human-readable printing.
+        Can override in subclass
+        """
+
+        return f"{type(self)}<pk={self.pk}>"
 
     def __init__(self, api, pk=None, data={}):
         """ Instantiate this InvenTree object.
