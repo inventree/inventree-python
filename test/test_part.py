@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from posixpath import expanduser
 import sys
 
 try:
@@ -88,6 +87,56 @@ class PartTest(InvenTreeTestCase):
 
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)
+
+    def test_part_edit(self):
+        """
+        Test that we can edit a part
+        """
+
+        # Select a part
+        p = part.Part.list(self.api)[-1]
+
+        name = p.name
+        name += '_append'
+
+        p.save(
+            data={
+                'name': name,
+                'description': 'A new description'
+            },
+        )
+        p.reload()
+
+        self.assertEqual(p.name, name)
+        self.assertEqual(p.description, 'A new description')
+
+    def test_part_delete(self):
+        """
+        Test we can create and delete a Part instance via the API
+        """
+        
+        n = len(part.Part.list(self.api))
+
+        # Create a new part
+        p = part.Part.create(
+            self.api,
+            {
+                'name': 'Delete Me',
+                'description': 'Not long for this world!',
+                'category': 1,
+            }
+        )
+
+        self.assertIsNotNone(p)
+        self.assertIsNotNone(p.pk)
+
+        self.assertEquals(len(part.Part.list(self.api)), n + 1)
+
+        response = p.delete()
+        self.assertEquals(response.status_code, 204)
+
+        # And check that the part has indeed been deleted
+        self.assertEquals(len(part.Part.list(self.api)), n)
 
     def test_image_upload(self):
         """

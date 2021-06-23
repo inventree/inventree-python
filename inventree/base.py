@@ -137,7 +137,7 @@ class InventreeObject(object):
     def delete(self):
         """ Delete this object from the database """
         if self._api:
-            self._api.delete(self._url)
+            return self._api.delete(self._url)
 
     def save(self, data=None, files=None, method='PATCH'):
         """
@@ -152,9 +152,9 @@ class InventreeObject(object):
             
             # Default method used is PATCH (partial update)
             if method.lower() == 'patch':
-                response = self._api.patch(self._url, self._data, files=files)
+                response = self._api.patch(self._url, data, files=files)
             elif method.lower() == 'put':
-                response = self._api.put(self._url, self._data, files=files)
+                response = self._api.put(self._url, data, files=files)
             else:
                 logger.warning(f"save() called with unknown method '{method}'")
                 return

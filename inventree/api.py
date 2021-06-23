@@ -275,9 +275,14 @@ class InvenTreeAPI(object):
         response = self.request(url, method='delete', headers=headers, **kwargs)
 
         if response is None:
-            return False
+            return None
+
+        if response.status_code not in [204]:
+            logger.error(f"DELETE request failed at '{url}' - {response.status_code}")
 
         logger.debug(response.status_code, response.text)
+
+        return response
 
     def post(self, url, data, files=None, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
@@ -326,7 +331,9 @@ class InvenTreeAPI(object):
             files - optional FILES struct
         """
 
-        headers = {}
+        headers = {
+            'content-type': 'application/json'
+        }
 
         params = {
             'format': 'json',
@@ -358,7 +365,6 @@ class InvenTreeAPI(object):
 
         return data
 
-
     def put(self, url, data, files=None, **kwargs):
         """
         Perform a PUT request. Used to update existing records in the database.
@@ -367,6 +373,8 @@ class InvenTreeAPI(object):
             url - API endpoint URL
             data - JSON data to PUT
         """
+
+        headers = {}
 
         params = {
             'format': 'json',
