@@ -3,6 +3,11 @@
 import os
 import sys
 
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
@@ -34,11 +39,14 @@ class PartTest(InvenTreeTestCase):
 
         # All categories
         cats = part.PartCategory.list(self.api)
-        self.assertEqual(len(cats), 9)
+        n = len(cats)
+        self.assertTrue(len(cats) >= 9)
 
-        # Filtered
-        cats = part.Part.list(self.api, parent=1)
-        print(len(cats))
+        # Filtered categories must be fewer than *all* categories
+        cats = part.PartCategory.list(self.api, parent=1)
+
+        self.assertGreater(len(cats), 0)
+        self.assertLess(len(cats), n)
 
     def test_elec(self):
         electronics = part.PartCategory(self.api, 1)
@@ -75,10 +83,95 @@ class PartTest(InvenTreeTestCase):
         for p in parts:
             self.assertEqual(p.category, capacitors.pk)
 
-    def test_parts(self):
+    def test_part_list(self):
+        """
+        Check that we can list Part objects,
+        and apply certain filters
+        """
 
         parts = part.Part.list(self.api)
-        self.assertEqual(len(parts), 19)
+        self.assertTrue(len(parts) >= 19)
 
         parts = part.Part.list(self.api, category=5)
-        self.assertEqual(len(parts), 3)
+        self.assertTrue(len(parts) >= 3)
+
+    def test_part_edit(self):
+        """
+        Test that we can edit a part
+        """
+
+        # Select a part
+        p = part.Part.list(self.api)[-1]
+
+        name = p.name
+
+        # Ajdust the name
+        if len(name) < 40:
+            name += '_append'
+        else:
+            name = name[:-10]
+
+        p.save(
+            data={
+                'name': name,
+                'description': 'A new description'
+            },
+        )
+        p.reload()
+
+        self.assertEqual(p.name, name)
+        self.assertEqual(p.description, 'A new description')
+
+    def test_part_delete(self):
+        """
+        Test we can create and delete a Part instance via the API
+        """
+        
+        n = len(part.Part.list(self.api))
+
+        # Create a new part
+        p = part.Part.create(
+            self.api,
+            {
+                'name': 'Delete Me',
+                'description': 'Not long for this world!',
+                'category': 1,
+            }
+        )
+
+        self.assertIsNotNone(p)
+        self.assertIsNotNone(p.pk)
+
+        self.assertEqual(len(part.Part.list(self.api)), n + 1)
+
+        response = p.delete()
+        self.assertEqual(response.status_code, 204)
+
+        # And check that the part has indeed been deleted
+        self.assertEqual(len(part.Part.list(self.api)), n)
+
+    def test_image_upload(self):
+        """
+        Test image upload functionality for Part model
+        """
+
+        # Grab the first part
+        p = part.Part.list(self.api)[0]
+
+        # Create a dummy file (not an image)
+        with open('dummy_image.jpg', 'w') as dummy_file:
+            dummy_file.write("hello world")
+
+        # Attempt to upload an image
+        response = p.uploadImage("dummy_image.jpg")
+        self.assertIsNone(response)
+
+        # Now, let's actually upload a real image
+        img = Image.new('RGB', (128, 128), color='red')
+        img.save('dummy_image.png')
+
+        response = p.uploadImage("dummy_image.png")
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(p['image'])
+        self.assertIn('dummy_image', p['image'])
