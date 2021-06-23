@@ -21,7 +21,7 @@ class InvenTreeAPI(object):
     Basic class for performing Inventree API requests.
     """
 
-    MIN_SUPPORTED_API_VERSION = 5
+    MIN_SUPPORTED_API_VERSION = 6
 
     @staticmethod
     def getMinApiVersion():
@@ -187,6 +187,8 @@ class InvenTreeAPI(object):
 
         json = kwargs.get('json', {})
 
+        files = kwargs.get('files', {})
+
         headers = kwargs.get('headers', {})
 
         search_term = kwargs.get('search', None)
@@ -221,6 +223,7 @@ class InvenTreeAPI(object):
         logger.debug(" - params:", params)
         logger.debug(" - headers:", headers)
         logger.debug(" - json:", json)
+        logger.debug(" - files:", files)
 
         try:
             response = methods[method](
@@ -228,7 +231,8 @@ class InvenTreeAPI(object):
                 auth=auth,
                 params=params,
                 headers=headers,
-                json=json
+                json=json,
+                files=files
             )
 
         except requests.exceptions.ConnectionError:
@@ -312,50 +316,83 @@ class InvenTreeAPI(object):
 
         return data
 
-    def put(self, url, data, **kwargs):
-        """ Perform a PUT request. Used to update existing records in the database.
+    def patch(self, url, data, files=None, **kwargs):
+        """
+        Perform a PATCH request.
+
+        Args:
+            url - API endpoint URL
+            data - JSON data
+            files - optional FILES struct
+        """
+
+        headers = {}
+
+        params = {
+            'format': 'json',
+        }
+
+        response = self.request(
+            url,
+            json=data,
+            method='patch',
+            headers=headers,
+            params=params,
+            files=files,
+            **kwargs
+        )
+
+        if response is None:
+            logger.error(f"PATCH returned null response at '{url}'")
+            return None
+
+        if response.status_code not in [200, 201]:
+            logger.error(f"PATCH request failed at '{url}' - {response.status_code}")
+            return None
+
+        try:
+            data = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            logger.error(f"Error decoding JSON response - '{url}'")
+            return None
+
+        return data
+
+
+    def put(self, url, data, files=None, **kwargs):
+        """
+        Perform a PUT request. Used to update existing records in the database.
 
         Args:
             url - API endpoint URL
             data - JSON data to PUT
         """
 
-        headers = {'content-type': 'application/json'}
-
         params = {
             'format': 'json',
         }
 
-        response = self.request(url, json=data, method='put', headers=headers, params=params, **kwargs)
+        response = self.request(
+            url,
+            json=data,
+            method='put',
+            headers=headers,
+            params=params,
+            files=files,
+            **kwargs
+        )
 
         if response is None:
             return None
-        
+
         if response.status_code not in [200, 201]:
-            logger.error("PUT request failed at '{url}' - {status}".format(url=url, status=response.status_code))
+            logger.error(f"PUT request failed at '{url}' - {response.status_code}")
             return None
 
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logger.error("Error decoding JSON response - '{url}'".format(url=url))
-            return None
-
-        return data
-
-    def put_image(self, url, data, files):
-        headers = {}
-
-        if self.use_token_auth and self.token:
-            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
-            auth = None
-        else:
-            auth = self.auth
-
-        url = self.clean_url(url)
-        response = requests.put(url, data=data, files=files, headers=headers, auth=auth)
-
-        if response.status_code not in [200, 201]:
+            logger.error(f"Error decoding JSON response - '{url}'")
             return None
 
         return data

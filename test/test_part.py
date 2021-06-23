@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+from posixpath import expanduser
 import sys
+
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
@@ -82,3 +88,29 @@ class PartTest(InvenTreeTestCase):
 
         parts = part.Part.list(self.api, category=5)
         self.assertEqual(len(parts), 3)
+
+    def test_image_upload(self):
+        """
+        Test image upload functionality for Part model
+        """
+
+        # Grab the first part
+        p = part.Part.list(self.api)[0]
+
+        # Create a dummy file (not an image)
+        with open('dummy_image.jpg', 'w') as dummy_file:
+            dummy_file.write("hello world")
+
+        # Attempt to upload an image
+        response = p.uploadImage("dummy_image.jpg")
+        self.assertIsNone(response)
+
+        # Now, let's actually upload a real image
+        img = Image.new('RGB', (128, 128), color='red')
+        img.save('dummy_image.png')
+
+        response = p.uploadImage("dummy_image.png")
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(p['image'])
+        self.assertIn('dummy_image.png', p['image'])

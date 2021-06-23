@@ -139,13 +139,33 @@ class InventreeObject(object):
         if self._api:
             self._api.delete(self._url)
 
-    def save(self):
-        """ Save this object to the database """
+    def save(self, data=None, files=None, method='PATCH'):
+        """
+        Save this object to the database
+        """
+        
+        # If 'data' is not specified, then use *all* the data
+        if data is None:
+            data = self._data
+        
         if self._api:
-            self._api.put(self._url, self._data)
+            
+            # Default method used is PATCH (partial update)
+            if method.lower() == 'patch':
+                response = self._api.patch(self._url, self._data, files=files)
+            elif method.lower() == 'put':
+                response = self._api.put(self._url, self._data, files=files)
+            else:
+                logger.warning(f"save() called with unknown method '{method}'")
+                return
 
-        # Automatically re-load data from the serve
-        self.reload()
+        # Automatically re-load data from the returned data
+        if response is not None:
+            self._data = response
+        else:
+            self.reload()
+
+        return response
 
     def reload(self):
         """ Reload object data from the database """
