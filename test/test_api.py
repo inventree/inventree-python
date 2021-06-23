@@ -147,7 +147,9 @@ class WidgetTest(InvenTreeTestCase):
         item = item[0]
 
         tests = item.getTestResults()
-        self.assertEqual(len(tests), 1)
+
+        n = len(tests)
+        self.assertGreater(n, 0)
 
         # Upload a test result against 'firmware' (should fail the first time)
         args = {
@@ -162,8 +164,9 @@ class WidgetTest(InvenTreeTestCase):
         item.uploadTestResult('paint', True)
         item.uploadTestResult('extra test', False, value='some data')
 
+        # There should be 3 more test results now!
         results = item.getTestResults()
-        self.assertEqual(len(results), 4)
+        self.assertEqual(len(results), n + 3)
 
 
 if __name__ == '__main__':

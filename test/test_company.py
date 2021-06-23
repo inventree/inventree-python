@@ -88,14 +88,19 @@ class CompanyTest(InvenTreeTestCase):
         Test that we can create, retrieve and edit ManufacturerPartParameter objects
         """
 
+        n = len(company.ManufacturerPart.list(self.api))
+
+        mpn = f"XYZ-12345678-{n}"
+
         # First, create a new ManufacturerPart
         part = company.ManufacturerPart.create(self.api, {
             'manufacturer': 1,
             'part': 1,
-            'MPN': 'XYZ-123456789'
+            'MPN': mpn,
         })
 
         self.assertIsNotNone(part)
+        self.assertEqual(len(company.ManufacturerPart.list(self.api)), n + 1)
 
         # Part should (initially) not have any parameters
         self.assertEqual(len(part.getParameters()), 0)
@@ -141,13 +146,13 @@ class CompanyTest(InvenTreeTestCase):
 
         # Test that the "list" function works correctly
         results = company.ManufacturerPartParameter.list(self.api)
-        self.assertEqual(len(results), 10)
+        self.assertGreaterEqual(len(results), 10)
 
         results = company.ManufacturerPartParameter.list(self.api, name='param 1')
-        self.assertEqual(len(results), 1)
+        self.assertGreaterEqual(len(results), 1)
 
         results = company.ManufacturerPartParameter.list(self.api, manufacturer_part=part.pk)
-        self.assertEqual(len(results), 10)
+        self.assertGreaterEqual(len(results), 10)
 
     def test_supplier_part_create(self):
         """

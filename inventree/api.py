@@ -270,7 +270,7 @@ class InvenTreeAPI(object):
 
         """
 
-        headers = {'content-type': 'application/json'}
+        headers = kwargs.get('headers', {})
 
         response = self.request(url, method='delete', headers=headers, **kwargs)
 
@@ -295,7 +295,7 @@ class InvenTreeAPI(object):
 
         url = self.clean_url(url)
 
-        headers = {}
+        headers = kwargs.get('headers', {})
 
         if self.use_token_auth and self.token:
             headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
@@ -331,9 +331,7 @@ class InvenTreeAPI(object):
             files - optional FILES struct
         """
 
-        headers = {
-            'content-type': 'application/json'
-        }
+        headers = kwargs.get('headers', {})
 
         params = {
             'format': 'json',
@@ -374,7 +372,7 @@ class InvenTreeAPI(object):
             data - JSON data to PUT
         """
 
-        headers = {}
+        headers = kwargs.get('headers', {})
 
         params = {
             'format': 'json',
