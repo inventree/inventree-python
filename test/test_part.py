@@ -139,8 +139,8 @@ class PartTest(InvenTreeTestCase):
             }
         )
 
-        self.assertEqual(part.active, True)
-        self.assertEqual(part.virtual, False)
+        self.assertEqual(p.active, True)
+        self.assertEqual(p.virtual, False)
 
         # Set both to false
         p = part.Part.create(
@@ -154,8 +154,8 @@ class PartTest(InvenTreeTestCase):
             }
         )
 
-        self.assertFalse(part.active)
-        self.assertFalse(part.virtual)
+        self.assertFalse(p.active)
+        self.assertFalse(p.virtual)
 
         # Set both to true
         p = part.Part.create(
@@ -169,8 +169,8 @@ class PartTest(InvenTreeTestCase):
             }
         )
 
-        self.assertTrue(part.active)
-        self.assertTrue(part.virtual)
+        self.assertTrue(p.active)
+        self.assertTrue(p.virtual)
 
     def test_part_delete(self):
         """
