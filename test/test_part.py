@@ -130,6 +130,7 @@ class PartTest(InvenTreeTestCase):
         n = len(part.Part.list(self.api))
 
         # Create a new part
+        # We do not specify 'active' value so it will default to True
         p = part.Part.create(
             self.api,
             {
@@ -144,6 +145,11 @@ class PartTest(InvenTreeTestCase):
 
         self.assertEqual(len(part.Part.list(self.api)), n + 1)
 
+        # Cannot delete - part is 'active'!
+        response = p.delete()
+        self.assertEqual(response.status_code, 405)
+
+        p.save(data={'active': False})
         response = p.delete()
         self.assertEqual(response.status_code, 204)
 
