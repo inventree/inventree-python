@@ -122,6 +122,56 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(p.name, name)
         self.assertEqual(p.description, 'A new description')
 
+    def test_default_values(self):
+        """
+        Test that the DRF framework will correctly insert the default values
+        """
+
+        n = len(part.Part.list(self.api))
+
+        # Create a part without specifying 'active' and 'virtual' fields
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test",
+                'category': 1,
+                'description': "Some part thingy",
+            }
+        )
+
+        self.assertEqual(p.active, True)
+        self.assertEqual(p.virtual, False)
+
+        # Set both to false
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test_2",
+                'category': 1,
+                'description': 'Setting fields to false',
+                'active': False,
+                'virtual': False,
+            }
+        )
+
+        self.assertFalse(p.active)
+        self.assertFalse(p.virtual)
+
+        # Set both to true
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test_3",
+                'category': 1,
+                'description': 'Setting fields to true',
+                'active': True,
+                'virtual': True,
+            }
+        )
+
+        self.assertTrue(p.active)
+        self.assertTrue(p.virtual)
+
     def test_part_delete(self):
         """
         Test we can create and delete a Part instance via the API
@@ -130,6 +180,7 @@ class PartTest(InvenTreeTestCase):
         n = len(part.Part.list(self.api))
 
         # Create a new part
+        # We do not specify 'active' value so it will default to True
         p = part.Part.create(
             self.api,
             {
@@ -144,6 +195,11 @@ class PartTest(InvenTreeTestCase):
 
         self.assertEqual(len(part.Part.list(self.api)), n + 1)
 
+        # Cannot delete - part is 'active'!
+        response = p.delete()
+        self.assertEqual(response.status_code, 405)
+
+        p.save(data={'active': False})
         response = p.delete()
         self.assertEqual(response.status_code, 204)
 
