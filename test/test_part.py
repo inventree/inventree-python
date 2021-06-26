@@ -122,6 +122,56 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(p.name, name)
         self.assertEqual(p.description, 'A new description')
 
+    def test_default_values(self):
+        """
+        Test that the DRF framework will correctly insert the default values
+        """
+
+        n = len(part.Part.list(self.api))
+
+        # Create a part without specifying 'active' and 'virtual' fields
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test",
+                'category': 1,
+                'description': "Some part thingy",
+            }
+        )
+
+        self.assertEqual(part.active, True)
+        self.assertEqual(part.virtual, False)
+
+        # Set both to false
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test_2",
+                'category': 1,
+                'description': 'Setting fields to false',
+                'active': False,
+                'virtual': False,
+            }
+        )
+
+        self.assertFalse(part.active)
+        self.assertFalse(part.virtual)
+
+        # Set both to true
+        p = part.Part.create(
+            self.api,
+            {
+                'name': f"Part_{n}_default_test_3",
+                'category': 1,
+                'description': 'Setting fields to true',
+                'active': True,
+                'virtual': True,
+            }
+        )
+
+        self.assertTrue(part.active)
+        self.assertTrue(part.virtual)
+
     def test_part_delete(self):
         """
         Test we can create and delete a Part instance via the API
