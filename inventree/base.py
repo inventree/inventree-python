@@ -5,7 +5,7 @@ import logging
 import json
 
 
-INVENTREE_PYTHON_VERSION = "0.2.4"
+INVENTREE_PYTHON_VERSION = "0.3.1"
 
 
 logger = logging.getLogger('inventree')

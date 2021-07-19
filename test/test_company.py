@@ -61,12 +61,18 @@ class CompanyTest(InvenTreeTestCase):
             mpn = f"MPN_XYX-{i}_{c.pk}"
             sku = f"SKU_ABC-{i}_{c.pk}"
 
+            # Create a new ManufacturerPart
+            m_part = company.ManufacturerPart.create(self.api, {
+                'part': 1,
+                'manufacturer': c.pk,
+                'MPN': mpn
+            })
+
             # Creating a unique SupplierPart should also create a ManufacturerPart
             company.SupplierPart.create(self.api, {
                 'supplier': c.pk,
                 'part': 1,
-                'manufacturer': c.pk,
-                'MPN': mpn,
+                'manufacturer_part': m_part.pk,
                 'SKU': sku,
             })
 
