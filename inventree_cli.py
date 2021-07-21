@@ -31,24 +31,30 @@ class InvenTreeCLI:
     def __init__(self, config_file):
         self.api = None
 
+        print('Connecting... ', end='')
+
         # Extract configuration data from file
         config_data = load_file(config_file)
-        server = config_data.get('server', None)
-        username = config_data.get('username', None)
-        password = config_data.get('password', None)
 
-        if server and username and password:
-            print('Connecting... ', end='')
-            try:
-                self.api = InvenTreeAPI(server, username=username, password=password)
-            except ConnectionRefusedError:
-                print('Error: check server configuration!')
-                return
+        if config_data:
+            server = config_data.get('server', None)
+            username = config_data.get('username', None)
+            password = config_data.get('password', None)
 
-        if self.api.token:
+            if server and username and password:
+                try:
+                    self.api = InvenTreeAPI(server, username=username, password=password)
+                except ConnectionRefusedError:
+                    print('Error: check server configuration!')
+                    return
+        else:
+            print('Error loading configuration file!')
+            return
+
+        if self.api:
             print('Connected.')
         else:
-            print('Error: Token does not exist!')
+            print('Error creating API!')
 
     def check_operation(self, table, operation):
         if not operation:
@@ -65,32 +71,28 @@ class InvenTreeCLI:
 
     def part(self, _function, category=None, id=None, name=None, description=None, revision=None, type=None):
         if _function.lower() == 'get':
-            if not name and not id:
-                print('Error: Missing part name or ID!')
-            else:
-                part = None
+            part = None
 
-                # Check with ID
-                if id:
-                    part_by_id = Part(self.api, pk=id)
+            # Check with ID
+            if id:
+                part_by_id = Part(self.api, pk=id)
+                try:
                     if part_by_id.pk:
                         part = part_by_id
-                else:
-                    # Download all parts from database
-                    db_parts = Part.list(self.api)
-                    
-                    for db_part in db_parts:
-                        if db_part.name == name:
-                            part = db_part
-                            break
+                except AttributeError:
+                    pass
+            else:
+                # Download all parts from database
+                db_parts = Part.list(self.api)
                 
-                if part:
-                    print(f'{part.IPN} | {part.name} | {part.revision}')
-                else:
-                    if id:
-                        print(f'Error: Part with {id=} does not exist!')
-                    else:
-                        print(f'Error: Part with {name=} does not exist!')
+                for db_part in db_parts:
+                    if db_part.name == name:
+                        part = db_part
+                        break
+            
+            return part
+                        
+        return None
 
 
 @click.command()
@@ -119,7 +121,18 @@ def main(config, table, op, list, id, name):
                 if inventree_api.check_operation(table, op):
                     print(f' : {op.upper()}')
                     if table == 'part':
-                        inventree_api.part(_function=op, id=id, name=name)
+                        if not name and not id:
+                            print('Error: Missing part name or ID!')
+                        else:
+                            part = inventree_api.part(_function=op, id=id, name=name)
+
+                            if part:
+                                print(f'{part.IPN} | {part.name} | {part.revision}')
+                            else:
+                                if id:
+                                    print(f'Error: Part with ID={id} does not exist!')
+                                else:
+                                    print(f'Error: Part with name={name} does not exist!')
                 else:
                     print(f' - Operation "{op}" not allowed!')
             else:
