@@ -15,7 +15,7 @@ def style(c):
     """
 
     print("Running PEP code style checks...")
-    c.run('flake8 .')
+    c.run('flake8 inventree_cli.py inventree/ scripts/ test/')
 
 
 @task

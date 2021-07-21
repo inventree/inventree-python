@@ -1,3 +1,5 @@
-requests==2.21.0                # Python HTTP for humans
+Click>=8.0.1                    # Command-Line Parser
 flake8==3.8.4                   # PEP checking
+pyyaml>=5.4.1                   # YAML package
+requests==2.21.0                # Python HTTP for humans
 wheel>=0.34.2                   # Building package

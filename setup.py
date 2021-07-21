@@ -32,12 +32,20 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     install_requires=[
-        "requests"
+        "Click",
+        "pyyaml",
+        "requests",
     ],
 
     setup_requires=[
         "wheel",
     ],
 
-    python_requires=">=3.6"
+    python_requires=">=3.6",
+
+    entry_points={
+        'console_scripts': [
+            'inventree = inventree_cli:main',
+        ],
+    },
 )
