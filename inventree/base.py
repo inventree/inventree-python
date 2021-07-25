@@ -226,6 +226,13 @@ class Attachment(InventreeObject):
         else:
             logger.warning("File upload failed")
 
+    def download(self, destination):
+        """
+        Download the attachment file to the specified location
+        """
+
+        self._api.downloadFile(self.attachment, destination)
+
 
 class Currency(InventreeObject):
     """ Class representing the Currency database model """

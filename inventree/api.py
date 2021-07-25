@@ -176,7 +176,7 @@ class InvenTreeAPI(object):
         if url.startswith('/'):
             url = url[1:]
 
-        api_url = os.path.join(self.api, url)
+        api_url = os.path.join(self.api_url, url)
 
         if not api_url.endswith('/'):
             api_url += '/'
