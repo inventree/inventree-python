@@ -117,9 +117,10 @@ class Part(inventree.base.InventreeObject):
         """
 
         if self.image:
-            self._api.downloadFile(self.image, destination)
+            return self._api.downloadFile(self.image, destination)
         else:
             logger.error(f"Part '{self.name}' does not have an associated image")
+            return False
 
 
 class PartAttachment(inventree.base.Attachment):

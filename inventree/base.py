@@ -231,7 +231,7 @@ class Attachment(InventreeObject):
         Download the attachment file to the specified location
         """
 
-        self._api.downloadFile(self.attachment, destination)
+        return self._api.downloadFile(self.attachment, destination)
 
 
 class Currency(InventreeObject):

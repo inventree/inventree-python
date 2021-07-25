@@ -214,6 +214,9 @@ class PartTest(InvenTreeTestCase):
         # Grab the first part
         p = part.Part.list(self.api)[0]
 
+        # Ensure the part does *not* have an image associated with it
+        p.save(data={'image': None})
+
         # Create a dummy file (not an image)
         with open('dummy_image.jpg', 'w') as dummy_file:
             dummy_file.write("hello world")
@@ -231,3 +234,13 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(p['image'])
         self.assertIn('dummy_image', p['image'])
+
+        # Re-download the image
+        self.assertTrue(p.downloadImage("downloaded_image.png"))
+
+        self.assertTrue(os.path.exists("downloaded_image.png"))
+
+        with Image.open("downloaded_image.png") as img2:
+
+            self.assertEqual(img2.width, 128)
+            self.assertEqual(img2.height, 128)

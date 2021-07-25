@@ -94,9 +94,10 @@ class Company(inventree.base.InventreeObject):
         """
 
         if self.image:
-            self._api.downloadFile(self.image, destination)
+            return self._api.downloadFile(self.image, destination)
         else:
             logger.error(f"Company '{self.name}' does not have an associated image")
+            return False
 
 
 class SupplierPart(inventree.base.InventreeObject):

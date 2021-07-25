@@ -461,7 +461,7 @@ class InvenTreeAPI(object):
                 logger.error(
                     f"Error downloading file '{url}': Server returned status {request.status_code}"
                 )
-                return
+                return False
 
             headers = request.headers
 
@@ -469,7 +469,7 @@ class InvenTreeAPI(object):
                 logger.error(
                     f"Error downloading file '{url}': Server return invalid response (text/html)"
                 )
-                return
+                return False
 
             with open(destination, 'wb') as f:
 
@@ -477,3 +477,4 @@ class InvenTreeAPI(object):
                     f.write(chunk)
 
         logger.info(f"Downloaded '{url}' to '{destination}'")
+        return True
