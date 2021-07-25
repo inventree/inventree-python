@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
+import logging
+
 import inventree.base
 import inventree.order
+
+
+logger = logging.get('inventree')
 
 
 class Company(inventree.base.InventreeObject):
@@ -56,6 +62,41 @@ class Company(inventree.base.InventreeObject):
             self._api,
             data=kwargs
         )
+
+    def uploadImage(self, image):
+        """
+        Upload an image file against this Company
+        
+        Returns the HTTP response object
+        """
+
+        files = {}
+
+        if image:
+            if os.path.exists(image):
+                f = os.path.basename(image)
+                fo = open(image, 'rb')
+                files['image'] = (f, fo)
+            else:
+                logger.error(f"Image '{image}' does not exist")
+                return None
+
+        response = self.save(
+            data={},
+            files=files,
+        )
+
+        return response
+
+    def downloadImage(self, destination):
+        """
+        Download the image for this Company, to the specified destination
+        """
+
+        if self.image:
+            self._api.downloadFile(self.image, destination)
+        else:
+            logger.error(f"Company '{self.name}' does not have an associated image")
 
 
 class SupplierPart(inventree.base.InventreeObject):
