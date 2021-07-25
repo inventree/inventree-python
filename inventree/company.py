@@ -7,7 +7,7 @@ import inventree.base
 import inventree.order
 
 
-logger = logging.get('inventree')
+logger = logging.getLogger('inventree')
 
 
 class Company(inventree.base.InventreeObject):

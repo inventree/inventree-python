@@ -10,7 +10,7 @@ import inventree.company
 import inventree.build
 
 
-logger = logging.get('inventree')
+logger = logging.getLogger('inventree')
 
 
 class PartCategory(inventree.base.InventreeObject):
