@@ -475,3 +475,5 @@ class InvenTreeAPI(object):
 
                 for chunk in request.iter_content(chunk_size=16 * 1024):
                     f.write(chunk)
+
+        logger.info(f"Downloaded '{url}' to '{destination}'")

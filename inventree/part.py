@@ -108,6 +108,16 @@ class Part(inventree.base.InventreeObject):
 
         return response
 
+    def downloadImage(self, destination):
+        """
+        Download the image for this Part, to the specified destination
+        """
+
+        if self.image:
+            self._api.downloadFile(self.image, destination)
+        else:
+            logging.error(f"Part '{self.name}' does not have an associated image")
+
 
 class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """
