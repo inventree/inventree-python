@@ -235,12 +235,4 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(p['image'])
         self.assertIn('dummy_image', p['image'])
 
-        # Re-download the image
-        self.assertTrue(p.downloadImage("downloaded_image.png"))
-
-        self.assertTrue(os.path.exists("downloaded_image.png"))
-
-        with Image.open("downloaded_image.png") as img2:
-
-            self.assertEqual(img2.width, 128)
-            self.assertEqual(img2.height, 128)
+        # TODO: Re-download the image
