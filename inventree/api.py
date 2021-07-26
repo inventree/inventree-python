@@ -467,9 +467,6 @@ class InvenTreeAPI(object):
                     f"Error downloading file '{url}': Server returned status {request.status_code}"
                 )
 
-                print(f"Error downloading file '{url}'")
-                print(request, request.headers)
-
                 return False
 
             headers = request.headers
@@ -478,9 +475,6 @@ class InvenTreeAPI(object):
                 logger.error(
                     f"Error downloading file '{url}': Server return invalid response (text/html)"
                 )
-
-                print(f"Error downloading file '{url}'")
-                print(request, request.headers)
 
                 return False
 
