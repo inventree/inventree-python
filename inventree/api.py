@@ -457,6 +457,7 @@ class InvenTreeAPI(object):
             }
             auth = None
         else:
+            headers = {}
             auth = self.auth
 
         with requests.get(url, stream=True, auth=auth, headers=headers) as request:
