@@ -451,11 +451,15 @@ class InvenTreeAPI(object):
 
         destination = os.path.abspath(destination)
 
-        headers = {
-            'AUTHORIZATION': f"Token {self.token}"
-        }
+        if self.token:
+            headers = {
+                'AUTHORIZATION': f"Token {self.token}"
+            }
+            auth = None
+        else:
+            auth = self.auth
 
-        with requests.get(url, stream=True, headers=headers) as request:
+        with requests.get(url, stream=True, auth=auth, headers=headers) as request:
 
             if not request.status_code == 200:
                 logger.error(
