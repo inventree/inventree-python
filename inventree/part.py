@@ -10,6 +10,9 @@ import inventree.company
 import inventree.build
 
 
+logger = logging.getLogger('inventree')
+
+
 class PartCategory(inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
@@ -98,7 +101,7 @@ class Part(inventree.base.InventreeObject):
                 fo = open(image, 'rb')
                 files['image'] = (f, fo)
             else:
-                logging.error("File does not exist: '{f}'".format(f=image))
+                logger.error("File does not exist: '{f}'".format(f=image))
                 return None
 
         response = self.save(
@@ -107,6 +110,17 @@ class Part(inventree.base.InventreeObject):
         )
 
         return response
+
+    def downloadImage(self, destination):
+        """
+        Download the image for this Part, to the specified destination
+        """
+
+        if self.image:
+            return self._api.downloadFile(self.image, destination)
+        else:
+            logger.error(f"Part '{self.name}' does not have an associated image")
+            return False
 
 
 class PartAttachment(inventree.base.Attachment):
@@ -139,7 +153,7 @@ class PartAttachment(inventree.base.Attachment):
                 fo = open(attachment, 'rb')
                 files['attachment'] = (f, fo)
             else:
-                logging.error("File does not exist: '{f}'".format(f=attachment))
+                logger.error("File does not exist: '{f}'".format(f=attachment))
 
         comment = kwargs.get('comment', '')
 
@@ -151,10 +165,10 @@ class PartAttachment(inventree.base.Attachment):
 
         # Send the data to the server
         if api.post(cls.URL, data, files=files):
-            logging.info("Uploaded attachment: '{f}'".format(f=attachment))
+            logger.info("Uploaded attachment: '{f}'".format(f=attachment))
             ret = True
         else:
-            logging.warning("Attachment upload failed")
+            logger.warning("Attachment upload failed")
             ret = False
 
         return ret

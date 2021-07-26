@@ -35,7 +35,8 @@ class InvenTreeAPI(object):
         """ Initialize class with initial parameters
 
         Args:
-            base_url - Base API URL
+            base_url - Base URL for the InvenTree server, including port (if required)
+                       e.g. "http://inventree.server.com:8000"
             
         kwargs:
             username - Login username
@@ -45,17 +46,16 @@ class InvenTreeAPI(object):
             verbose - Print extra debug messages (default = False)
         """
 
-        if not base_url.endswith('/'):
-            base_url += '/'
-
-        # Server address *must* end with /api/
-        if not base_url.endswith('/api/'):
-            base_url = os.path.join(base_url, 'api')
+        # Strip out trailing "/api/" (if provided)
+        if base_url.endswith("/api/"):
+            base_url = base_url[:-5]
 
         if not base_url.endswith('/'):
             base_url += '/'
 
         self.base_url = base_url
+
+        self.api_url = os.path.join(self.base_url, 'api/')
 
         logger.info("Connecting to server: " + str(self.base_url))
 
@@ -78,7 +78,7 @@ class InvenTreeAPI(object):
 
     def clean_url(self, url):
 
-        url = os.path.join(self.base_url, url)
+        url = os.path.join(self.api_url, url)
 
         if not url.endswith('/'):
             url += '/'
@@ -97,7 +97,7 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.base_url)
+            response = requests.get(self.api_url)
         except requests.exceptions.ConnectionError:
             logger.error("Server connection refused - check server address")
             return False
@@ -144,7 +144,7 @@ class InvenTreeAPI(object):
         logger.info("Requesting auth token from server...")
 
         # Request an auth token from the server
-        token_url = os.path.join(self.base_url, 'user/token/')
+        token_url = os.path.join(self.api_url, 'user/token/')
         
         reply = requests.get(token_url, auth=self.auth)
 
@@ -176,7 +176,7 @@ class InvenTreeAPI(object):
         if url.startswith('/'):
             url = url[1:]
 
-        api_url = os.path.join(self.base_url, url)
+        api_url = os.path.join(self.api_url, url)
 
         if not api_url.endswith('/'):
             api_url += '/'
@@ -426,3 +426,55 @@ class InvenTreeAPI(object):
             return None
 
         return data
+
+    def downloadFile(self, url, destination):
+        """
+        Download a file from the InvenTree server.
+
+        - If the "destination" is a directory, use the filename of the remote URL
+        """
+
+        # Check that the provided URL is "absolute"
+        if not url.startswith(self.base_url):
+
+            if url.startswith('/'):
+                url = url[1:]
+
+            url = os.path.join(self.base_url, url)
+
+        if os.path.exists(destination) and os.path.isdir(destination):
+
+            destination = os.path.join(
+                destination,
+                os.path.basename(url)
+            )
+
+        destination = os.path.abspath(destination)
+
+        headers = {
+            'AUTHORIZATION': f"Token {self.token}"
+        }
+
+        with requests.get(url, stream=True, headers=headers) as request:
+
+            if not request.status_code == 200:
+                logger.error(
+                    f"Error downloading file '{url}': Server returned status {request.status_code}"
+                )
+                return False
+
+            headers = request.headers
+
+            if 'text/html' in headers['Content-Type']:
+                logger.error(
+                    f"Error downloading file '{url}': Server return invalid response (text/html)"
+                )
+                return False
+
+            with open(destination, 'wb') as f:
+
+                for chunk in request.iter_content(chunk_size=16 * 1024):
+                    f.write(chunk)
+
+        logger.info(f"Downloaded '{url}' to '{destination}'")
+        return True
