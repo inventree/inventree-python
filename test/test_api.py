@@ -51,7 +51,7 @@ class Unauthenticated(unittest.TestCase):
         Attemtping to download a file while unauthenticated should return False
         """
 
-        self.assertEqual(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
+        self.assertFalse(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
 
 
 class InvenTreeTestCase(unittest.TestCase):
