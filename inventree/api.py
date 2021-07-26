@@ -455,20 +455,16 @@ class InvenTreeAPI(object):
             'AUTHORIZATION': f"Token {self.token}"
         }
 
-        print("Downloading file:")
-        print("src:", url)
-        print("dst:", destination)
-
         with requests.get(url, stream=True, headers=headers) as request:
-
-            print("Response:")
-            print(request)
-            print(request.headers)
 
             if not request.status_code == 200:
                 logger.error(
                     f"Error downloading file '{url}': Server returned status {request.status_code}"
                 )
+
+                print(f"Error downloading file '{url}'")
+                print(request, request.headers)
+
                 return False
 
             headers = request.headers
@@ -477,6 +473,10 @@ class InvenTreeAPI(object):
                 logger.error(
                     f"Error downloading file '{url}': Server return invalid response (text/html)"
                 )
+
+                print(f"Error downloading file '{url}'")
+                print(request, request.headers)
+
                 return False
 
             with open(destination, 'wb') as f:
