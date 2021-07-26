@@ -455,7 +455,15 @@ class InvenTreeAPI(object):
             'AUTHORIZATION': f"Token {self.token}"
         }
 
+        print("Downloading file:")
+        print("src:", url)
+        print("dst:", destination)
+
         with requests.get(url, stream=True, headers=headers) as request:
+
+            print("Response:")
+            print(request)
+            print(request.headers)
 
             if not request.status_code == 200:
                 logger.error(
