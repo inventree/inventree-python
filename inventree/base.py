@@ -221,7 +221,7 @@ class Attachment(InventreeObject):
         # Send the file off to the server
         response = api.post(cls.URL, data, files=files)
 
-        if response and response.status_code in [200, 201]:
+        if response:
             logger.info("Uploaded attachment file: '{f}'".format(f=f))
         else:
             logger.warning("File upload failed")
