@@ -19,6 +19,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+      - name: Check Release Tag
+        run: |
+          python3 ci/check_version_number.py ${{ github.event.release.tag_name }}
       - name: Install Python Dependencies
         run: |
           pip install -U -r requirements.txt
