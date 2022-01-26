@@ -242,8 +242,8 @@ class PartTest(InvenTreeTestCase):
         Tests that an internal price can be set for a part
         """
 
-        TEST_PRICE = 100.0
-        TEST_QUANTITY = 1
+        test_price = 100.0
+        test_quantity = 1
 
         # Grab the first part
         p = part.Part.list(self.api)[0]
@@ -255,7 +255,7 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(len(ip), 0)
 
         # Set the internal price
-        p.setInternalPrice(TEST_QUANTITY, TEST_PRICE)
+        p.setInternalPrice(test_quantity, test_price)
 
         # Ensure that the part has an internal price
         ip = part.InternalPrice.list(self.api, part=p.pk)
@@ -264,6 +264,6 @@ class PartTest(InvenTreeTestCase):
         # Grab the internal price
         ip = ip[0]
 
-        self.assertEqual(ip.quantity, TEST_QUANTITY)
+        self.assertEqual(ip.quantity, test_quantity)
         self.assertEqual(ip.part, p.pk)
-        self.assertEqual(ip.price, TEST_PRICE)
+        self.assertEqual(ip.price, test_price)
