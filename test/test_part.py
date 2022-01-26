@@ -236,3 +236,34 @@ class PartTest(InvenTreeTestCase):
         self.assertIn('dummy_image', p['image'])
 
         # TODO: Re-download the image
+
+    def test_set_price(self):
+        """
+        Tests that an internal price can be set for a part
+        """
+
+        TEST_PRICE = 100.0
+        TEST_QUANTITY = 1
+
+        # Grab the first part
+        p = part.Part.list(self.api)[0]
+
+        # Grab all internal prices for the part
+        ip = part.InternalPrice.list(self.api, part=p.pk)
+
+        # Ensure that no part has an internal price
+        self.assertEqual(len(ip), 0)
+
+        # Set the internal price
+        p.setInternalPrice(TEST_QUANTITY, TEST_PRICE)
+
+        # Ensure that the part has an internal price
+        ip = part.InternalPrice.list(self.api, part=p.pk)
+        self.assertEqual(len(ip), 1)
+        
+        # Grab the internal price
+        ip = ip[0]
+
+        self.assertEqual(ip.quantity, TEST_QUANTITY)
+        self.assertEqual(ip.pk, p.pk)
+        self.assertEqual(ip.price, TEST_PRICE)
