@@ -111,7 +111,7 @@ class Part(inventree.base.InventreeObject):
 
         return response
 
-    def getInternalPrice(self):
+    def getInternalPriceList(self):
         """
         Returns the InternalPrice list for this part
         """
