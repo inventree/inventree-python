@@ -265,5 +265,5 @@ class PartTest(InvenTreeTestCase):
         ip = ip[0]
 
         self.assertEqual(ip.quantity, TEST_QUANTITY)
-        self.assertEqual(ip.pk, p.pk)
+        self.assertEqual(ip.part, p.pk)
         self.assertEqual(ip.price, TEST_PRICE)
