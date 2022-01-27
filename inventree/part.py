@@ -111,6 +111,20 @@ class Part(inventree.base.InventreeObject):
 
         return response
 
+    def getInternalPriceList(self):
+        """
+        Returns the InternalPrice list for this part
+        """
+
+        return InternalPrice.list(self._api, part=self.pk)
+    
+    def setInternalPrice(self, quantity: int, price: float):
+        """
+        Set the internal price for this part
+        """
+
+        return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
+
     def downloadImage(self, destination):
         """
         Download the image for this Part, to the specified destination
@@ -199,3 +213,24 @@ class BomItem(inventree.base.InventreeObject):
     """ Class representing the BomItem database model """
 
     URL = 'bom'
+
+
+class InternalPrice(inventree.base.InventreeObject):
+    """ Class representing the InternalPrice model """
+
+    URL = 'part/internal-price'
+
+    @classmethod
+    def setInternalPrice(cls, api, part, quantity: int, price: float):
+        """
+        Set the internal price for this part
+        """
+
+        data = {
+            'part': part,
+            'quantity': quantity,
+            'price': price,
+        }
+
+        # Send the data to the server
+        return api.post(cls.URL, data)
