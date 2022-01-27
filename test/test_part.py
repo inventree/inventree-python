@@ -266,4 +266,5 @@ class PartTest(InvenTreeTestCase):
 
         self.assertEqual(ip.quantity, test_quantity)
         self.assertEqual(ip.part, p.pk)
-        self.assertEqual(ip.price, test_price)
+        ip_price_clean = float(ip.price)
+        self.assertEqual(ip_price_clean, test_price)
