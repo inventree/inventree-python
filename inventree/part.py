@@ -234,3 +234,25 @@ class InternalPrice(inventree.base.InventreeObject):
 
         # Send the data to the server
         return api.post(cls.URL, data)
+    
+    
+class PartRelated(inventree.base.InventreeObject):
+    """ Class representing a relationship between parts"""
+
+    URL = 'part/related'
+
+    @classmethod
+    def add_related(cls, api, part1, part2):
+    
+        data = {
+            'part_1': part1,
+            'part_2': part2,
+        }
+        # Send the data to the server
+        if api.post(cls.URL, data):
+            logging.info("Related OK")
+            ret = True
+        else:
+            logging.warning("Related failed")
+            ret = False
+        return ret
