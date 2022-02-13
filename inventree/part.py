@@ -236,7 +236,7 @@ class InternalPrice(inventree.base.InventreeObject):
         return api.post(cls.URL, data)
     
     
-    class PartRelated(inventree.base.InventreeObject):
+class PartRelated(inventree.base.InventreeObject):
     """ Class representing a relationship between parts"""
 
     URL = 'part/related'
@@ -250,7 +250,7 @@ class InternalPrice(inventree.base.InventreeObject):
         }
         # Send the data to the server
         if api.post(cls.URL, data):
-            logging.info("Related OK" )
+            logging.info("Related OK")
             ret = True
         else:
             logging.warning("Related failed")
