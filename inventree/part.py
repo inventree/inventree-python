@@ -265,4 +265,4 @@ class PartRelated(inventree.base.InventreeObject):
     def delete_related(cls, api, part):
 
         # Send the data to the server
-        api.delete(cls.URL+'/' + str(part))
+        api.delete(cls.URL + '/' + str(part))
