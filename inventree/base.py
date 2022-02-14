@@ -256,3 +256,9 @@ class ParameterTemplate(InventreeObject):
     """ class representing the Parameter Template database model"""
 
     URL = 'part/parameter/template'
+
+
+class Related(InventreeObject):
+    """ Class representing the Reletaion between parts """
+
+    URL = 'part/related'
