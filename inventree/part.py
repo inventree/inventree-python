@@ -87,7 +87,6 @@ class Part(inventree.base.InventreeObject):
         """ Return parameters associated with this part """
         return inventree.base.Related.list(self._api, part=self.pk)
 
-
     def uploadImage(self, image):
         """
         Upload an image against this Part
@@ -266,4 +265,4 @@ class PartRelated(inventree.base.InventreeObject):
     def delete_related(cls, api, part):
 
         # Send the data to the server
-        api.delete(cls.URL+'/'+str(part))
+        api.delete(cls.URL+'/' + str(part))
