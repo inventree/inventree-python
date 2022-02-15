@@ -84,8 +84,8 @@ class Part(inventree.base.InventreeObject):
         return inventree.base.Parameter.list(self._api, part=self.pk)
 
     def getRelated(self):
-        """ Return parameters associated with this part """
-        return inventree.base.Related.list(self._api, part=self.pk)
+        """ Return related parts associated with this part """
+        return PartRelated.list(self._api, part=self.pk)
 
     def uploadImage(self, image):
         """
@@ -260,9 +260,3 @@ class PartRelated(inventree.base.InventreeObject):
             logging.warning("Related failed")
             ret = False
         return ret
-
-    @classmethod
-    def delete_related(cls, api, part):
-
-        # Send the data to the server
-        api.delete(cls.URL + '/' + str(part))
