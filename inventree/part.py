@@ -83,6 +83,10 @@ class Part(inventree.base.InventreeObject):
         """ Return parameters associated with this part """
         return inventree.base.Parameter.list(self._api, part=self.pk)
 
+    def getRelated(self):
+        """ Return related parts associated with this part """
+        return PartRelated.list(self._api, part=self.pk)
+
     def uploadImage(self, image):
         """
         Upload an image against this Part
