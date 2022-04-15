@@ -138,7 +138,7 @@ class StockItemTestResult(inventree.base.InventreeObject):
                 fo = open(attachment, 'rb')
                 files['attachment'] = (f, fo)
             else:
-                logging.error("File does not exist: '{f}'".format(f=attachment))
+                logging.error(f"File does not exist: '{attachment}'")
 
         notes = kwargs.get('notes', '')
         value = kwargs.get('value', '')
@@ -153,7 +153,7 @@ class StockItemTestResult(inventree.base.InventreeObject):
 
         # Send the data to the serever
         if api.post(cls.URL, data, files=files):
-            logging.info("Uploaded test result: '{test}'".format(test=test))
+            logging.info(f"Uploaded test result: '{test}'")
             ret = True
         else:
             logging.warning("Test upload failed")

@@ -38,7 +38,7 @@ class InventreeObject(object):
         if pk is None:
             pk = data.get('pk', None)
 
-        self._url = "{url}/{pk}/".format(url=self.URL, pk=pk)
+        self._url = f"{self.URL}/{pk}/"
         self._api = api
         self._data = data
 
@@ -184,13 +184,13 @@ class InventreeObject(object):
         if name in self._data.keys():
             return self._data[name]
         else:
-            raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
+            raise KeyError(f"Key '{name}' does not exist in dataset")
 
     def __setitem__(self, name, value):
         if name in self._data.keys():
             self._data[name] = value
         else:
-            raise KeyError("Key '{k}' does not exist in dataset".format(k=name))
+            raise KeyError(f"Key '{name}' does not exist in dataset")
 
 
 class Attachment(InventreeObject):

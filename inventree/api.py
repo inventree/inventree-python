@@ -201,7 +201,7 @@ class InvenTreeAPI(object):
         method = method.upper()
 
         if self.use_token_auth and self.token:
-            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
+            headers['AUTHORIZATION'] = f'Token {self.token}'
             auth = None
         else:
             auth = self.auth
@@ -284,7 +284,7 @@ class InvenTreeAPI(object):
         headers = kwargs.get('headers', {})
 
         if self.use_token_auth and self.token:
-            headers['AUTHORIZATION'] = 'Token {t}'.format(t=self.token)
+            headers['AUTHORIZATION'] = f'Token {self.token}'
             auth = None
         else:
             auth = self.auth
