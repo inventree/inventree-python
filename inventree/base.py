@@ -204,7 +204,7 @@ class Attachment(InventreeObject):
         """
 
         if not os.path.exists(filename):
-            logger.error("File does not exist: '{f}'".format(f=filename))
+            logger.error(f"File does not exist: '{filename}'")
             return
 
         f = os.path.basename(filename)
@@ -222,7 +222,7 @@ class Attachment(InventreeObject):
         response = api.post(cls.URL, data, files=files)
 
         if response:
-            logger.info("Uploaded attachment file: '{f}'".format(f=f))
+            logger.info(f"Uploaded attachment file: '{f}'")
         else:
             logger.warning("File upload failed")
 
