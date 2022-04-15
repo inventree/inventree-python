@@ -105,7 +105,7 @@ class Part(inventree.base.InventreeObject):
                 fo = open(image, 'rb')
                 files['image'] = (f, fo)
             else:
-                logger.error("File does not exist: '{f}'".format(f=image))
+                logger.error(f"File does not exist: '{image}'")
                 return None
 
         response = self.save(
@@ -171,7 +171,7 @@ class PartAttachment(inventree.base.Attachment):
                 fo = open(attachment, 'rb')
                 files['attachment'] = (f, fo)
             else:
-                logger.error("File does not exist: '{f}'".format(f=attachment))
+                logger.error(f"File does not exist: '{attachment}'")
 
         comment = kwargs.get('comment', '')
 
@@ -183,7 +183,7 @@ class PartAttachment(inventree.base.Attachment):
 
         # Send the data to the server
         if api.post(cls.URL, data, files=files):
-            logger.info("Uploaded attachment: '{f}'".format(f=attachment))
+            logger.info(f"Uploaded attachment: '{attachment}'")
             ret = True
         else:
             logger.warning("Attachment upload failed")
