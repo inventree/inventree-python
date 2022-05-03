@@ -118,7 +118,7 @@ class POTest(InvenTreeTestCase):
             self.assertIsNotNone(line)
 
             # Assert that a new line item has been created
-            self.assertEqual(len(po.getLineItems()), idx + 1)
+            self.assertEqual(len(po.getLineItems()), idx)
 
             # Check that the supplier part reference is correct
             self.assertEqual(line.getSupplierPart().pk, sp.pk)
