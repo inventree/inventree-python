@@ -127,7 +127,7 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.getPart().pk, sp.part)
 
         for idx, line in enumerate(po.getLineItems()):
-            self.assertEqual(line.quantity, idx)
+            self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
 
 
