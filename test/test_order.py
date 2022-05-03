@@ -108,7 +108,10 @@ class POTest(InvenTreeTestCase):
 
             line = po.addLineItem(part=sp.pk, quantity=idx)
 
-            print(idx, sp, line)
+            if idx == 0:
+                # This will have thrown an error, as quantity = 0
+                self.assertIsNone(line)
+                continue
 
             self.assertEqual(line.getOrder().pk, po.pk)
 
