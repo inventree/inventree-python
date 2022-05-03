@@ -108,12 +108,17 @@ class POTest(InvenTreeTestCase):
 
             line = po.addLineItem(part=sp.pk, quantity=idx)
 
+            if idx == 0:
+                # This will have thrown an error, as quantity = 0
+                self.assertIsNone(line)
+                continue
+
             self.assertEqual(line.getOrder().pk, po.pk)
 
             self.assertIsNotNone(line)
 
             # Assert that a new line item has been created
-            self.assertEqual(len(po.getLineItems()), idx + 1)
+            self.assertEqual(len(po.getLineItems()), idx)
 
             # Check that the supplier part reference is correct
             self.assertEqual(line.getSupplierPart().pk, sp.pk)
@@ -122,7 +127,7 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.getPart().pk, sp.part)
 
         for idx, line in enumerate(po.getLineItems()):
-            self.assertEqual(line.quantity, idx)
+            self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
 
 
