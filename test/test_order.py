@@ -108,6 +108,8 @@ class POTest(InvenTreeTestCase):
 
             line = po.addLineItem(part=sp.pk, quantity=idx)
 
+            print(idx, sp, line)
+
             self.assertEqual(line.getOrder().pk, po.pk)
 
             self.assertIsNotNone(line)
