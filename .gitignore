@@ -10,6 +10,7 @@ test.py
 dummy_image.*
 
 test/data/
+test/*.tmp
 
 # General python stuff
 *.pyc

@@ -416,9 +416,12 @@ class InvenTreeAPI(object):
 
         return data
 
-    def downloadFile(self, url, destination):
+    def downloadFile(self, url, destination, overwrite=False):
         """
         Download a file from the InvenTree server.
+
+        Args:
+            destination: Filename (string) 
 
         - If the "destination" is a directory, use the filename of the remote URL
         """
@@ -439,6 +442,9 @@ class InvenTreeAPI(object):
             )
 
         destination = os.path.abspath(destination)
+
+        if os.path.exists(destination) and not overwrite:
+            raise FileExistsError(f"Destinationi file '{destination}' already exists")
 
         if self.token:
             headers = {

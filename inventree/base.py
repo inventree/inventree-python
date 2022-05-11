@@ -234,65 +234,78 @@ class InventreeObject(object):
 
 
 class Attachment(InventreeObject):
-    """ Class representing a file attachment object """
+    """
+    Class representing a file attachment object
+    
+    Multiple sub-classes exist, representing various types of attachment models in the database
+    """
+
+    # List of required kwargs required for the particular subclass
+    REQUIRED_KWARGS = []
 
     @classmethod
-    def upload(cls, api, filename, comment, **kwargs):
+    def upload(cls, api, attachment, comment='', **kwargs):
         """
         Upload a file attachment.
         Ref: https://2.python-requests.org/en/master/user/quickstart/#post-a-multipart-encoded-file
+
+        Args:
+            api: Authenticated InvenTree API instance
+            attachment: Either a file object, or a filename (string)
+            comment: Add comment to the upload
+            kwargs: Additional kwargs to supply
         """
 
-        if not os.path.exists(filename):
-            logger.error(f"File does not exist: '{filename}'")
-            return
-
-        f = os.path.basename(filename)
-
         data = kwargs
+        data['comment']= comment
 
-        # File comment must be provided
-        data['comment'] = comment
+        # Check that the extra kwargs are provided
+        for arg in cls.REQUIRED_KWARGS:
+            if arg not in kwargs:
+                raise ValueError(f"Required argument '{arg}' not supplied to upload method")
 
-        files = {
-            'attachment': (f, open(filename, 'rb')),
-        }
+        if type(attachment) is str:
+            if not os.path.exists(attachment):
+                raise FileNotFoundError(f"Attachment file '{attachment}' does not exist")
 
-        # Send the file off to the server
-        response = api.post(cls.URL, data, files=files)
+            # Load the file as an in-memory file object
+            with open(attachment, 'rb') as fo:
+
+                response = api.post(
+                    cls.URL,
+                    data,
+                    files={
+                        'attachment': (os.path.basename(attachment), fo),        
+                    }
+                )
+        
+        else:
+            # Assumes a StringIO or BytesIO like object
+            name = getattr(attachment, name, 'filename')
+            response = api.post(
+                cls.URL,
+                data,
+                files={
+                    'attachment': (name, attachment),
+                }
+            )
 
         if response:
-            logger.info(f"Uploaded attachment file: '{f}'")
+            logger.info(f"File uploaded to {cls.URL}")
         else:
-            logger.warning("File upload failed")
+            logger.error(f"File upload failed at {cls.URL}")
+        
+        return response
 
-    def download(self, destination):
+    def download(self, destination, **kwargs):
         """
         Download the attachment file to the specified location
         """
 
-        return self._api.downloadFile(self.attachment, destination)
+        return self._api.downloadFile(self.attachment, destination, **kwargs)
 
 
 class Currency(InventreeObject):
     """ Class representing the Currency database model """
 
     URL = 'common/currency'
-
-
-class Parameter(InventreeObject):
-    """class representing the Parameter database model """
-    URL = 'part/parameter'
-
-    def getunits(self):
-        """ Get the dimension and units for this parameter """
-
-        return [element for element
-                in ParameterTemplate.list(self._api)
-                if element['pk'] == self._data['template']]
-
-
-class ParameterTemplate(InventreeObject):
-    """ class representing the Parameter Template database model"""
-
-    URL = 'part/parameter/template'

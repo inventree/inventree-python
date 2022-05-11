@@ -317,6 +317,57 @@ class PartTest(InvenTreeTestCase):
 
         # TODO: Re-download the image
 
+    def test_part_attachment(self):
+        """
+        Check that we can upload attachment files against the part
+        """
+
+        prt = Part(self.api, pk=1)
+        attachments = PartAttachment.list(self.api, part=1)
+
+        for a in attachments:
+            self.assertEqual(a.part, 1)
+
+        n = len(attachments)
+
+        # Test that a file upload without the required 'part' parameter fails
+        with self.assertRaises(ValueError):
+            PartAttachment.upload(self.api, 'test-file.txt')
+
+        # Test that attempting to upload an invalid file fails
+        with self.assertRaises(FileNotFoundError):
+            PartAttachment.upload(self.api, 'test-file.txt', part=1)
+
+        # Check that no new files have been uploaded
+        self.assertEqual(len(PartAttachment.list(self.api, part=1)), n)
+
+        # Test that we can upload a file by filename, directly from the Part instance
+        filename = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
+
+        response = prt.uploadAttachment(
+            filename,
+            comment='Uploading a file'
+        )
+
+        self.assertIsNotNone(response)
+        
+        pk = response['pk']
+
+        # Check that a new attachment has been created!
+        attachment = PartAttachment(self.api, pk=pk)
+        self.assertTrue(attachment.is_valid())
+
+        # Download the attachment to a local file!
+        dst = os.path.join(os.path.dirname(__file__), 'test.tmp')
+        attachment.download(dst, overwrite=True)
+
+        self.assertTrue(os.path.exists(dst))
+        self.assertTrue(os.path.isfile(dst))
+
+        with self.assertRaises(FileExistsError):
+            # Attempt to download the file again, but without overwrite option
+            attachment.download(dst)
+
     def test_set_price(self):
         """
         Tests that an internal price can be set for a part

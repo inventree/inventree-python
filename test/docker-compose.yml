@@ -24,6 +24,7 @@ services:
       - INVENTREE_ADMIN_EMAIL=test@test.com
     restart: unless-stopped
     volumes:
+      # Note: media and static files are ephemeral
       - ./data/media:/home/inventree/media/
       - ./data/static:/home/inventree/static/
       - ./data/db:/home/inventree/db/
