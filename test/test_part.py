@@ -12,7 +12,8 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree import part  # noqa: E402
+from inventree.part import Part, PartAttachment, PartCategory  # noqa: E402
+from inventree.part import InternalPrice  # noqa: E402
 
 
 class PartTest(InvenTreeTestCase):
@@ -20,12 +21,28 @@ class PartTest(InvenTreeTestCase):
     Test for PartCategory and Part objects.
     """
 
+    def testAccessErrors(self):
+        """
+        Test that errors are flagged when we try to access an invalid part
+        """
+
+        with self.assertRaises(TypeError):
+            p = Part(self.api, 'hello')
+        
+        with self.assertRaises(ValueError):
+            p = Part(self.api, -1)
+
+        # Try to access a Part which does not exist
+        p = Part(self.api, 9999999999999)
+
+        self.assertFalse(p.is_valid())
+
     def test_fields(self):
         """
         Test field names via OPTIONS request
         """
 
-        field_names = part.Part.fieldNames(self.api)
+        field_names = Part.fieldNames(self.api)
 
         self.assertIn('active', field_names)
         self.assertIn('revision', field_names)
@@ -38,50 +55,95 @@ class PartTest(InvenTreeTestCase):
         """
 
         # All categories
-        cats = part.PartCategory.list(self.api)
+        cats = PartCategory.list(self.api)
         n = len(cats)
         self.assertTrue(len(cats) >= 9)
 
         # Filtered categories must be fewer than *all* categories
-        cats = part.PartCategory.list(self.api, parent=1)
+        cats = PartCategory.list(self.api, parent=1)
 
         self.assertGreater(len(cats), 0)
         self.assertLess(len(cats), n)
 
     def test_elec(self):
-        electronics = part.PartCategory(self.api, 1)
+        electronics = PartCategory(self.api, 1)
 
         # This is a top-level category, should not have a parent!
         self.assertIsNone(electronics.getParentCategory())
         self.assertEqual(electronics.name, "Electronics")
 
         children = electronics.getChildCategories()
-        self.assertEqual(len(children), 1)
+        self.assertGreaterEqual(len(children), 3)
+
+        for child in children:
+            self.assertEqual(child.parent, 1)
         
-        passives = children[0]
-        self.assertEqual(passives.name, 'Passives')
+        child = PartCategory(self.api, pk=3)
+        self.assertEqual(child.name, 'Capacitors')
+        self.assertEqual(child.getParentCategory().pk, electronics.pk)
         
         # Grab all child categories
-        children = part.PartCategory.list(self.api, parent=passives.pk)
-        self.assertEqual(len(children), 3)
+        children = PartCategory.list(self.api, parent=child.pk)
 
-        children = passives.getChildCategories()
-        self.assertEqual(len(children), 3)
-        
-        parent = passives.getParentCategory()
-        self.assertEqual(parent.pk, 1)
-        self.assertEqual(parent.name, 'Electronics')
+        n = len(children)
+
+        for c in children:
+            self.assertEqual(c.parent, child.pk)
+
+        # Create some new categories under this one
+        for idx in range(3):
+            name = f"Subcategory {n+idx}"
+
+            cat = PartCategory.create(self.api, {
+                "parent": child.pk,
+                "name": name,
+                "description": "A new subcategory",
+            })
+
+            self.assertEqual(cat.parent, child.pk)
+            self.assertEqual(cat.name, name)
+
+            # Edit the name of the new location
+            cat.save({
+                "name": f"{name}_suffix",
+            })
+
+            # Reload from server, and check
+            cat.reload()
+            self.assertEqual(cat.name, f"{name}_suffix")
+
+        # Number of children should have increased!
+        self.assertEqual(len(child.getChildCategories()), n + 3)
         
     def test_caps(self):
 
-        # Capacitors
-        capacitors = part.PartCategory(self.api, 6)
-        self.assertEqual(capacitors.name, "Capacitors")
-        parts = capacitors.getParts()
-        self.assertEqual(len(parts), 4)
+        cat = PartCategory(self.api, 6)
+        self.assertEqual(cat.name, "Transceivers")
+        parts = cat.getParts()
+
+        n_parts = len(parts)
 
         for p in parts:
-            self.assertEqual(p.category, capacitors.pk)
+            self.assertEqual(p.category, cat.pk)
+
+        # Create some new parts
+        for i in range(10):
+
+            name = f"Part_{cat.pk}_{n_parts + i}"
+
+            prt = Part.create(self.api, {
+                "category": cat.pk,
+                "name": name,
+                "description": "A new part in this category",
+            })
+
+            self.assertIsNotNone(prt)
+
+            self.assertEqual(prt.name, name)
+        
+        parts = cat.getParts()
+
+        self.assertEqual(len(parts), n_parts + 10)
 
     def test_part_list(self):
         """
@@ -89,11 +151,27 @@ class PartTest(InvenTreeTestCase):
         and apply certain filters
         """
 
-        parts = part.Part.list(self.api)
+        parts = Part.list(self.api)
         self.assertTrue(len(parts) >= 19)
 
-        parts = part.Part.list(self.api, category=5)
-        self.assertTrue(len(parts) >= 3)
+        parts = Part.list(self.api, category=5)
+
+        n = len(parts)
+
+        for i in range(5):
+            prt = Part.create(self.api, {
+                "category": 5,
+                "name": f"Special Part {n+i}",
+                "description": "A new part in this category!",
+            })
+
+            self.assertEqual(prt.category, 5)
+            cat = prt.getCategory()
+            self.assertEqual(cat.pk, 5)
+
+            parts = cat.getParts()
+
+            self.assertGreaterEqual(len(parts), i + 1)
 
     def test_part_edit(self):
         """
@@ -101,7 +179,7 @@ class PartTest(InvenTreeTestCase):
         """
 
         # Select a part
-        p = part.Part.list(self.api)[-1]
+        p = Part.list(self.api)[-1]
 
         name = p.name
 
@@ -127,10 +205,10 @@ class PartTest(InvenTreeTestCase):
         Test that the DRF framework will correctly insert the default values
         """
 
-        n = len(part.Part.list(self.api))
+        n = len(Part.list(self.api))
 
         # Create a part without specifying 'active' and 'virtual' fields
-        p = part.Part.create(
+        p = Part.create(
             self.api,
             {
                 'name': f"Part_{n}_default_test",
@@ -143,7 +221,7 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(p.virtual, False)
 
         # Set both to false
-        p = part.Part.create(
+        p = Part.create(
             self.api,
             {
                 'name': f"Part_{n}_default_test_2",
@@ -158,7 +236,7 @@ class PartTest(InvenTreeTestCase):
         self.assertFalse(p.virtual)
 
         # Set both to true
-        p = part.Part.create(
+        p = Part.create(
             self.api,
             {
                 'name': f"Part_{n}_default_test_3",
@@ -177,11 +255,11 @@ class PartTest(InvenTreeTestCase):
         Test we can create and delete a Part instance via the API
         """
         
-        n = len(part.Part.list(self.api))
+        n = len(Part.list(self.api))
 
         # Create a new part
         # We do not specify 'active' value so it will default to True
-        p = part.Part.create(
+        p = Part.create(
             self.api,
             {
                 'name': 'Delete Me',
@@ -193,7 +271,7 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(p)
         self.assertIsNotNone(p.pk)
 
-        self.assertEqual(len(part.Part.list(self.api)), n + 1)
+        self.assertEqual(len(Part.list(self.api)), n + 1)
 
         # Cannot delete - part is 'active'!
         response = p.delete()
@@ -204,7 +282,7 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(response.status_code, 204)
 
         # And check that the part has indeed been deleted
-        self.assertEqual(len(part.Part.list(self.api)), n)
+        self.assertEqual(len(Part.list(self.api)), n)
 
     def test_image_upload(self):
         """
@@ -212,7 +290,7 @@ class PartTest(InvenTreeTestCase):
         """
 
         # Grab the first part
-        p = part.Part.list(self.api)[0]
+        p = Part.list(self.api)[0]
 
         # Ensure the part does *not* have an image associated with it
         p.save(data={'image': None})
@@ -237,6 +315,57 @@ class PartTest(InvenTreeTestCase):
 
         # TODO: Re-download the image
 
+    def test_part_attachment(self):
+        """
+        Check that we can upload attachment files against the part
+        """
+
+        prt = Part(self.api, pk=1)
+        attachments = PartAttachment.list(self.api, part=1)
+
+        for a in attachments:
+            self.assertEqual(a.part, 1)
+
+        n = len(attachments)
+
+        # Test that a file upload without the required 'part' parameter fails
+        with self.assertRaises(ValueError):
+            PartAttachment.upload(self.api, 'test-file.txt')
+
+        # Test that attempting to upload an invalid file fails
+        with self.assertRaises(FileNotFoundError):
+            PartAttachment.upload(self.api, 'test-file.txt', part=1)
+
+        # Check that no new files have been uploaded
+        self.assertEqual(len(PartAttachment.list(self.api, part=1)), n)
+
+        # Test that we can upload a file by filename, directly from the Part instance
+        filename = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
+
+        response = prt.uploadAttachment(
+            filename,
+            comment='Uploading a file'
+        )
+
+        self.assertIsNotNone(response)
+        
+        pk = response['pk']
+
+        # Check that a new attachment has been created!
+        attachment = PartAttachment(self.api, pk=pk)
+        self.assertTrue(attachment.is_valid())
+
+        # Download the attachment to a local file!
+        dst = os.path.join(os.path.dirname(__file__), 'test.tmp')
+        attachment.download(dst, overwrite=True)
+
+        self.assertTrue(os.path.exists(dst))
+        self.assertTrue(os.path.isfile(dst))
+
+        with self.assertRaises(FileExistsError):
+            # Attempt to download the file again, but without overwrite option
+            attachment.download(dst)
+
     def test_set_price(self):
         """
         Tests that an internal price can be set for a part
@@ -246,19 +375,25 @@ class PartTest(InvenTreeTestCase):
         test_quantity = 1
 
         # Grab the first part
-        p = part.Part.list(self.api)[0]
+        p = Part.list(self.api)[0]
 
         # Grab all internal prices for the part
-        ip = part.InternalPrice.list(self.api, part=p.pk)
+        ip = InternalPrice.list(self.api, part=p.pk)
+
+        # Delete any existsing prices
+        for price in ip:
+            self.assertEqual(type(price), InternalPrice)
+            price.delete()
 
         # Ensure that no part has an internal price
+        ip = InternalPrice.list(self.api, part=p.pk)
         self.assertEqual(len(ip), 0)
 
         # Set the internal price
         p.setInternalPrice(test_quantity, test_price)
 
         # Ensure that the part has an internal price
-        ip = part.InternalPrice.list(self.api, part=p.pk)
+        ip = InternalPrice.list(self.api, part=p.pk)
         self.assertEqual(len(ip), 1)
         
         # Grab the internal price

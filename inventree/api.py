@@ -97,14 +97,17 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url)
-        except requests.exceptions.ConnectionError:
-            logger.error("Server connection refused - check server address")
+            response = requests.get(self.api_url, timeout=2.5)
+        except requests.exceptions.ConnectionError as e:
+            logger.fatal("Server connection error:", str(e))
             return False
+        except Exception as e:
+            logger.fatal("Unhandled server error:", str(e))
+            # Re-throw the exception
+            raise e
 
-        if not response.status_code == 200:
-            logger.error(f"Error code from server: {response.status_code} - {response.text}")
-            return False
+        if response.status_code != 200:
+            raise requests.exceptions.RequestException(f"Error code from server: {response.status_code} - {response.text}")
 
         # Record server details
         self.server_details = json.loads(response.text)
@@ -221,11 +224,18 @@ class InvenTreeAPI(object):
                 params=params,
                 headers=headers,
                 json=json,
-                files=files
+                files=files,
+                timeout=2.5,
             )
 
-        except requests.exceptions.ConnectionError:
-            logger.error(f"Connection refused - '{api_url}'")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection refused - {method} @ '{api_url}'")
+            logger.info(str(e))
+            return None
+
+        except Exception as e:
+            logger.error(f"Unhandled exception - {method} @ '{api_url}'")
+            logger.info(str(e))
             return None
 
         if response is None:
@@ -413,9 +423,12 @@ class InvenTreeAPI(object):
 
         return data
 
-    def downloadFile(self, url, destination):
+    def downloadFile(self, url, destination, overwrite=False):
         """
         Download a file from the InvenTree server.
+
+        Args:
+            destination: Filename (string)
 
         - If the "destination" is a directory, use the filename of the remote URL
         """
@@ -436,6 +449,9 @@ class InvenTreeAPI(object):
             )
 
         destination = os.path.abspath(destination)
+
+        if os.path.exists(destination) and not overwrite:
+            raise FileExistsError(f"Destinationi file '{destination}' already exists")
 
         if self.token:
             headers = {

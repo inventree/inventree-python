@@ -63,21 +63,6 @@ class StockItem(inventree.base.InventreeObject):
 
         return StockLocation(self._api, self.location)
 
-    def getAttachments(self):
-        """ Return all file attachments for this StockItem """
-
-        return StockItemAttachment.list(
-            self._api,
-            stock_item=self.pk
-        )
-
-    def uploadAttachment(self, filename, comment, **kwargs):
-        """ Upload a file attachment against this StockItem """
-
-        kwargs['stock_item'] = self.pk
-
-        StockItemAttachment.upload(self._api, filename, comment, **kwargs)
-
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
 
@@ -88,11 +73,33 @@ class StockItem(inventree.base.InventreeObject):
 
         return StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
 
+    def getAttachments(self):
+        """ Return all file attachments for this StockItem """
+
+        return StockItemAttachment.list(
+            self._api,
+            stock_item=self.pk
+        )
+
+    def uploadAttachment(self, attachment, comment=''):
+        """
+        Upload an attachment against this StockItem
+        """
+
+        return StockItemAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            stock_item=self.pk
+        )
+
 
 class StockItemAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
+
+    REQUIRED_KWARGS = ['stock_item']
 
 
 class StockItemTracking(inventree.base.InventreeObject):

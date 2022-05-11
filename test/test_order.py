@@ -44,7 +44,12 @@ class POTest(InvenTreeTestCase):
         self.assertTrue(supplier.is_supplier)
 
         # Find all purchaseable parts
-        for prt in part.Part.list(self.api, purchaseable=True):
+        parts = part.Part.list(self.api, purchaseable=True)
+
+        for idx, prt in enumerate(parts):
+
+            if idx >= 10:
+                break
 
             # Check that the part is marked as purchaseable
             self.assertTrue(prt.purchaseable)
@@ -53,7 +58,6 @@ class POTest(InvenTreeTestCase):
             supplier_parts = supplier.getSuppliedParts(part=prt.pk)
 
             if len(supplier_parts) == 0:
-                print(f"Creating supplier part for {prt.name}")
 
                 supplier_part = company.SupplierPart.create(
                     self.api,
@@ -129,6 +133,58 @@ class POTest(InvenTreeTestCase):
         for idx, line in enumerate(po.getLineItems()):
             self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
+
+    def test_purchase_order_delete(self):
+        """
+        Test that we can delete existing purchase orders
+        """
+
+        orders = order.PurchaseOrder.list(self.api)
+
+        self.assertTrue(len(orders) > 0)
+
+        for po in orders:
+            po.delete()
+
+        orders = order.PurchaseOrder.list(self.api)
+        self.assertEqual(len(orders), 0)
+
+    def test_po_attachment(self):
+        """
+        Test upload of attachment against a PurchaseOrder
+        """
+
+        # Ensure we have a least one purchase order to work with
+        n = len(order.PurchaseOrder.list(self.api))
+
+        po = order.PurchaseOrder.create(self.api, {
+            'supplier': 1,
+            'reference': f'xyz-abc-{n}',
+            'description': 'A new purchase order',
+        })
+
+        attachments = po.getAttachments()
+        self.assertEqual(len(attachments), 0)
+
+        # Test we can upload an attachment against this PurchaseOrder
+        fn = os.path.join(os.path.dirname(__file__), 'attachment.txt')
+
+        # Should be able to upload the same file multiple times!
+        for i in range(3):
+            response = po.uploadAttachment(fn, comment='Test upload to purchase order')
+            self.assertEqual(response['comment'], 'Test upload to purchase order')
+
+        # Test that an invalid file raises an error
+        with self.assertRaises(FileNotFoundError):
+            po.uploadAttachment('not_found.txt')
+
+        # Test that missing the 'order' parameter fails too
+        with self.assertRaises(ValueError):
+            order.PurchaseOrderAttachment.upload(self.api, fn, comment='Should not work!')
+
+        # Check that attachments uploaded OK
+        attachments = order.PurchaseOrderAttachment.list(self.api, order=po.pk)
+        self.assertEqual(len(attachments), 3)
 
 
 class SOTest(InvenTreeTestCase):
@@ -212,3 +268,36 @@ class SOTest(InvenTreeTestCase):
                 self.assertEqual(line.getOrder().pk, sales_order.pk)
 
                 self.assertEqual(len(sales_order.getLineItems()), idx + 1)
+
+    def test_so_attachment(self):
+        """
+        Test upload of attachment against a SalesOrder
+        """
+
+        # Grab the first available SalesOrder
+        orders = order.SalesOrder.list(self.api)
+
+        if len(orders) > 0:
+            so = orders[0]
+        else:
+            so = order.SalesOrder.create(self.api, {
+                'customer': 4,
+                'reference': "My new sales order",
+                "description": "Selling some stuff",
+            })
+
+        n = len(so.getAttachments())
+
+        # Upload a new attachment
+        fn = os.path.join(os.path.dirname(__file__), 'attachment.txt')
+        response = so.uploadAttachment(fn, comment='Sales order attachment')
+
+        pk = response['pk']
+
+        attachment = order.SalesOrderAttachment(self.api, pk=pk)
+        
+        self.assertEqual(attachment.order, so.pk)
+        self.assertEqual(attachment.comment, 'Sales order attachment')
+
+        attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
+        self.assertEqual(len(attachments), n + 1)

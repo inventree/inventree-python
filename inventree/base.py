@@ -24,7 +24,7 @@ class InventreeObject(object):
 
         return f"{type(self)}<pk={self.pk}>"
 
-    def __init__(self, api, pk=None, data={}):
+    def __init__(self, api, pk=None, data=None):
         """ Instantiate this InvenTree object.
 
         Args:
@@ -37,9 +37,17 @@ class InventreeObject(object):
         # extract it from the provided dataset
         if pk is None:
             pk = data.get('pk', None)
+        elif type(pk) is not int:
+            raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
+        elif pk <= 0:
+            raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
         self._url = f"{self.URL}/{pk}/"
         self._api = api
+
+        if data is None:
+            data = {}
+
         self._data = data
 
         # If the data are not populated, fetch from server
@@ -166,13 +174,45 @@ class InventreeObject(object):
             self.reload()
 
         return response
+    
+    def is_valid(self):
+        """
+        Test if this object is 'valid' - it has received data from the server.
+
+        To be considered 'valid':
+
+        - Must have a non-null PK
+        - Must have a non-null and non-empty data structure
+        """
+
+        data = getattr(self, '_data', None)
+
+        if self.pk is None:
+            return False
+
+        if data is None:
+            return False
+        
+        if len(data) == 0:
+            return False
+        
+        return True
 
     def reload(self):
         """ Reload object data from the database """
         if self._api:
             data = self._api.get(self._url)
-            if data is not None:
+
+            if data is None:
+                logger.error(f"Error during reload at {self._url}")
+            else:
                 self._data = data
+
+            if not self.is_valid():
+                logger.error(f"Error during reload at {self._url} - returned data is invalid")
+
+        else:
+            raise ValueError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
         if name in self._data.keys():
@@ -194,65 +234,78 @@ class InventreeObject(object):
 
 
 class Attachment(InventreeObject):
-    """ Class representing a file attachment object """
+    """
+    Class representing a file attachment object
+    
+    Multiple sub-classes exist, representing various types of attachment models in the database
+    """
+
+    # List of required kwargs required for the particular subclass
+    REQUIRED_KWARGS = []
 
     @classmethod
-    def upload(cls, api, filename, comment, **kwargs):
+    def upload(cls, api, attachment, comment='', **kwargs):
         """
         Upload a file attachment.
         Ref: https://2.python-requests.org/en/master/user/quickstart/#post-a-multipart-encoded-file
+
+        Args:
+            api: Authenticated InvenTree API instance
+            attachment: Either a file object, or a filename (string)
+            comment: Add comment to the upload
+            kwargs: Additional kwargs to supply
         """
 
-        if not os.path.exists(filename):
-            logger.error(f"File does not exist: '{filename}'")
-            return
-
-        f = os.path.basename(filename)
-
         data = kwargs
-
-        # File comment must be provided
         data['comment'] = comment
 
-        files = {
-            'attachment': (f, open(filename, 'rb')),
-        }
+        # Check that the extra kwargs are provided
+        for arg in cls.REQUIRED_KWARGS:
+            if arg not in kwargs:
+                raise ValueError(f"Required argument '{arg}' not supplied to upload method")
 
-        # Send the file off to the server
-        response = api.post(cls.URL, data, files=files)
+        if type(attachment) is str:
+            if not os.path.exists(attachment):
+                raise FileNotFoundError(f"Attachment file '{attachment}' does not exist")
+
+            # Load the file as an in-memory file object
+            with open(attachment, 'rb') as fo:
+
+                response = api.post(
+                    cls.URL,
+                    data,
+                    files={
+                        'attachment': (os.path.basename(attachment), fo),
+                    }
+                )
+        
+        else:
+            # Assumes a StringIO or BytesIO like object
+            name = getattr(attachment, 'name', 'filename')
+            response = api.post(
+                cls.URL,
+                data,
+                files={
+                    'attachment': (name, attachment),
+                }
+            )
 
         if response:
-            logger.info(f"Uploaded attachment file: '{f}'")
+            logger.info(f"File uploaded to {cls.URL}")
         else:
-            logger.warning("File upload failed")
+            logger.error(f"File upload failed at {cls.URL}")
+        
+        return response
 
-    def download(self, destination):
+    def download(self, destination, **kwargs):
         """
         Download the attachment file to the specified location
         """
 
-        return self._api.downloadFile(self.attachment, destination)
+        return self._api.downloadFile(self.attachment, destination, **kwargs)
 
 
 class Currency(InventreeObject):
     """ Class representing the Currency database model """
 
     URL = 'common/currency'
-
-
-class Parameter(InventreeObject):
-    """class representing the Parameter database model """
-    URL = 'part/parameter'
-
-    def getunits(self):
-        """ Get the dimension and units for this parameter """
-
-        return [element for element
-                in ParameterTemplate.list(self._api)
-                if element['pk'] == self._data['template']]
-
-
-class ParameterTemplate(InventreeObject):
-    """ class representing the Parameter Template database model"""
-
-    URL = 'part/parameter/template'

@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree import company  # noqa: E402
+from inventree.part import Part  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
 
 
@@ -32,7 +33,7 @@ class CompanyTest(InvenTreeTestCase):
             self.assertIn(field, field_names)
 
     def test_company_create(self):
-        c = company.Company(self.api, {
+        c = company.Company.create(self.api, {
             'name': 'Company',
         })
 
@@ -80,14 +81,24 @@ class CompanyTest(InvenTreeTestCase):
         self.assertEqual(len(c.getSuppliedParts()), 3)
 
     def test_manufacturer_part_create(self):
-        manufacturer = company.Company(self.api, 1)
 
-        manufacturer_part = company.ManufacturerPart(self.api, {
-            'manufacturer': manufacturer,
-            'MPN': 'MPN_TEST',
+        manufacturer = company.Company(self.api, 7)
+
+        n = len(manufacturer.getManufacturedParts())
+
+        # Create a new manufacturer part with a unique name
+        manufacturer_part = company.ManufacturerPart.create(self.api, {
+            'manufacturer': manufacturer.pk,
+            'MPN': f'MPN_TEST_{n}',
+            'part': 3,
         })
 
         self.assertIsNotNone(manufacturer_part)
+        self.assertEqual(manufacturer_part.manufacturer, manufacturer.pk)
+
+        # Check that listing the manufacturer parts against this manufacturer has increased by 1
+        man_parts = company.ManufacturerPart.list(self.api, manufacturer=manufacturer.pk)
+        self.assertEqual(len(man_parts), n + 1)
 
     def test_manufacturer_part_parameters(self):
         """
@@ -100,7 +111,7 @@ class CompanyTest(InvenTreeTestCase):
 
         # First, create a new ManufacturerPart
         part = company.ManufacturerPart.create(self.api, {
-            'manufacturer': 1,
+            'manufacturer': 6,
             'part': 1,
             'MPN': mpn,
         })
@@ -167,9 +178,28 @@ class CompanyTest(InvenTreeTestCase):
 
         supplier = company.Company(self.api, 1)
 
-        supplier_part = company.SupplierPart(self.api, {
-            'manufacturer': supplier,
-            'SKU': 'SKU_TEST',
+        # Find a purchaseable part
+        parts = Part.list(self.api, purchasable=True)
+
+        if len(parts) > 0:
+            prt = parts[0]
+        else:
+            prt = Part.create(self.api, {
+                'name': 'My purchaseable part',
+                'description': 'A purchasenable part we can use to make a SupplierPart',
+                'category': 1,
+                'purchaseable': True
+            })
+
+        n = len(company.SupplierPart.list(self.api))
+
+        supplier_part = company.SupplierPart.create(self.api, {
+            'supplier': supplier.pk,
+            'SKU': f'SKU_TEST_{n}',
+            'part': prt.pk,
         })
 
         self.assertIsNotNone(supplier_part)
+        self.assertTrue(supplier_part.part, prt.pk)
+
+        self.assertEqual(len(company.SupplierPart.list(self.api)), n + 1)

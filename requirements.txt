@@ -1,3 +1,4 @@
 requests==2.21.0                # Python HTTP for humans
 flake8==3.8.4                   # PEP checking
 wheel>=0.34.2                   # Building package
+invoke>=1.4.0

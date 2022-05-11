@@ -23,6 +23,17 @@ class PurchaseOrder(inventree.base.InventreeObject):
 
         return PurchaseOrderLineItem.create(self._api, data=kwargs)
 
+    def getAttachments(self):
+        return PurchaseOrderAttachment.list(self._api, order=self.pk)
+    
+    def uploadAttachment(self, attachment, comment=''):
+        return PurchaseOrderAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            order=self.pk,
+        )
+
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
@@ -48,6 +59,14 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         return PurchaseOrder(self._api, self.order)
 
 
+class PurchaseOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a PurchaseOrder"""
+
+    URL = 'order/po/attachment'
+
+    REQUIRED_KWARGS = ['order']
+
+
 class SalesOrder(inventree.base.InventreeObject):
     """ Class respresenting the SalesOrder database model """
 
@@ -66,6 +85,17 @@ class SalesOrder(inventree.base.InventreeObject):
 
         return SalesOrderLineItem.create(self._api, data=kwargs)
 
+    def getAttachments(self):
+        return SalesOrderAttachment.list(self._api, order=self.pk)
+    
+    def uploadAttachment(self, attachment, comment=''):
+        return SalesOrderAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            order=self.pk,
+        )
+
 
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
@@ -83,3 +113,11 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         Return the SalesOrder to which this SalesOrderLineItem belongs
         """
         return SalesOrder(self._api, self.order)
+
+
+class SalesOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a SalesOrder"""
+
+    URL = 'order/so/attachment'
+
+    REQUIRED_KWARGS = ['order']

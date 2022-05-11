@@ -13,9 +13,9 @@ from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
 
 
-SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:8000')
-USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'admin')
-PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'password')
+SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:12345')
+USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'testuser')
+PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'testpassword')
 
 
 class LoginTests(unittest.TestCase):
@@ -24,7 +24,7 @@ class LoginTests(unittest.TestCase):
 
         # Attempt connection where no server exists
         with self.assertRaises(Exception):
-            a = api.InvenTreeAPI("http://127.0.0.1:1234", username="admin", password="password")
+            a = api.InvenTreeAPI("http://127.0.0.1:9999", username="admin", password="password")
 
         # Attempt connection with invalid credentials
         a = api.InvenTreeAPI(SERVER, username="abcde", password="********")
@@ -130,33 +130,52 @@ class TestCreate(InvenTreeTestCase):
         self.assertEqual(prt.name, 'ACME Widget')
 
 
-class WidgetTest(InvenTreeTestCase):
+class TemplateTest(InvenTreeTestCase):
 
     def test_get_widget(self):
 
-        widget = part.Part(self.api, 8)
-        self.assertEqual(widget.IPN, "W001")
+        widget = part.Part(self.api, 10000)
+
+        self.assertEqual(widget.name, "Chair Template")
 
         test_templates = widget.getTestTemplates()
-        self.assertEqual(len(test_templates), 3)
+        self.assertGreaterEqual(len(test_templates), 5)
         
         keys = [test.key for test in test_templates]
 
-        self.assertIn('firmware', keys)
-        self.assertIn('weight', keys)
-        self.assertIn('paint', keys)
+        self.assertIn('teststrengthofchair', keys)
+        self.assertIn('applypaint', keys)
+        self.assertIn('attachlegs', keys)
+
+    def test_add_template(self):
+        """
+        Test that we can add a test template via the API
+        """
+
+        widget = part.Part(self.api, pk=10000)
+
+        n = len(widget.getTestTemplates())
+
+        part.PartTestTemplate.create(self.api, {
+            'part': widget.pk,
+            'test_name': f"Test_Name_{n}",
+            'description': 'A test or something',
+            'required': True,
+        })
+
+        self.assertEqual(len(widget.getTestTemplates()), n + 1)
 
     def test_add_result(self):
         
         # Look for a particular serial number
-        item = stock.StockItem.list(self.api, IPN="W001", serial=10)
-        self.assertEqual(len(item), 1)
-        item = item[0]
+        items = stock.StockItem.list(self.api, serial=1000)
+        self.assertEqual(len(items), 1)
+
+        item = items[0]
 
         tests = item.getTestResults()
 
         n = len(tests)
-        self.assertGreater(n, 0)
 
         # Upload a test result against 'firmware' (should fail the first time)
         args = {

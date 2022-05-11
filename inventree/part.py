@@ -75,10 +75,6 @@ class Part(inventree.base.InventreeObject):
         """ Return the stock items associated with this part """
         return inventree.stock.StockItem.list(self._api, part=self.pk)
 
-    def getAttachments(self):
-        """ Return attachments associated with this part """
-        return PartAttachment.list(self._api, part=self.pk)
-
     def getParameters(self):
         """ Return parameters associated with this part """
         return inventree.base.Parameter.list(self._api, part=self.pk)
@@ -102,18 +98,32 @@ class Part(inventree.base.InventreeObject):
         if image:
             if os.path.exists(image):
                 f = os.path.basename(image)
-                fo = open(image, 'rb')
-                files['image'] = (f, fo)
+
+                with open(image, 'rb') as fo:
+                    files['image'] = (f, fo)
+                    response = self.save(
+                        data={},
+                        files=files
+                    )
+
+                    return response
             else:
                 logger.error(f"File does not exist: '{image}'")
                 return None
 
-        response = self.save(
-            data={},
-            files=files
-        )
+        else:
+            raise ValueError("uploadImage called with null file object")
 
-        return response
+    def downloadImage(self, destination):
+        """
+        Download the image for this Part, to the specified destination
+        """
+
+        if self.image:
+            return self._api.downloadFile(self.image, destination)
+        else:
+            logger.error(f"Part '{self.name}' does not have an associated image")
+            return False
 
     def getInternalPriceList(self):
         """
@@ -129,16 +139,24 @@ class Part(inventree.base.InventreeObject):
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
 
-    def downloadImage(self, destination):
+    def getAttachments(self):
+        return PartAttachment.list(self._api, part=self.pk)
+
+    def uploadAttachment(self, attachment, comment=''):
         """
-        Download the image for this Part, to the specified destination
+        Upload an attachment (file) against this Part.
+
+        Args:
+            attachment: Either a string (filename) or a file object
+            comment: Attachment comment
         """
 
-        if self.image:
-            return self._api.downloadFile(self.image, destination)
-        else:
-            logger.error(f"Part '{self.name}' does not have an associated image")
-            return False
+        return PartAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            part=self.pk
+        )
 
 
 class PartAttachment(inventree.base.Attachment):
@@ -146,50 +164,7 @@ class PartAttachment(inventree.base.Attachment):
 
     URL = 'part/attachment'
 
-    @classmethod
-    def upload_attachment(cls, api, part, **kwargs):
-        """
-        Upload a Part attachment
-
-        args:
-            api: Authenticated InvenTree API object
-            part: pk of the Part object to upload the attachment to
-
-        kwargs:
-            attachment: Attach a file
-            comment: Add comment
-        """
-        attachment = kwargs.get('attachment', None)
-
-        files = {}
-
-        fo = None
-
-        if attachment:
-            if os.path.exists(attachment):
-                f = os.path.basename(attachment)
-                fo = open(attachment, 'rb')
-                files['attachment'] = (f, fo)
-            else:
-                logger.error(f"File does not exist: '{attachment}'")
-
-        comment = kwargs.get('comment', '')
-
-        data = {
-            'part': part,
-            'attachment': os.path.basename(attachment),
-            'comment': comment,
-        }
-
-        # Send the data to the server
-        if api.post(cls.URL, data, files=files):
-            logger.info(f"Uploaded attachment: '{attachment}'")
-            ret = True
-        else:
-            logger.warning("Attachment upload failed")
-            ret = False
-
-        return ret
+    REQUIRED_KWARGS = ['part']
 
 
 class PartTestTemplate(inventree.base.InventreeObject):
@@ -260,3 +235,21 @@ class PartRelated(inventree.base.InventreeObject):
             logging.warning("Related failed")
             ret = False
         return ret
+
+
+class Parameter(inventree.base.InventreeObject):
+    """class representing the Parameter database model """
+    URL = 'part/parameter'
+
+    def getunits(self):
+        """ Get the dimension and units for this parameter """
+
+        return [element for element
+                in ParameterTemplate.list(self._api)
+                if element['pk'] == self._data['template']]
+
+
+class ParameterTemplate(inventree.base.InventreeObject):
+    """ class representing the Parameter Template database model"""
+
+    URL = 'part/parameter/template'

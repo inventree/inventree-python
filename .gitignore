@@ -9,9 +9,13 @@ test.py
 
 dummy_image.*
 
-# General python stuff
+test/data/
+test/*.tmp
+
+# General python / dev stuff
 *.pyc
 .pypirc
 dist
 build
 inventree.egg-info
+.vscode/
