@@ -24,17 +24,6 @@ def style(c):
 
 
 @task
-def update_image(c, debug=True):
-    """
-    Update the InvenTree image to the latest version
-    """
-
-    print("Pulling latest InvenTree image from docker hub (maybe grab a coffee!)")
-    
-    c.run("docker-compose -f test/docker-compose.yml pull", hide=None if debug else 'both')
-
-
-@task
 def reset_data(c, debug=False):
     """
     Reset the database to a known state.
@@ -46,6 +35,17 @@ def reset_data(c, debug=False):
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=None if debug else 'both')
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke delete-data -f", hide=None if debug else 'both')
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=None if debug else 'both')
+
+
+@task(post=[reset_data])
+def update_image(c, debug=True):
+    """
+    Update the InvenTree image to the latest version
+    """
+
+    print("Pulling latest InvenTree image from docker hub (maybe grab a coffee!)")
+    
+    c.run("docker-compose -f test/docker-compose.yml pull", hide=None if debug else 'both')
 
 
 @task
