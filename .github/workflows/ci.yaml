@@ -38,9 +38,9 @@ jobs:
           invoke migrate
           invoke import-fixtures
           invoke server -a http://localhost:12345 &
-          invoke check-server
       - name: Run Tests
         run: |
+          invoke check-server
           coverage run -m unittest discover -s test/
       - name: Upload Report
         run: |
