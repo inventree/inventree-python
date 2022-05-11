@@ -9,6 +9,8 @@ test.py
 
 dummy_image.*
 
+test/data/
+
 # General python stuff
 *.pyc
 .pypirc
