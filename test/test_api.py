@@ -130,33 +130,52 @@ class TestCreate(InvenTreeTestCase):
         self.assertEqual(prt.name, 'ACME Widget')
 
 
-class WidgetTest(InvenTreeTestCase):
+class TemplateTest(InvenTreeTestCase):
 
     def test_get_widget(self):
 
-        widget = part.Part(self.api, 8)
-        self.assertEqual(widget.IPN, "W001")
+        widget = part.Part(self.api, 10000)
+
+        self.assertEqual(widget.name, "Chair Template")
 
         test_templates = widget.getTestTemplates()
-        self.assertEqual(len(test_templates), 3)
+        self.assertGreaterEqual(len(test_templates), 5)
         
         keys = [test.key for test in test_templates]
 
-        self.assertIn('firmware', keys)
-        self.assertIn('weight', keys)
-        self.assertIn('paint', keys)
+        self.assertIn('teststrengthofchair', keys)
+        self.assertIn('applypaint', keys)
+        self.assertIn('attachlegs', keys)
+
+    def test_add_template(self):
+        """
+        Test that we can add a test template via the API
+        """
+
+        widget = part.Part(self.api, pk=10000)
+
+        n = len(widget.getTestTemplates())
+
+        part.PartTestTemplate.create(self.api, {
+            'part': widget.pk,
+            'test_name': f"Test_Name_{n}",
+            'description': 'A test or something',
+            'required': True,
+        })
+
+        self.assertEqual(len(widget.getTestTemplates()), n + 1)
 
     def test_add_result(self):
         
         # Look for a particular serial number
-        item = stock.StockItem.list(self.api, IPN="W001", serial=10)
-        self.assertEqual(len(item), 1)
-        item = item[0]
+        items = stock.StockItem.list(self.api, serial=1000)
+        self.assertEqual(len(items), 1)
+
+        item = items[0]
 
         tests = item.getTestResults()
 
         n = len(tests)
-        self.assertGreater(n, 0)
 
         # Upload a test result against 'firmware' (should fail the first time)
         args = {
