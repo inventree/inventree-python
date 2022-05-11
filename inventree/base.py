@@ -24,7 +24,7 @@ class InventreeObject(object):
 
         return f"{type(self)}<pk={self.pk}>"
 
-    def __init__(self, api, pk=None, data={}):
+    def __init__(self, api, pk=None, data=None):
         """ Instantiate this InvenTree object.
 
         Args:
@@ -44,6 +44,10 @@ class InventreeObject(object):
 
         self._url = f"{self.URL}/{pk}/"
         self._api = api
+
+        if data is None:
+            data = {}
+
         self._data = data
 
         # If the data are not populated, fetch from server
@@ -170,13 +174,45 @@ class InventreeObject(object):
             self.reload()
 
         return response
+    
+    def is_valid(self):
+        """
+        Test if this object is 'valid' - it has received data from the server.
+
+        To be considered 'valid':
+
+        - Must have a non-null PK
+        - Must have a non-null and non-empty data structure
+        """
+
+        data = getattr(self, '_data', None)
+
+        if self.pk is None:
+            return False
+
+        if data is None:
+            return False
+        
+        if len(data) == 0:
+            return False
+        
+        return True
 
     def reload(self):
         """ Reload object data from the database """
         if self._api:
             data = self._api.get(self._url)
-            if data is not None:
+
+            if data is None:
+                logger.error(f"Error during reload at {self._url}")
+            else:
                 self._data = data
+
+            if not self.is_valid():
+                logger.error(f"Error during reload at {self._url} - returned data is invalid")
+
+        else:
+            raise ValueError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
         if name in self._data.keys():
