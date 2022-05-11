@@ -75,10 +75,6 @@ class Part(inventree.base.InventreeObject):
         """ Return the stock items associated with this part """
         return inventree.stock.StockItem.list(self._api, part=self.pk)
 
-    def getAttachments(self):
-        """ Return attachments associated with this part """
-        return PartAttachment.list(self._api, part=self.pk)
-
     def getParameters(self):
         """ Return parameters associated with this part """
         return inventree.base.Parameter.list(self._api, part=self.pk)
@@ -116,8 +112,7 @@ class Part(inventree.base.InventreeObject):
                 return None
 
         else:
-            raise ValueError(f"uploadImage called with null file object")
-            return None
+            raise ValueError("uploadImage called with null file object")
 
     def downloadImage(self, destination):
         """

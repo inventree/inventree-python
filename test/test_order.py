@@ -275,7 +275,16 @@ class SOTest(InvenTreeTestCase):
         """
 
         # Grab the first available SalesOrder
-        so = order.SalesOrder.list(self.api)[0]
+        orders = order.SalesOrder.list(self.api)
+
+        if len(orders) > 0:
+            so = orders[0]
+        else:
+            so = order.SalesOrder.create(self.api, {
+                'company': 3,
+                'reference': "My new sales order",
+                "description": "Selling some stuff",
+            })
 
         n = len(so.getAttachments())
 
@@ -289,3 +298,6 @@ class SOTest(InvenTreeTestCase):
         
         self.assertEqual(attachment.order, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
+
+        attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
+        self.assertEqual(len(attachments), n + 1)

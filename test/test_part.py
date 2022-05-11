@@ -12,8 +12,8 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.part import Part, PartAttachment, PartCategory, PartRelated
-from inventree.part import InternalPrice
+from inventree.part import Part, PartAttachment, PartCategory  # noqa: E402
+from inventree.part import InternalPrice  # noqa: E402
 
 
 class PartTest(InvenTreeTestCase):
@@ -36,7 +36,6 @@ class PartTest(InvenTreeTestCase):
         p = Part(self.api, 9999999999999)
 
         self.assertFalse(p.is_valid())
-
 
     def test_fields(self):
         """
@@ -173,7 +172,6 @@ class PartTest(InvenTreeTestCase):
             parts = cat.getParts()
 
             self.assertGreaterEqual(len(parts), i + 1)
-
 
     def test_part_edit(self):
         """

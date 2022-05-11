@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.stock import StockItem, StockLocation
+from inventree.stock import StockItem, StockLocation  # noqa: E402
 from inventree import part  # noqa: E402
 
 from test_api import InvenTreeTestCase  # noqa: E402
@@ -92,7 +92,8 @@ class StockLocationTest(InvenTreeTestCase):
         n = len(items)
 
         for i in range(5):
-            StockItem.create(self.api,
+            StockItem.create(
+                self.api,
                 {
                     "part": 1,
                     "quantity": (i + 1) * 50,

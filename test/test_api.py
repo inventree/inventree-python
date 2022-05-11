@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import requests
 import unittest
 
 import os
@@ -23,8 +24,8 @@ class LoginTests(unittest.TestCase):
     def test_failed_logins(self):
 
         # Attempt connection where no server exists
-        with self.assertRaises(Exception):
-            a = api.InvenTreeAPI("http://127.0.0.1:1234", username="admin", password="password")
+        with self.assertRaises(requests.exceptions.InvalidURL):
+            a = api.InvenTreeAPI("http://127.0.0.1:99999", username="admin", password="password")
 
         # Attempt connection with invalid credentials
         a = api.InvenTreeAPI(SERVER, username="abcde", password="********")

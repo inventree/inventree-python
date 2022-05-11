@@ -34,8 +34,6 @@ class InternalPriceTest(InvenTreeTestCase):
             'name': 'Test Part',
             'description': 'Test Part',
             'category': 1,
-            'supplier': 1,
-            'manufacturer': 1,
             'revision': 1,
             'active': True,
         })
@@ -43,7 +41,7 @@ class InternalPriceTest(InvenTreeTestCase):
         self.assertIsNotNone(p)
         self.assertIsNotNone(p.pk)
 
-        ip = InternalPrice(self.api, {
+        ip = InternalPrice.create(self.api, {
             'part': p.pk,
             'quantity': 1,
             'price': '1.00'

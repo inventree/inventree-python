@@ -257,7 +257,7 @@ class Attachment(InventreeObject):
         """
 
         data = kwargs
-        data['comment']= comment
+        data['comment'] = comment
 
         # Check that the extra kwargs are provided
         for arg in cls.REQUIRED_KWARGS:
@@ -275,13 +275,13 @@ class Attachment(InventreeObject):
                     cls.URL,
                     data,
                     files={
-                        'attachment': (os.path.basename(attachment), fo),        
+                        'attachment': (os.path.basename(attachment), fo),
                     }
                 )
         
         else:
             # Assumes a StringIO or BytesIO like object
-            name = getattr(attachment, name, 'filename')
+            name = getattr(attachment, 'name', 'filename')
             response = api.post(
                 cls.URL,
                 data,

@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree import company  # noqa: E402
-from inventree.part import Part
+from inventree.part import Part  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
 
 
