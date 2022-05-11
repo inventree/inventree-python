@@ -105,16 +105,19 @@ class Part(inventree.base.InventreeObject):
 
                 with open(image, 'rb') as fo:
                     files['image'] = (f, fo)
+                    response = self.save(
+                        data={},
+                        files=files
+                    )
+
+                    return response
             else:
                 logger.error(f"File does not exist: '{image}'")
                 return None
 
-        response = self.save(
-            data={},
-            files=files
-        )
-
-        return response
+        else:
+            raise ValueError(f"uploadImage called with null file object")
+            return None
 
     def getInternalPriceList(self):
         """
