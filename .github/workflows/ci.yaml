@@ -8,6 +8,10 @@ jobs:
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      INVENTREE_DB_ENGINE: django.db.backends.sqlite3
+      INVENTREE_DB_NAME: ../inventree_unit_test_db.sqlite3
+      INVENTREE_MEDIA_ROOT: ../test_inventree_media
+      INVENTREE_STATIC_ROOT: ../test_inventree_static
 
     strategy:
       max-parallel: 4
@@ -31,7 +35,6 @@ jobs:
           git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
           cd inventree_server
           invoke install
-          cp ../test/inventree_config.yaml ./InvenTree/config.yaml
           invoke migrate
           invoke import-fixtures
           invoke server -a 127.0.0.1:12345 &
