@@ -88,11 +88,25 @@ class StockItem(inventree.base.InventreeObject):
 
         return StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
 
+    def uploadAttachment(self, attachment, comment=''):
+        """
+        Upload an attachment against this StockItem
+        """
+
+        return StockItemAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            stock_item=self.pk
+        )
+
 
 class StockItemAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a StockItem """
 
     URL = 'stock/attachment'
+
+    REQUIRED_KWARGS = ['stock_item']
 
 
 class StockItemTracking(inventree.base.InventreeObject):

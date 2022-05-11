@@ -157,7 +157,7 @@ class Part(inventree.base.InventreeObject):
             self._api,
             attachment,
             comment=comment,
-            part=self.pk,
+            part=self.pk
         )
 
 
