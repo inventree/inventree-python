@@ -109,7 +109,7 @@ def start_server(c, debug=False):
 
 
 @task
-def test(c, update=False, reset=True, debug=False):
+def test(c, source=None, update=False, reset=False, debug=False):
     """
     Run the unit tests for the python bindings.
     Performs the following steps:
@@ -118,6 +118,15 @@ def test(c, update=False, reset=True, debug=False):
     - Reset the database to a known state
     - Perform unit testing
     """
+
+    # If a source file is provided, check that it actually exists
+    if source:
+        if not os.path.exists(source):
+            source = os.path.join('test', source)
+        
+        if not os.path.exists(source):
+            print(f"Error: Source file '{source}' does not exist")
+            sys.exit(1)
 
     if update:
         # Pull down the latest InvenTree docker image
@@ -137,4 +146,12 @@ def test(c, update=False, reset=True, debug=False):
     os.environ['INVENTREE_PYTHON_TEST_PASSWORD'] = 'testpassword'
 
     # Run unit tests
-    c.run('coverage run -m unittest discover -s test/')
+
+    # If a single source file is supplied, test *just* that file
+    # Otherwise, test *all* files
+    if source:
+        print(f"Running tests for '{source}'")
+        c.run(f'coverage run -m unittest {source}')
+    else:
+        # Automatically discover tests, and run only those
+        c.run('coverage run -m unittest discover -s test/')
