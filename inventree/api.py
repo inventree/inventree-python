@@ -224,11 +224,17 @@ class InvenTreeAPI(object):
                 params=params,
                 headers=headers,
                 json=json,
-                files=files
+                files=files,
+                timeout=2.5,
             )
 
-        except requests.exceptions.ConnectionError:
-            logger.error(f"Connection refused - '{api_url}'")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection refused - {method} @ '{api_url}'")
+            logger.info(str(e))
+            return None
+        
+        except Exception as e:
+            logger.error(f"Unhandled exception - {method} @ '{api_url}'")
             return None
 
         if response is None:

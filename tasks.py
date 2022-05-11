@@ -44,6 +44,7 @@ def reset_data(c, debug=False):
     print("Reset test database to a known state (this might take a little while...)")
 
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=None if debug else 'both')
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke delete-data -f", hide=None if debug else 'both')
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=None if debug else 'both')
 
 

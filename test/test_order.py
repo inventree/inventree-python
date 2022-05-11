@@ -44,7 +44,12 @@ class POTest(InvenTreeTestCase):
         self.assertTrue(supplier.is_supplier)
 
         # Find all purchaseable parts
-        for prt in part.Part.list(self.api, purchaseable=True):
+        parts = part.Part.list(self.api, purchaseable=True)
+
+        for idx, prt in enumerate(parts):
+
+            if idx >= 10:
+                break
 
             # Check that the part is marked as purchaseable
             self.assertTrue(prt.purchaseable)
@@ -53,7 +58,6 @@ class POTest(InvenTreeTestCase):
             supplier_parts = supplier.getSuppliedParts(part=prt.pk)
 
             if len(supplier_parts) == 0:
-                print(f"Creating supplier part for {prt.name}")
 
                 supplier_part = company.SupplierPart.create(
                     self.api,
