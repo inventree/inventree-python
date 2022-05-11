@@ -85,6 +85,17 @@ class SalesOrder(inventree.base.InventreeObject):
 
         return SalesOrderLineItem.create(self._api, data=kwargs)
 
+    def getAttachments(self):
+        return SalesOrderAttachment.list(self._api, order=self.pk)
+    
+    def uploadAttachment(self, attachment, comment=''):
+        return SalesOrderAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            order=self.pk,
+        )
+
 
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
@@ -102,3 +113,11 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         Return the SalesOrder to which this SalesOrderLineItem belongs
         """
         return SalesOrder(self._api, self.order)
+
+
+class SalesOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a SalesOrder"""
+
+    URL = 'order/so/attachment'
+
+    REQUIRED_KWARGS = ['order']

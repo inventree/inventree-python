@@ -268,3 +268,24 @@ class SOTest(InvenTreeTestCase):
                 self.assertEqual(line.getOrder().pk, sales_order.pk)
 
                 self.assertEqual(len(sales_order.getLineItems()), idx + 1)
+
+    def test_so_attachment(self):
+        """
+        Test upload of attachment against a SalesOrder
+        """
+
+        # Grab the first available SalesOrder
+        so = order.SalesOrder.list(self.api)[0]
+
+        n = len(so.getAttachments())
+
+        # Upload a new attachment
+        fn = os.path.join(os.path.dirname(__file__), 'attachment.txt')
+        response = so.uploadAttachment(fn, comment='Sales order attachment')
+
+        pk = response['pk']
+
+        attachment = order.SalesOrderAttachment(self.api, pk=pk)
+        
+        self.assertEqual(attachment.order, so.pk)
+        self.assertEqual(attachment.comment, 'Sales order attachment')
