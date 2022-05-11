@@ -37,7 +37,7 @@ jobs:
           invoke install
           invoke migrate
           invoke import-fixtures
-          invoke server -a http://localhost:12345 &
+          invoke server -a 127.0.0.1:12345 &
       - name: Run Tests
         run: |
           invoke check-server
