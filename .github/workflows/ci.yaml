@@ -27,6 +27,7 @@ jobs:
           sudo apt-get install python3-dev python3-pip python3-wheel
       - name: Run Unit Tests
         run: |
+          mkdir data/media -p
           invoke test -d
       - name: Upload Report
         run: |
