@@ -78,6 +78,31 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
 
 
 @task
+def start_server(c, debug=False):
+    """
+    Launch the InvenTree server (in a docker container)
+    """
+
+    # Start the InvenTree server
+    print("Starting InvenTree server instance")
+    c.run('docker-compose -f test/docker-compose.yml up -d', hide=None if debug else 'both')
+
+    print("Waiting for InvenTree server to respond:")
+
+    count = 60
+
+    while not check_server(c, debug=False) and count > 0:
+        count -= 1
+        time.sleep(1)
+    
+    if count == 0:
+        print("No response from InvenTree server")
+        sys.exit(1)
+    else:
+        print("InvenTree server is active - proceeding with tests")
+
+
+@task
 def test(c, update=False, reset=True, debug=False):
     """
     Run the unit tests for the python bindings.
@@ -95,25 +120,10 @@ def test(c, update=False, reset=True, debug=False):
     if reset:
         reset_data(c, debug=debug)
     
-    # Start the InvenTree server
-    print("Restarting InvenTree server instance")
-    c.run('docker-compose -f test/docker-compose.yml up -d', hide='both')
+    # Launch the InvenTree server (dockerized)
+    start_server(c)
 
     # Wait until the docker server is running, and API is accessible
-
-    print("Waiting for InvenTree server to response:")
-
-    count = 60
-
-    while not check_server(c, debug=False) and count > 0:
-        count -= 1
-        time.sleep(1)
-    
-    if count == 0:
-        print("No response from InvenTree server")
-        sys.exit(1)
-    else:
-        print("InvenTree server is active - proceeding with tests")
 
     # Set environment variables so test scripts can access them
     os.environ['INVENTREE_PYTHON_TEST_SERVER'] = 'http://localhost:12345'
