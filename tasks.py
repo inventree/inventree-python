@@ -29,7 +29,7 @@ def update_image(c, debug=True):
     Update the InvenTree image to the latest version
     """
 
-    print("Pulling latest InvenTree image from docker hub (grab a coffee!)")
+    print("Pulling latest InvenTree image from docker hub (maybe grab a coffee!)")
     
     c.run("docker-compose -f test/docker-compose.yml pull", hide=None if debug else 'both')
 
@@ -117,11 +117,5 @@ def test(c, update=False, reset=True, debug=False):
     os.environ['INVENTREE_PYTHON_TEST_USERNAME'] = 'testuser'
     os.environ['INVENTREE_PYTHON_TEST_PASSWORD'] = 'testpassword'
 
-    print("Running tests")
-    result = c.run('coverage run -m unittest discover -s test/')
-
-    # Tear down the docker containers
-    # print("Stopping docker containers...")
-    # c.run('docker-compose -f test/docker-compose.yml stop', hide='both')
-
-    print("All tests complete! Result =", result)
+    # Run unit tests
+    c.run('coverage run -m unittest discover -s test/')
