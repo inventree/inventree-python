@@ -23,6 +23,17 @@ class PurchaseOrder(inventree.base.InventreeObject):
 
         return PurchaseOrderLineItem.create(self._api, data=kwargs)
 
+    def getAttachments(self):
+        return PurchaseOrderAttachment.list(self._api, order=self.pk)
+    
+    def uploadAttachment(self, attachment, comment=''):
+        return PurchaseOrderAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            order=self.pk,
+        )
+
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
@@ -46,6 +57,14 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         Return the PurchaseOrder to which this PurchaseOrderLineItem belongs
         """
         return PurchaseOrder(self._api, self.order)
+
+
+class PurchaseOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a PurchaseOrder"""
+
+    URL = 'order/po/attachment'
+
+    REQUIRED_KWARGS = ['order']
 
 
 class SalesOrder(inventree.base.InventreeObject):

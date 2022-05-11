@@ -144,6 +144,9 @@ class Part(inventree.base.InventreeObject):
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
 
+    def getAttachments(self):
+        return PartAttachment.list(self._api, part=self.pk)
+
     def uploadAttachment(self, attachment, comment=''):
         """
         Upload an attachment (file) against this Part.

@@ -134,6 +134,58 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
 
+    def test_purchase_order_delete(self):
+        """
+        Test that we can delete existing purchase orders
+        """
+
+        orders = order.PurchaseOrder.list(self.api)
+
+        self.assertTrue(len(orders) > 0)
+
+        for po in orders:
+            po.delete()
+
+        orders = order.PurchaseOrder.list(self.api)
+        self.assertEqual(len(orders), 0)
+
+    def test_po_attachment(self):
+        """
+        Test upload of attachment against a PurchaseOrder
+        """
+
+        # Ensure we have a least one purchase order to work with
+        n = len(order.PurchaseOrder.list(self.api))
+
+        po = order.PurchaseOrder.create(self.api, {
+            'supplier': 1,
+            'reference': f'xyz-abc-{n}',
+            'description': 'A new purchase order',
+        })
+
+        attachments = po.getAttachments()
+        self.assertEqual(len(attachments), 0)
+
+        # Test we can upload an attachment against this PurchaseOrder
+        fn = os.path.join(os.path.dirname(__file__), 'attachment.txt')
+
+        # Should be able to upload the same file multiple times!
+        for i in range(3):
+            response = po.uploadAttachment(fn, comment='Test upload to purchase order')
+            self.assertEqual(response['comment'], 'Test upload to purchase order')
+
+        # Test that an invalid file raises an error
+        with self.assertRaises(FileNotFoundError):
+            po.uploadAttachment('not_found.txt')
+
+        # Test that missing the 'order' parameter fails too
+        with self.assertRaises(ValueError):
+            order.PurchaseOrderAttachment.upload(self.api, fn, comment='Should not work!')
+
+        # Check that attachments uploaded OK
+        attachments = order.PurchaseOrderAttachment.list(self.api, order=po.pk)
+        self.assertEqual(len(attachments), 3)
+
 
 class SOTest(InvenTreeTestCase):
     """
