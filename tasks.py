@@ -33,6 +33,7 @@ def update_image(c, debug=True):
     
     c.run("docker-compose -f test/docker-compose.yml pull", hide=None if debug else 'both')
 
+
 @task
 def reset_data(c, debug=False):
     """
@@ -44,6 +45,7 @@ def reset_data(c, debug=False):
 
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=None if debug else 'both')
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=None if debug else 'both')
+
 
 @task
 def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True):
@@ -64,10 +66,11 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
 
     if 'token' not in response.text:
         if debug:
-            print(f"Token not in returned response")
+            print("Token not in returned response:")
+            print(str(response.text))
         return False
 
-    # We have confirmed that the server is available    
+    # We have confirmed that the server is available
     if debug:
         print(f"InvenTree server is available at {host}")
 
@@ -77,7 +80,7 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
 @task
 def test(c, update=False, reset=True, debug=False):
     """
-    Run the unit tests for the python bindings. 
+    Run the unit tests for the python bindings.
     Performs the following steps:
 
     - Ensure the docker container is up and running
