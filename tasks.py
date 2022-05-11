@@ -57,7 +57,13 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
 
     url = f"{host}/api/user/token/"
 
-    response = requests.get(url, auth=auth)
+    try:
+        response = requests.get(url, auth=auth, timeout=0.5)
+    except Exception as e:
+        if debug:
+            print("Error:", str(e))
+        
+        return False
 
     if response.status_code != 200:
         if debug:
