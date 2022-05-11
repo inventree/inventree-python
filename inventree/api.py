@@ -97,9 +97,12 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url)
-        except requests.exceptions.ConnectionError:
-            logger.error("Server connection refused - check server address")
+            response = requests.get(self.api_url, timeout=2.5)
+        except requests.exceptions.ConnectionError as e:
+            logger.error("Server connection error:", str(e))
+            return False
+        except Exception as e:
+            logger.error("Unhandled server error:", str(e))
             return False
 
         if not response.status_code == 200:
