@@ -12,9 +12,10 @@ dummy_image.*
 test/data/
 test/*.tmp
 
-# General python stuff
+# General python / dev stuff
 *.pyc
 .pypirc
 dist
 build
 inventree.egg-info
+.vscode/
