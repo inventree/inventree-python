@@ -24,11 +24,21 @@ jobs:
       - name: Install Deps
         run: |
           pip install -U -r requirements.txt
-          sudo apt-get install python3-dev python3-pip python3-wheel
-      - name: Run Unit Tests
+      - name: Start InvenTree Server
         run: |
-          mkdir data/media -p
-          invoke test -d
+          sudo apt-get install python3-dev python3-pip python3-venv python3-wheel g++
+          pip3 install invoke
+          git clone --depth 1 https://github.com/inventree/inventree ./inventree_server
+          cd inventree_server
+          invoke install
+          cp ../test/inventree_config.yaml ./InvenTree/config.yaml
+          invoke migrate
+          invoke import-fixtures
+          invoke server -a 127.0.0.1:12345 &
+          sleep 60
+      - name: Run Tests
+        run: |
+          coverage run -m unittest discover -s test/
       - name: Upload Report
         run: |
           coveralls
