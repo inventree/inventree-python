@@ -102,8 +102,9 @@ class Part(inventree.base.InventreeObject):
         if image:
             if os.path.exists(image):
                 f = os.path.basename(image)
-                fo = open(image, 'rb')
-                files['image'] = (f, fo)
+
+                with open(image, 'rb') as fo:
+                    files['image'] = (f, fo)
             else:
                 logger.error(f"File does not exist: '{image}'")
                 return None
