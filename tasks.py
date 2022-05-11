@@ -99,7 +99,7 @@ def start_server(c, debug=False):
         print("No response from InvenTree server")
         sys.exit(1)
     else:
-        print("InvenTree server is active - proceeding with tests")
+        print("InvenTree server is active!")
 
 
 @task
