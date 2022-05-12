@@ -3,6 +3,11 @@
 import os
 import sys
 
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree import company  # noqa: E402
@@ -203,3 +208,39 @@ class CompanyTest(InvenTreeTestCase):
         self.assertTrue(supplier_part.part, prt.pk)
 
         self.assertEqual(len(company.SupplierPart.list(self.api)), n + 1)
+
+    def test_upload_company_image(self):
+        """
+        Check we can upload image against a company
+        """
+
+        # Grab the first company
+        c = company.Company.list(self.api)[0]
+
+        # Ensure the company does *not* have an image
+        c.save(data={'image': None})
+        c.reload()
+
+        self.assertIsNone(c.image)
+
+        # Test that trying to *download* a null image results in failure!
+        with self.assertRaises(ValueError):
+            c.downloadImage("downloaded.png")
+
+        # Now, let's actually upload a real image
+        # Upload as an im-memory imgae file
+        img = Image.new('RGB', (128, 128), color='blue')
+        img.save('dummy_image.png')
+
+        response = c.uploadImage('dummy_image.png')
+
+        self.assertTrue(response)
+
+        with self.assertRaises(FileNotFoundError):
+            c.uploadImage('ddddummy_image.png')
+        
+        with self.assertRaises(TypeError):
+            c.uploadImage(1)
+
+        with self.assertRaises(TypeError):
+            c.uploadImage(None)

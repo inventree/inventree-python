@@ -309,3 +309,50 @@ class Currency(InventreeObject):
     """ Class representing the Currency database model """
 
     URL = 'common/currency'
+
+
+class ImageMixin:
+    """
+    Mixin class for supporting image upload against a model,
+    which has a specific 'image' field associated
+    """
+
+    def uploadImage(self, image):
+        """
+        Upload an image against this model.
+
+        Args:
+            image: Either an image file (BytesIO) or a filename path
+        """
+
+        files = {}
+
+        # string image = filename
+        if type(image) is str:
+            if os.path.exists(image):
+                f = os.path.basename(image)
+
+                with open(image, 'rb') as fo:
+                    files['image'] = (f, fo)
+
+                    return self.save(
+                        data={},
+                        files=files
+                    )
+            else:
+                raise FileNotFoundError(f"Image file does not exist: '{image}'")
+
+        # TODO: Support upload of in-memory images (e.g. Image / BytesIO)
+
+        else:
+            raise TypeError(f"uploadImage called with invalid image: '{image}'")
+
+    def downloadImage(self, destination, **kwargs):
+        """
+        Download the image for this Part, to the specified destination
+        """
+
+        if self.image:
+            return self._api.downloadFile(self.image, destination, **kwargs)
+        else:
+            raise ValueError(f"Part '{self.name}' does not have an associated image")
