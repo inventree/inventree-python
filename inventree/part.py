@@ -42,7 +42,7 @@ class PartCategory(inventree.base.InventreeObject):
                          fetch_parent=fetch_parent)
 
 
-class Part(inventree.base.InventreeObject):
+class Part(inventree.base.ImageMixin, inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
@@ -82,48 +82,6 @@ class Part(inventree.base.InventreeObject):
     def getRelated(self):
         """ Return related parts associated with this part """
         return PartRelated.list(self._api, part=self.pk)
-
-    def uploadImage(self, image):
-        """
-        Upload an image against this Part
-
-        args:
-            - image: path to an image file
-        
-        Returns the HTTP response object
-        """
-
-        files = {}
-
-        if image:
-            if os.path.exists(image):
-                f = os.path.basename(image)
-
-                with open(image, 'rb') as fo:
-                    files['image'] = (f, fo)
-                    response = self.save(
-                        data={},
-                        files=files
-                    )
-
-                    return response
-            else:
-                logger.error(f"File does not exist: '{image}'")
-                return None
-
-        else:
-            raise ValueError("uploadImage called with null file object")
-
-    def downloadImage(self, destination):
-        """
-        Download the image for this Part, to the specified destination
-        """
-
-        if self.image:
-            return self._api.downloadFile(self.image, destination)
-        else:
-            logger.error(f"Part '{self.name}' does not have an associated image")
-            return False
 
     def getInternalPriceList(self):
         """

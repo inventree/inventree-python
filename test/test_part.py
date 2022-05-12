@@ -315,7 +315,9 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(p['image'])
         self.assertIn('dummy_image', p['image'])
 
-        # TODO: Re-download the image
+        # Re-download the image file
+        response = p.downloadImage('test/output.png')
+        self.assertTrue(response)
 
     def test_part_attachment(self):
         """
