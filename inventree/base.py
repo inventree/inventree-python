@@ -327,32 +327,32 @@ class ImageMixin:
 
         files = {}
 
-        if image:
+        # string image = filename
+        if type(image) is str:
             if os.path.exists(image):
                 f = os.path.basename(image)
 
                 with open(image, 'rb') as fo:
                     files['image'] = (f, fo)
-                    response = self.save(
+
+                    return self.save(
                         data={},
                         files=files
                     )
-
-                    return response
             else:
-                logger.error(f"File does not exist: '{image}'")
-                return None
+                raise FileNotFoundError(f"Image file does not exist: '{image}'")
+
+        # TODO: Support upload of in-memory images (e.g. Image / BytesIO)
 
         else:
-            raise ValueError("uploadImage called with null file object")
+            raise TypeError(f"uploadImage called with invalid image: '{image}'")
 
-    def downloadImage(self, destination):
+    def downloadImage(self, destination, **kwargs):
         """
         Download the image for this Part, to the specified destination
         """
 
         if self.image:
-            return self._api.downloadFile(self.image, destination)
+            return self._api.downloadFile(self.image, destination, **kwargs)
         else:
-            logger.error(f"Part '{self.name}' does not have an associated image")
-            return False
+            raise ValueError(f"Part '{self.name}' does not have an associated image")
