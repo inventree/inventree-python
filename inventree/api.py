@@ -217,6 +217,7 @@ class InvenTreeAPI(object):
         logger.debug(f" - json: {json}")
         logger.debug(f" - files: {files}")
 
+        # Send request to server!
         try:
             response = methods[method](
                 api_url,
@@ -227,16 +228,10 @@ class InvenTreeAPI(object):
                 files=files,
                 timeout=2.5,
             )
-
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"Connection refused - {method} @ '{api_url}'")
-            logger.info(str(e))
-            return None
-
         except Exception as e:
-            logger.error(f"Unhandled exception - {method} @ '{api_url}'")
-            logger.info(str(e))
-            return None
+            # Re-thrown any caught errors, and add a message to the log
+            logger.critical(f"Error at api.request - {method} @ {api_url}")
+            raise e
 
         if response is None:
             logger.error(f"Null response - {method} '{api_url}'")
@@ -247,7 +242,28 @@ class InvenTreeAPI(object):
         # Detect invalid response codes
         # Anything 300+ is 'bad'
         if response.status_code >= 300:
-            logger.warning(f"Bad response ({response.status_code}) - {method} '{api_url}' - {response.text}")
+
+            detail = {
+                'detail': 'Error occurred during API request',
+                'url': api_url,
+                'method': method,
+                'status_code': response.status_code,
+                'body': response.text,
+            }
+
+            if headers:
+                detail['headers'] = headers
+            
+            if params:
+                detail['params'] = params
+            
+            if files:
+                detail['files'] = files
+            
+            if json:
+                detail['data'] = json
+
+            raise requests.exceptions.HTTPError(detail)
 
         # A delete request won't return JSON formatted data (ignore further checks)
         if method == 'DELETE':
@@ -255,9 +271,11 @@ class InvenTreeAPI(object):
 
         ctype = response.headers.get('content-type')
 
+        # An API request must respond in JSON format
         if not ctype == 'application/json':
-            logger.error(f"'Response content-type is not JSON - '{api_url}' - '{ctype}'")
-            return None
+            raise requests.exceptions.InvalidJSONError(
+                f"'Response content-type is not JSON - '{api_url}' - '{ctype}'"
+            )
 
         return response
 
@@ -462,13 +480,23 @@ class InvenTreeAPI(object):
             headers = {}
             auth = self.auth
 
-        with requests.get(url, stream=True, auth=auth, headers=headers) as request:
+        with requests.get(url, stream=True, auth=auth, headers=headers) as response:
 
-            if not request.status_code == 200:
-                logger.error(f"Error downloading file '{url}': Server returned status {request.status_code}")
-                return False
+            # Error code
+            if response.status_code >= 300:
+                detail = {
+                    'detail': 'Error occurred during file download',
+                    'url': url,
+                    'status_code': response.status_code,
+                    'body': response.text
+                }
 
-            headers = request.headers
+                if headers:
+                    detail['headers'] = headers
+                
+                raise requests.exceptions.HTTPError(detail)
+
+            headers = response.headers
 
             if 'text/html' in headers['Content-Type']:
                 logger.error(f"Error downloading file '{url}': Server return invalid response (text/html)")
@@ -476,7 +504,7 @@ class InvenTreeAPI(object):
 
             with open(destination, 'wb') as f:
 
-                for chunk in request.iter_content(chunk_size=16 * 1024):
+                for chunk in response.iter_content(chunk_size=16 * 1024):
                     f.write(chunk)
 
         logger.info(f"Downloaded '{url}' to '{destination}'")

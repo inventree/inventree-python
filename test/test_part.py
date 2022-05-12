@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import requests
 import sys
 
 try:
@@ -21,21 +22,20 @@ class PartTest(InvenTreeTestCase):
     Test for PartCategory and Part objects.
     """
 
-    def testAccessErrors(self):
+    def test_access_erors(self):
         """
         Test that errors are flagged when we try to access an invalid part
         """
 
         with self.assertRaises(TypeError):
-            p = Part(self.api, 'hello')
+            Part(self.api, 'hello')
         
         with self.assertRaises(ValueError):
-            p = Part(self.api, -1)
+            Part(self.api, -1)
 
         # Try to access a Part which does not exist
-        p = Part(self.api, 9999999999999)
-
-        self.assertFalse(p.is_valid())
+        with self.assertRaises(requests.exceptions.HTTPError):
+            Part(self.api, 9999999999999)
 
     def test_fields(self):
         """
@@ -274,8 +274,10 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(len(Part.list(self.api)), n + 1)
 
         # Cannot delete - part is 'active'!
-        response = p.delete()
-        self.assertEqual(response.status_code, 405)
+        with self.assertRaises(requests.exceptions.HTTPError) as ar:
+            response = p.delete()
+
+        self.assertIn("is active: cannot delete", str(ar.exception))
 
         p.save(data={'active': False})
         response = p.delete()
@@ -300,9 +302,9 @@ class PartTest(InvenTreeTestCase):
             dummy_file.write("hello world")
 
         # Attempt to upload an image
-        response = p.uploadImage("dummy_image.jpg")
-        self.assertIsNone(response)
-
+        with self.assertRaises(requests.exceptions.HTTPError):
+            response = p.uploadImage("dummy_image.jpg")
+    
         # Now, let's actually upload a real image
         img = Image.new('RGB', (128, 128), color='red')
         img.save('dummy_image.png')
