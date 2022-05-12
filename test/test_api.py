@@ -55,7 +55,7 @@ class Unauthenticated(unittest.TestCase):
         """
 
         # Downloading without auth = unauthorized error (401)
-        with self.assertRaises(requests.exceptions.HTTPError) as ar:
+        with self.assertRaises(requests.exceptions.HTTPError):
             self.assertFalse(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
 
 
