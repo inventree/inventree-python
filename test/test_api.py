@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import requests
 
 import os
 import sys
@@ -42,16 +43,20 @@ class Unauthenticated(unittest.TestCase):
         self.api = api.InvenTreeAPI(SERVER, username="hello", password="world")
 
     def test_read_parts(self):
-        parts = part.Part.list(self.api)
 
-        self.assertEqual(len(parts), 0)
+        with self.assertRaises(requests.exceptions.HTTPError) as ar:
+            part.Part.list(self.api)
+
+        self.assertIn('Invalid username/password', str(ar.exception))
 
     def test_file_download(self):
         """
         Attemtping to download a file while unauthenticated should return False
         """
 
-        self.assertFalse(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
+        # Downloading without auth = unauthorized error (401)
+        with self.assertRaises(requests.exceptions.HTTPError) as ar:
+            self.assertFalse(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
 
 
 class InvenTreeTestCase(unittest.TestCase):
