@@ -12,6 +12,8 @@ dummy_image.*
 # General python stuff
 *.pyc
 .pypirc
+.eggs
+.env
 dist
 build
 inventree.egg-info
