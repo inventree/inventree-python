@@ -315,7 +315,24 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(p['image'])
         self.assertIn('dummy_image', p['image'])
 
-        # TODO: Re-download the image
+        # Re-download the image file
+        fout = 'test/output.png'
+
+        if os.path.exists(fout):
+            # Delete the file if it already exists
+            os.remove(fout)
+
+        response = p.downloadImage(fout)
+        self.assertTrue(response)
+
+        self.assertTrue(os.path.exists(fout))
+
+        # Attempt to re-download
+        with self.assertRaises(FileExistsError):
+            p.downloadImage(fout)
+
+        # Download, with overwrite enabled
+        p.downloadImage(fout, overwrite=True)
 
     def test_part_attachment(self):
         """

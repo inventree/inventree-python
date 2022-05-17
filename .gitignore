@@ -11,6 +11,7 @@ dummy_image.*
 
 test/data/
 test/*.tmp
+test/output.png
 
 # General python / dev stuff
 *.pyc

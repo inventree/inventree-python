@@ -51,7 +51,7 @@ class Unauthenticated(unittest.TestCase):
 
     def test_file_download(self):
         """
-        Attemtping to download a file while unauthenticated should return False
+        Attemtping to download a file while unauthenticated should raise an error
         """
 
         # Downloading without auth = unauthorized error (401)
@@ -60,6 +60,11 @@ class Unauthenticated(unittest.TestCase):
 
 
 class InvenTreeTestCase(unittest.TestCase):
+    """
+    Base class for running InvenTree unit tests.
+
+    - Creates an authenticated API instance
+    """
 
     def setUp(self):
         """

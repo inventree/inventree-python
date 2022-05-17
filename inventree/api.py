@@ -99,10 +99,10 @@ class InvenTreeAPI(object):
         try:
             response = requests.get(self.api_url, timeout=2.5)
         except requests.exceptions.ConnectionError as e:
-            logger.fatal("Server connection error:", str(e))
+            logger.fatal("Server connection error:", type(e))
             return False
         except Exception as e:
-            logger.fatal("Unhandled server error:", str(e))
+            logger.fatal("Unhandled server error:", type(e))
             # Re-throw the exception
             raise e
 
@@ -469,7 +469,7 @@ class InvenTreeAPI(object):
         destination = os.path.abspath(destination)
 
         if os.path.exists(destination) and not overwrite:
-            raise FileExistsError(f"Destinationi file '{destination}' already exists")
+            raise FileExistsError(f"Destination file '{destination}' already exists")
 
         if self.token:
             headers = {
