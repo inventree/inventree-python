@@ -29,7 +29,13 @@ setuptools.setup(
 
     license="MIT",
 
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(
+        exclude=[
+            'ci',
+            'scripts',
+            'test',
+        ]
+    ),
 
     install_requires=[
         "requests"
