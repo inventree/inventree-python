@@ -22,7 +22,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.7]
+        python-version: [3.8]
 
     steps:
       - name: Checkout Code
@@ -44,6 +44,7 @@ jobs:
           invoke migrate
           invoke import-fixtures
           invoke server -a 127.0.0.1:12345 &
+          invoke wait
       - name: Run Tests
         run: |
           invoke check-server
