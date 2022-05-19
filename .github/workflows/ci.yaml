@@ -44,6 +44,7 @@ jobs:
           invoke migrate
           invoke import-fixtures
           invoke server -a 127.0.0.1:12345 &
+          invoke wait
       - name: Run Tests
         run: |
           invoke check-server
