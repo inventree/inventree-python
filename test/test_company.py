@@ -247,7 +247,17 @@ class CompanyTest(InvenTreeTestCase):
 
     def test_attachments(self):
 
-        mp = company.ManufacturerPart.list(self.api)[0]
+        # Create a new manufacturer part, if one does not already exist
+        mps = company.ManufacturerPart.list(self.api)
+
+        if len(mps) > 0:
+            mp = mps[0]
+        else:
+            mp = company.ManufacturerPart.create(self.api, {
+                'manufacturer': 7,
+                'part': 3,
+                'MPN': 'M7P3',
+            })
 
         # Initially, ensure there are no attachments associated with this part
         for attachment in mp.getAttachments():
