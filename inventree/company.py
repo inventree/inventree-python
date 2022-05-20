@@ -88,6 +88,10 @@ class ManufacturerPart(inventree.base.InventreeObject):
 
         return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
 
+    def getAttachments(self, **kwargs):
+
+        return ManufacturerPartAttachment.list(self._api, manufacturer_part=self.pk, **kwargs)
+
 
 class ManufacturerPartParameter(inventree.base.InventreeObject):
     """
@@ -95,6 +99,14 @@ class ManufacturerPartParameter(inventree.base.InventreeObject):
     """
 
     URL = 'company/part/manufacturer/parameter'
+
+
+class ManufacturerPartAttachment(inventree.base.Attachment):
+    """
+    Class representing the ManufacturerPartAttachment model
+    """
+
+    URL = 'company/part/manufacturer/attachment'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
