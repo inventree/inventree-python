@@ -92,6 +92,15 @@ class ManufacturerPart(inventree.base.InventreeObject):
 
         return ManufacturerPartAttachment.list(self._api, manufacturer_part=self.pk, **kwargs)
 
+    def uploadAttachment(self, attachment, comment=''):
+
+        return ManufacturerPartAttachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            manufacturer_part=self.pk,
+        )
+
 
 class ManufacturerPartParameter(inventree.base.InventreeObject):
     """
