@@ -244,3 +244,48 @@ class CompanyTest(InvenTreeTestCase):
 
         with self.assertRaises(TypeError):
             c.uploadImage(None)
+
+    def test_attachments(self):
+
+        # Create a new manufacturer part, if one does not already exist
+        mps = company.ManufacturerPart.list(self.api)
+
+        if len(mps) > 0:
+            mp = mps[0]
+        else:
+            mp = company.ManufacturerPart.create(self.api, {
+                'manufacturer': 7,
+                'part': 3,
+                'MPN': 'M7P3',
+            })
+
+        # Initially, ensure there are no attachments associated with this part
+        for attachment in mp.getAttachments():
+            attachment.delete()
+
+        attachments = company.ManufacturerPartAttachment.list(self.api, manufacturer_part=mp.pk)
+
+        self.assertTrue(len(attachments) == 0)
+
+        # Let's create one!
+
+        # Grab the first available manufacturer part
+
+        response = mp.uploadAttachment(
+            os.path.join(os.path.dirname(__file__), 'attachment.txt'),
+            comment='Uploading a new manufacturer part attachment',
+        )
+
+        self.assertIsNotNone(response)
+
+        attachments = company.ManufacturerPartAttachment.list(self.api)
+
+        self.assertEqual(len(attachments), 1)
+
+        attachment = attachments[0]
+
+        self.assertEqual(attachment['comment'], 'Uploading a new manufacturer part attachment')
+
+        attachments = mp.getAttachments()
+
+        self.assertEqual(len(attachments), 1)
