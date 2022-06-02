@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.part import Part, PartAttachment, PartCategory  # noqa: E402
+from inventree.part import Part, PartAttachment, PartCategory, Parameter, ParameterTemplate  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 
 
