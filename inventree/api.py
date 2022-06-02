@@ -226,7 +226,7 @@ class InvenTreeAPI(object):
                 headers=headers,
                 json=json,
                 files=files,
-                timeout=2.5,
+                timeout=10,
             )
         except Exception as e:
             # Re-thrown any caught errors, and add a message to the log
