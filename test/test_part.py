@@ -453,29 +453,29 @@ class PartTest(InvenTreeTestCase):
         existingParameters = len(p.getParameters())
         
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'template':parametertemplate.pk})
+        param = Parameter.create(self.api, data={'part':p.pk, 'template':parametertemplate.pk})
         
         # result should be None
         self.assertIsNone(param)
         
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'data':10})
+        param = Parameter.create(self.api, data={'part':p.pk, 'data':10})
         
         # result should be None
         self.assertIsNone(param)
         
         # Define w. required values - integer
-        param = Parameter.create(self.api, data={'template':parametertemplate.pk,'data':10})
+        param = Parameter.create(self.api, data={'part':p.pk, 'template':parametertemplate.pk,'data':10})
         
         # result should not be None
         self.assertIsNotNone(param)
         
         # Same parameter for same part - should fail
         # Define w. required values - string
-        param = Parameter.create(self.api, data={'template':parametertemplate.pk,'data':'String value'})
+        param2 = Parameter.create(self.api, data={'part':p.pk, 'template':parametertemplate.pk,'data':'String value'})
         
         # result should be None
-        self.assertIsNone(param)
+        self.assertIsNone(param2)
         
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters+1)
