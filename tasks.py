@@ -49,22 +49,33 @@ def update_image(c, debug=True):
 
 
 @task
-def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True):
+def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True, timeout=30):
     """
-    Check that we can ping the sevrer and get a token
+    Check that we can ping the sevrer and get a token.
+    A generous timeout is applied here, to give the server time to activate
     """
 
     auth = HTTPBasicAuth(username=username, password=password)
 
     url = f"{host}/api/user/token/"
 
-    try:
-        response = requests.get(url, auth=auth, timeout=0.5)
-    except Exception as e:
-        if debug:
-            print("Error:", str(e))
+    response = None
+
+    while response is None:
+
+        try:
+            response = requests.get(url, auth=auth, timeout=0.5)
+        except Exception as e:
+            if debug:
+                print("Error:", str(e))
         
-        return False
+        if response is None:
+            timeout -= 1
+
+            time.sleep(1)
+        
+            if timeout <= 0:
+                return False
 
     if response.status_code != 200:
         if debug:
