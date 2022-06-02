@@ -51,7 +51,7 @@ class PurchaseOrder(inventree.base.InventreeObject):
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
 
-    URL = 'order/po-line/'
+    URL = 'order/po-line'
 
     def getSupplierPart(self):
         """
@@ -75,7 +75,7 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
 class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
-    URL = 'order/po-extra-line/'
+    URL = 'order/po-extra-line'
 
     def getOrder(self):
         """
