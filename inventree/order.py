@@ -14,6 +14,10 @@ class PurchaseOrder(inventree.base.InventreeObject):
         """ Return the line items associated with this order """
         return PurchaseOrderLineItem.list(self._api, order=self.pk, **kwargs)
 
+    def getExtraLineItems(self, **kwargs):
+        """ Return the line items associated with this order """
+        return PurchaseOrderExtraLineItem.list(self._api, order=self.pk, **kwargs)
+
     def addLineItem(self, **kwargs):
         """
         Create (and return) new PurchaseOrderLineItem object against this PurchaseOrder
@@ -22,6 +26,15 @@ class PurchaseOrder(inventree.base.InventreeObject):
         kwargs['order'] = self.pk
 
         return PurchaseOrderLineItem.create(self._api, data=kwargs)
+
+    def addExtraLineItem(self, **kwargs):
+        """
+        Create (and return) new PurchaseOrderExtraLineItem object against this PurchaseOrder
+        """
+
+        kwargs['order'] = self.pk
+
+        return PurchaseOrderExtraLineItem.create(self._api, data=kwargs)
 
     def getAttachments(self):
         return PurchaseOrderAttachment.list(self._api, order=self.pk)
@@ -51,6 +64,17 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         Return the Part referenced by the associated SupplierPart
         """
         return inventree.part.Part(self._api, self.getSupplierPart().part)
+
+    def getOrder(self):
+        """
+        Return the PurchaseOrder to which this PurchaseOrderLineItem belongs
+        """
+        return PurchaseOrder(self._api, self.order)
+
+class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
+    """ Class representing the PurchaseOrderExtraLineItem database model """
+
+    URL = 'order/po-extra-line/'
 
     def getOrder(self):
         """
