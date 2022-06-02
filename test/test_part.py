@@ -422,3 +422,72 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(ip.part, p.pk)
         ip_price_clean = float(ip.price)
         self.assertEqual(ip_price_clean, test_price)
+
+    def test_parameters(self):
+        """
+        Test setting and getting Part parameter templates, as well as parameter values
+        """
+        
+        # Count number of existing Parameter Templates
+        existingTemplates = len(ParameterTemplate.list(self.api))
+        
+        # Create new parameter template - this will fail, no name given
+        parametertemplate = ParameterTemplate.create(self.api, data={'units':"kg A"})
+        
+        # result should be None
+        self.assertIsNone(parametertemplate)
+        
+        # Now create a proper parameter template
+        parametertemplate = ParameterTemplate.create(self.api, data={'name':'Test parameter','units':"kg A"})
+        
+        # result should not be None
+        self.assertIsNotNone(parametertemplate)
+        
+        # Count should be one higher now
+        self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates+1)
+        
+        # Grab the first part
+        p = Part.list(self.api)[0]
+        
+        # Count number of parameters
+        existingParameters = len(p.getParameters())
+        
+        # Define parameter value for this part - without all required values
+        param = Parameter.create(self.api, data={'template':parametertemplate.pk})
+        
+        # result should be None
+        self.assertIsNone(param)
+        
+        # Define parameter value for this part - without all required values
+        param = Parameter.create(self.api, data={'data':10})
+        
+        # result should be None
+        self.assertIsNone(param)
+        
+        # Define w. required values - integer
+        param = Parameter.create(self.api, data={'template':parametertemplate.pk,'data':10})
+        
+        # result should not be None
+        self.assertIsNotNone(param)
+        
+        # Same parameter for same part - should fail
+        # Define w. required values - string
+        param = Parameter.create(self.api, data={'template':parametertemplate.pk,'data':'String value'})
+        
+        # result should be None
+        self.assertIsNone(param)
+        
+        # Number of parameters should be one higher than before
+        self.assertEqual(len(p.getParameters()), existingParameters+1)
+        
+        # Delete the parameter
+        param.delete()
+        
+        # Check count
+        self.assertEqual(len(p.getParameters()), existingParameters)
+        
+        # Delete the parameter template
+        parametertemplate.delete()
+        
+        # Check count
+        self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates)
