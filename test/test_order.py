@@ -120,7 +120,7 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.getOrder().pk, po.pk)
 
             self.assertIsNotNone(line)
-
+        
             # Assert that a new line item has been created
             self.assertEqual(len(po.getLineItems()), idx)
 
@@ -133,12 +133,10 @@ class POTest(InvenTreeTestCase):
         for idx, line in enumerate(po.getLineItems()):
             self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
-        
-        # Delete the last line item as a test
-        line.delete()
+            line.delete()
         
         # Assert length is now one less than before
-        self.assertEqual(len(po.getLineItems()), idx - 1)
+        self.assertEqual(len(po.getLineItems()), 0)
         
         # Should not be any extra-line-items yet!
         extraitems = po.getExtraLineItems()
@@ -158,7 +156,7 @@ class POTest(InvenTreeTestCase):
         extraline.delete()
         
         # Now there should be 0 lines left
-        self.assertEqual(po.getExtraLineItems(), 0)
+        self.assertEqual(len(po.getExtraLineItems()), 0)
 
     def test_purchase_order_delete(self):
         """
