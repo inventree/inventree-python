@@ -71,6 +71,7 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         """
         return PurchaseOrder(self._api, self.order)
 
+
 class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
