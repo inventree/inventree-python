@@ -76,7 +76,7 @@ class Part(inventree.base.ImageMixin, inventree.base.InventreeObject):
 
     def getParameters(self):
         """ Return parameters associated with this part """
-        return inventree.base.Parameter.list(self._api, part=self.pk)
+        return inventree.part.Parameter.list(self._api, part=self.pk)
 
     def getRelated(self):
         """ Return related parts associated with this part """
