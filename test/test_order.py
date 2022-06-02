@@ -138,14 +138,14 @@ class POTest(InvenTreeTestCase):
         line.delete()
         
         # Assert length is now one less than before
-        self.assertEqual(len(po.getLineItems()), idx-1)
+        self.assertEqual(len(po.getLineItems()), idx - 1)
         
         # Should not be any extra-line-items yet!
         extraitems = po.getExtraLineItems()
         self.assertEqual(len(extraitems), 0)
         
         # Let's add some!
-        extraline = po.addExtraLineItem(quantity = 1, reference = "Transport costs", notes="Extra line item added from Python interface",price=10,price_currency="EUR")
+        extraline = po.addExtraLineItem(quantity=1, reference="Transport costs", notes="Extra line item added from Python interface", price=10, price_currency="EUR")
         
         self.assertEqual(extraline.getOrder().pk, po.pk)
 
