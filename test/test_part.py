@@ -485,3 +485,9 @@ class PartTest(InvenTreeTestCase):
         
         # Check count
         self.assertEqual(len(p.getParameters()), existingParameters)
+        
+        # Delete the parameter template
+        parametertemplate.delete()
+        
+        # Check count
+        self.assertEqual(len(ParameterTemplate.list(self.api), existingTemplates)
