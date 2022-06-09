@@ -490,4 +490,4 @@ class PartTest(InvenTreeTestCase):
         parametertemplate.delete()
         
         # Check count
-        self.assertEqual(len(ParameterTemplate.list(self.api), existingTemplates)
+        self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates)
