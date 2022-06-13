@@ -101,6 +101,10 @@ class SalesOrder(inventree.base.InventreeObject):
         """ Return the line items associated with this order """
         return SalesOrderLineItem.list(self._api, order=self.pk, **kwargs)
 
+    def getExtraLineItems(self, **kwargs):
+        """ Return the line items associated with this order """
+        return SalesOrderExtraLineItem.list(self._api, order=self.pk, **kwargs)
+
     def addLineItem(self, **kwargs):
         """
         Create (and return) new SalesOrderLineItem object against this SalesOrder
@@ -109,6 +113,15 @@ class SalesOrder(inventree.base.InventreeObject):
         kwargs['order'] = self.pk
 
         return SalesOrderLineItem.create(self._api, data=kwargs)
+
+    def addExtraLineItem(self, **kwargs):
+        """
+        Create (and return) new SalesOrderExtraLineItem object against this SalesOrder
+        """
+
+        kwargs['order'] = self.pk
+
+        return SalesOrderExtraLineItem.create(self._api, data=kwargs)
 
     def getAttachments(self):
         return SalesOrderAttachment.list(self._api, order=self.pk)
@@ -132,6 +145,18 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         Return the Part object referenced by this SalesOrderLineItem
         """
         return inventree.part.Part(self._api, self.part)
+
+    def getOrder(self):
+        """
+        Return the SalesOrder to which this SalesOrderLineItem belongs
+        """
+        return SalesOrder(self._api, self.order)
+
+
+class SalesOrderExtraLineItem(inventree.base.InventreeObject):
+    """ Class representing the SalesOrderExtraLineItem database model """
+
+    URL = 'order/so-extra-line'
 
     def getOrder(self):
         """
