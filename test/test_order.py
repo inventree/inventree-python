@@ -293,6 +293,25 @@ class SOTest(InvenTreeTestCase):
 
                 self.assertEqual(len(sales_order.getLineItems()), idx + 1)
 
+            # Should not be any extra-line-items yet!
+            self.assertEqual(len(sales_order.getExtraLineItems()), 0)
+
+            # Let's add some!
+            extraline = sales_order.addExtraLineItem(quantity=1, reference="Transport costs", notes="Extra line item added from Python interface", price=10, price_currency="EUR")
+
+            self.assertIsNotNone(extraline)
+
+            self.assertEqual(extraline.getOrder().pk, sales_order.pk)
+
+            # Assert that a new line item has been created
+            self.assertEqual(len(sales_order.getExtraLineItems()), 1)
+
+            # Assert that we can delete the item again
+            extraline.delete()
+
+            # Now there should be 0 lines left
+            self.assertEqual(len(sales_order.getExtraLineItems()), 0)
+
     def test_so_attachment(self):
         """
         Test upload of attachment against a SalesOrder
