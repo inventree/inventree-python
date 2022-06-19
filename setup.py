@@ -38,7 +38,7 @@ setuptools.setup(
     ),
 
     install_requires=[
-        "requests"
+        "requests>=2.27.0"
     ],
 
     setup_requires=[
