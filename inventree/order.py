@@ -138,7 +138,7 @@ class SalesOrder(inventree.base.InventreeObject):
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
-    URL = 'order/so-line/'
+    URL = 'order/so-line'
 
     def getPart(self):
         """
