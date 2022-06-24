@@ -133,7 +133,18 @@ class SalesOrder(inventree.base.InventreeObject):
             comment=comment,
             order=self.pk,
         )
+    
+    def getShipments(self, **kwargs):
+        """ Return the shipments associated with this order """
+        
+        return SalesOrderShipment.list(self._api, order=self.pk, **kwargs)
 
+    def addShipment(self, **kwargs):
+        """ Create (and return) new SalesOrderShipment against this SalesOrder """
+        
+        kwargs['order'] = self.pk
+
+        return SalesOrderShipment.create(self._api, data=kwargs)
 
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
@@ -171,3 +182,15 @@ class SalesOrderAttachment(inventree.base.Attachment):
     URL = 'order/so/attachment'
 
     REQUIRED_KWARGS = ['order']
+
+
+class SalesOrderShipment(inventree.base.InventreeObject):
+    """Class representing a shipment for a SalesOrder"""
+
+    URL = 'order/so/shipment'
+
+    def getOrder(self):
+        """
+        Return the SalesOrder to which this SalesOrderShipment belongs
+        """
+        return SalesOrder(self._api, self.order)
