@@ -422,3 +422,7 @@ class SOTest(InvenTreeTestCase):
 
         # Assert the shipment Order is equal to the expected one
         self.assertEqual(shipment_2.getOrder().pk, so.pk)
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
