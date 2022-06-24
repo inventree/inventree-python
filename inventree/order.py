@@ -146,6 +146,7 @@ class SalesOrder(inventree.base.InventreeObject):
 
         return SalesOrderShipment.create(self._api, data=kwargs)
 
+
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
