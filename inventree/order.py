@@ -139,10 +139,11 @@ class SalesOrder(inventree.base.InventreeObject):
         
         return SalesOrderShipment.list(self._api, order=self.pk, **kwargs)
 
-    def addShipment(self, **kwargs):
+    def addShipment(self, reference, **kwargs):
         """ Create (and return) new SalesOrderShipment against this SalesOrder """
         
         kwargs['order'] = self.pk
+        kwargs['reference'] = reference
 
         return SalesOrderShipment.create(self._api, data=kwargs)
 
