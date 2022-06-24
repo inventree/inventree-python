@@ -344,3 +344,81 @@ class SOTest(InvenTreeTestCase):
 
         attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
         self.assertEqual(len(attachments), n + 1)
+
+    def test_so_shipment(self):
+        """
+        Test shipment functionality for a SalesOrder
+        """
+
+        # Grab the last available SalesOrder - should not have a shipment yet
+        orders = order.SalesOrder.list(self.api)
+
+        if len(orders) > 0:
+            so = orders[-1]
+        else:
+            so = order.SalesOrder.create(self.api, {
+                'customer': 4,
+                'reference': "My new sales order",
+                "description": "Selling some stuff",
+            })
+
+        # The shipments list should return something which is not none
+        self.assertIsNotNone(so.getShipments())
+
+        # Count number of current shipments
+        num_shipments = len(so.getShipments())
+
+        # Create a new shipment - without data, use SalesOrderShipment method
+        with self.assertRaises(TypeError):
+            shipment_1 = order.SalesOrderShipment.create(self.api)
+
+        # Create new shipment - minimal data, use SalesOrderShipment method
+        shipment_1 = order.SalesOrderShipment.create(self.api,data={'order': so.pk, 'reference': f'Package {num_shipments+1}'})
+
+        # Assert the shipment is created
+        self.assertIsNotNone(shipment_1)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_1.getOrder().pk, so.pk)
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
+
+        # Create new shipment - use addShipment method.
+        # Should fail because reference will not be unique
+        shipment_2 = so.addShipment(f'Package {num_shipments}')
+
+        # Assert the shipment is not created
+        self.assertIsNone(shipment_2)
+
+        # Create new shipment - use addShipment method. No extra data
+        # Should fail because reference will not be unique
+        shipment_2 = so.addShipment(f'Package {num_shipments+1}')
+
+        # Assert the shipment is not created
+        self.assertIsNotNone(shipment_2)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_2.getOrder().pk, so.pk)
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
+
+        # Create another shipment - use addShipment method. With some extra data,
+        # including non-sense order (which should be overwritten)
+        shipment_2 = so.addShipment(reference = f'Package {num_shipments+1}',
+            data = {
+                'order' : 10103413,
+                'shipment_date' : '2025-09-05',
+                'tracking_number': '93414134343',
+                'notes': f'Test shipment number 2 for order {so.pk}'
+            }
+        )
+
+        # Assert the shipment is created
+        self.assertIsNotNone(shipment_2)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_2.getOrder().pk, so.pk)
