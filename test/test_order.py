@@ -373,7 +373,7 @@ class SOTest(InvenTreeTestCase):
             shipment_1 = order.SalesOrderShipment.create(self.api)
 
         # Create new shipment - minimal data, use SalesOrderShipment method
-        shipment_1 = order.SalesOrderShipment.create(self.api,data={'order': so.pk, 'reference': f'Package {num_shipments+1}'})
+        shipment_1 = order.SalesOrderShipment.create(self.api, data={'order': so.pk, 'reference': f'Package {num_shipments+1}'})
 
         # Assert the shipment is created
         self.assertIsNotNone(shipment_1)
@@ -408,10 +408,11 @@ class SOTest(InvenTreeTestCase):
 
         # Create another shipment - use addShipment method. With some extra data,
         # including non-sense order (which should be overwritten)
-        shipment_2 = so.addShipment(reference = f'Package {num_shipments+1}',
-            data = {
-                'order' : 10103413,
-                'shipment_date' : '2025-09-05',
+        shipment_2 = so.addShipment(
+            reference=f'Package {num_shipments + 1}',
+            data={
+                'order': 10103413,
+                'shipment_date': '2025-09-05',
                 'tracking_number': '93414134343',
                 'notes': f'Test shipment number 2 for order {so.pk}'
             }
