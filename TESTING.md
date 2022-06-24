@@ -20,9 +20,15 @@ invoke test
 
 This assumes you have installed, on your path:
 
-- python
+- python (with requirements in requirements.txt)
 - invoke
 - docker-compose
+
+Before the first test, run the following:
+
+```
+invoke update-image
+```
 
 The `invoke-test` command performs the following sequence of actions:
 
