@@ -137,7 +137,7 @@ class InventreeObject(object):
         items = []
 
         if isinstance(response, dict) and response['results'] is not None:
-          response = response['results']
+            response = response['results']
 
         for data in response:
             if 'pk' in data:
