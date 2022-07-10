@@ -81,7 +81,7 @@ class POTest(InvenTreeTestCase):
         n = len(order.PurchaseOrder.list(self.api))
 
         # Create a PO with unique reference
-        ref = f"po_{n+1}_{supplier.pk}"
+        ref = f"PO-{n+1}"
 
         po = supplier.createPurchaseOrder(
             reference=ref,
@@ -183,7 +183,7 @@ class POTest(InvenTreeTestCase):
 
         po = order.PurchaseOrder.create(self.api, {
             'supplier': 1,
-            'reference': f'xyz-abc-{n}',
+            'reference': f'PO-{n + 100}',
             'description': 'A new purchase order',
         })
 
@@ -269,13 +269,12 @@ class SOTest(InvenTreeTestCase):
             # Create a new sales order for this customer
             n = len(customer.getSalesOrders())
 
-            ref = f"SO_{n}_customer_{customer.pk}"
-
             # Create a new sales order for the company
             sales_order = customer.createSalesOrder(
-                reference=ref,
                 description='This is a new SalesOrder!'
             )
+
+            self.assertIsNotNone(sales_order)
 
             self.assertEqual(len(sales_order.getLineItems()), 0)
 
@@ -297,7 +296,12 @@ class SOTest(InvenTreeTestCase):
             self.assertEqual(len(sales_order.getExtraLineItems()), 0)
 
             # Let's add some!
-            extraline = sales_order.addExtraLineItem(quantity=1, reference="Transport costs", notes="Extra line item added from Python interface", price=10, price_currency="EUR")
+            extraline = sales_order.addExtraLineItem(
+                quantity=1,
+                reference="Transport costs",
+                notes="Extra line item added from Python interface",
+                price=10, price_currency="EUR"
+            )
 
             self.assertIsNotNone(extraline)
 
@@ -325,7 +329,6 @@ class SOTest(InvenTreeTestCase):
         else:
             so = order.SalesOrder.create(self.api, {
                 'customer': 4,
-                'reference': "My new sales order",
                 "description": "Selling some stuff",
             })
 
