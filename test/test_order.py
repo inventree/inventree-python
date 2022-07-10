@@ -329,7 +329,6 @@ class SOTest(InvenTreeTestCase):
         else:
             so = order.SalesOrder.create(self.api, {
                 'customer': 4,
-                'reference': "My new sales order",
                 "description": "Selling some stuff",
             })
 
