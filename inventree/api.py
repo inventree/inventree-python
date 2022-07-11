@@ -130,6 +130,9 @@ class InvenTreeAPI(object):
         if api_version < InvenTreeAPI.getMinApiVersion():
             raise ValueError(f"Server API version ({api_version}) is older than minimum supported API version ({InvenTreeAPI.getMinApiVersion()})")
 
+        # Store the server API version
+        self.api_version = api_version
+
         return True
 
     def requestToken(self):
