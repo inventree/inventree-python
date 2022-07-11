@@ -334,11 +334,13 @@ class MetadataMixin:
         """Read model instance metadata"""
         if self._api:
 
-            if self.api_version < 49:
+            if self._api.api_version < 49:
                 logger.error(f"API version 49 or newer required to access instance metadata")
                 return {}
 
-            return self._api.get(self.metdata_url)
+            response = self._api.get(self.metdata_url)
+
+            return response['metadata']
         else:
             raise AttributeError(f"model.getMetadata failed at '{self._url}': No API instance provided")
 
@@ -355,19 +357,23 @@ class MetadataMixin:
 
         if self._api:
 
-            if self.api_version < 49:
+            if self._api.api_version < 49:
                 logger.error(f"API version 49 or newer required to access instance metadata")
                 return None
 
             if overwrite:
                 return self._api.put(
                     self.metdata_url,
-                    data=data,
+                    data={
+                        "metadata": data,
+                    }
                 )
             else:
                 return self._api.patch(
                     self.metdata_url,
-                    data=data,
+                    data={
+                        "metadata": data
+                    }
                 )
         else:
             raise AttributeError(f"model.setMetadata failed at '{self._url}': No API instance provided")
