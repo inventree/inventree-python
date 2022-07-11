@@ -145,6 +145,15 @@ class PartTest(InvenTreeTestCase):
 
         self.assertEqual(len(parts), n_parts + 10)
 
+    def test_pagination(self):
+        """ Test that we can paginate the queryset by specifying a 'limit' parameter"""
+
+        parts = Part.list(self.api, limit=5)
+        self.assertEqual(len(parts), 5)
+
+        for p in parts:
+            self.assertTrue(type(p) is Part)
+
     def test_part_list(self):
         """
         Check that we can list Part objects,
