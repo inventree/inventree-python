@@ -215,7 +215,7 @@ class InventreeObject(object):
                 logger.error(f"Error during reload at {self._url} - returned data is invalid")
 
         else:
-            raise ValueError(f"model.reload failed at '{self._url}': No API instance provided")
+            raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
         if name in self._data.keys():
@@ -314,10 +314,69 @@ class Currency(InventreeObject):
     URL = 'common/currency'
 
 
-class ImageMixin:
+class MetadataMixin:
+    """Mixin class for models which support a 'metadata' attribute.
+
+    - The 'metadata' is not used for any InvenTree business logic
+    - Instead it can be used by plugins for storing arbitrary information
+    - Internally it is stored as a JSON database field
+    - Metadata is accessed via the API by appending '/metadata/' to the API URL
+
+    Note: Requires server API version 49 or newer
+
     """
-    Mixin class for supporting image upload against a model,
-    which has a specific 'image' field associated
+
+    @property
+    def metdata_url(self):
+        return os.path.join(self._url, "metadata/")
+
+    def getMetadata(self):
+        """Read model instance metadata"""
+        if self._api:
+
+            if self.api_version < 49:
+                logger.error(f"API version 49 or newer required to access instance metadata")
+                return {}
+
+            return self._api.get(self.metdata_url)
+        else:
+            raise AttributeError(f"model.getMetadata failed at '{self._url}': No API instance provided")
+
+    def setMetadata(self, data, overwrite=False):
+        """Write metadata to this particular model.
+        
+        Arguments:
+            data: The data to be written. Must be a dict object
+            overwrite: If true, provided data replaces existing data. If false (default) data is merged with any existing data.
+        """
+
+        if type(data) is not dict:
+            raise TypeError("Data provided to 'setMetadata' method must be a dict object")
+
+        if self._api:
+
+            if self.api_version < 49:
+                logger.error(f"API version 49 or newer required to access instance metadata")
+                return None
+
+            if overwrite:
+                return self._api.put(
+                    self.metdata_url,
+                    data=data,
+                )
+            else:
+                return self._api.patch(
+                    self.metdata_url,
+                    data=data,
+                )
+        else:
+            raise AttributeError(f"model.setMetadata failed at '{self._url}': No API instance provided")
+
+
+class ImageMixin:
+    """Mixin class for supporting image upload against a model.
+
+    - The model must have a specific 'image' field associated
     """
 
     def uploadImage(self, image):
