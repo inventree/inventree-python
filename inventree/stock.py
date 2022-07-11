@@ -7,7 +7,7 @@ import inventree.base
 import inventree.part
 
 
-class StockLocation(inventree.base.InventreeObject):
+class StockLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -33,7 +33,7 @@ class StockLocation(inventree.base.InventreeObject):
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItem(inventree.base.InventreeObject):
+class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the StockItem database model.
     
     Stock items can be filtered by:

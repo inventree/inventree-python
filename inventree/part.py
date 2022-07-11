@@ -12,7 +12,7 @@ import inventree.build
 logger = logging.getLogger('inventree')
 
 
-class PartCategory(inventree.base.InventreeObject):
+class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
     URL = 'part/category'
@@ -41,7 +41,7 @@ class PartCategory(inventree.base.InventreeObject):
                          fetch_parent=fetch_parent)
 
 
-class Part(inventree.base.ImageMixin, inventree.base.InventreeObject):
+class Part(inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'

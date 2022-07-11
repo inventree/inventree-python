@@ -500,3 +500,42 @@ class PartTest(InvenTreeTestCase):
         
         # Check count
         self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates)
+
+    def test_metadata(self):
+        """Test Part instance metadata"""
+
+        # Grab the first available part
+        part = Part.list(self.api, limit=1)[0]
+
+        part.setMetadata(
+            {
+                "foo": "bar",
+            },
+            overwrite=True,
+        )
+
+        metadata = part.getMetadata()
+
+        # Check that the metadata has been overwritten
+        self.assertEqual(len(metadata.keys()), 1)
+
+        self.assertEqual(metadata['foo'], 'bar')
+
+        # Now 'patch' in some metadata
+        part.setMetadata(
+            {
+                'hello': 'world',
+            },
+        )
+
+        part.setMetadata(
+            {
+                'foo': 'rab',
+            }
+        )
+
+        metadata = part.getMetadata()
+
+        self.assertEqual(len(metadata.keys()), 2)
+        self.assertEqual(metadata['foo'], 'rab')
+        self.assertEqual(metadata['hello'], 'world')
