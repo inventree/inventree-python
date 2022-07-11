@@ -335,7 +335,7 @@ class MetadataMixin:
         if self._api:
 
             if self._api.api_version < 49:
-                logger.error(f"API version 49 or newer required to access instance metadata")
+                logger.error("API version 49 or newer required to access instance metadata")
                 return {}
 
             response = self._api.get(self.metdata_url)
@@ -358,7 +358,7 @@ class MetadataMixin:
         if self._api:
 
             if self._api.api_version < 49:
-                logger.error(f"API version 49 or newer required to access instance metadata")
+                logger.error("API version 49 or newer required to access instance metadata")
                 return None
 
             if overwrite:
