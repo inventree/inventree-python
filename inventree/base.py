@@ -59,7 +59,7 @@ class InventreeObject(object):
         """Perform an OPTIONS request for this model, to determine model information.
 
         InvenTree provides custom metadata for each API endpoint, accessed via a HTTP OPTIONS request.
-        This endpoint provides information on the various fields available for that endpoint.        
+        This endpoint provides information on the various fields available for that endpoint.
         """
 
         return api.request(
