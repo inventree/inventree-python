@@ -55,6 +55,19 @@ class InventreeObject(object):
             self.reload()
 
     @classmethod
+    def options(cls, api):
+        """Perform an OPTIONS request for this model, to determine model information.
+
+        InvenTree provides custom metadata for each API endpoint, accessed via a HTTP OPTIONS request.
+        This endpoint provides information on the various fields available for that endpoint.        
+        """
+
+        return api.request(
+            cls.URL,
+            method='OPTIONS',
+        )
+
+    @classmethod
     def fields(cls, api):
         """
         Returns a list of available fields for this model.
@@ -62,10 +75,7 @@ class InventreeObject(object):
         Introspects the available fields using an OPTIONS request.
         """
 
-        response = api.request(
-            cls.URL,
-            method='options',
-        )
+        response = cls.options(api)
 
         if not response.status_code == 200:
             logger.error(f"OPTIONS for '{cls.URL}' returned code {response.status_code}")
