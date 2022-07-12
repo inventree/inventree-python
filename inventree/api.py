@@ -31,7 +31,7 @@ class InvenTreeAPI(object):
 
         return InvenTreeAPI.MIN_SUPPORTED_API_VERSION
 
-    def __init__(self, base_url, **kwargs):
+    def __init__(self, host=None, **kwargs):
         """ Initialize class with initial parameters
 
         Args:
@@ -44,26 +44,48 @@ class InvenTreeAPI(object):
             token - Authentication token (if provided, username/password are ignored)
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
+
+        Login details can be specified using environment variables, rather than being provided as arguments:
+            INVENTREE_API_HOST - Host address e.g. "http://inventree.server.com:8000"
+            INVENTREE_API_USERNAME - Username
+            INVENTREE_API_PASSWORD - Password
+            INVENTREE_API_TOKEN - User access token
         """
 
+        self.base_url = host
+
+        if self.base_url is None:
+            self.base_url = os.environ.get('INVENTREE_API_HOST', None)
+        
+        if self.base_url is None:
+            raise AttributeError("InvenTreeAPI initialized without providing host address")
+
         # Strip out trailing "/api/" (if provided)
-        if base_url.endswith("/api/"):
-            base_url = base_url[:-5]
+        if self.base_url.endswith("/api/"):
+            self.base_url = self.base_url[:-5]
 
-        if not base_url.endswith('/'):
-            base_url += '/'
-
-        self.base_url = base_url
+        if not self.base_url.endswith('/'):
+            self.base_url += '/'
 
         self.api_url = os.path.join(self.base_url, 'api/')
-
-        logger.info(f"Connecting to server: {self.base_url}")
 
         self.username = kwargs.get('username', None)
         self.password = kwargs.get('password', None)
         self.token = kwargs.get('token', None)
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
+
+        # Check for environment variables
+        if self.username is None:
+            self.username = os.environ.get('INVENTREE_API_USERNAME', None)
+        
+        if self.password is None:
+            self.password = os.environ.get('INVENTREE_API_PASSWORD', None)
+        
+        if self.token is None:
+            self.token = os.environ.get('INVENTREE_API_TOKEN', None)
+
+        logger.info(f"Connecting to server: {self.base_url}")
 
         # Check if the server is there
         if not self.testServer():
