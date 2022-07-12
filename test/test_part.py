@@ -52,8 +52,6 @@ class PartTest(InvenTreeTestCase):
     def test_options(self):
         """Extends tests for OPTIONS model metadata"""
 
-        opts = Part.options(self.api)
-
         # Check for field which does not exist
         with self.assertLogs():
             Part.fieldInfo('abcde', self.api)
