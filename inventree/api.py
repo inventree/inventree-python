@@ -121,10 +121,10 @@ class InvenTreeAPI(object):
         try:
             response = requests.get(self.api_url, timeout=2.5)
         except requests.exceptions.ConnectionError as e:
-            logger.fatal("Server connection error:", type(e))
+            logger.fatal(f"Server connection error: {str(type(e))}")
             return False
         except Exception as e:
-            logger.fatal("Unhandled server error:", type(e))
+            logger.fatal(f"Unhandled server error: {str(type(e))}")
             # Re-throw the exception
             raise e
 

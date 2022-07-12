@@ -55,16 +55,16 @@ class InventreeObject(object):
             self.reload()
 
     @classmethod
-    def fields(cls, api):
-        """
-        Returns a list of available fields for this model.
+    def options(cls, api):
+        """Perform an OPTIONS request for this model, to determine model information.
 
-        Introspects the available fields using an OPTIONS request.
+        InvenTree provides custom metadata for each API endpoint, accessed via a HTTP OPTIONS request.
+        This endpoint provides information on the various fields available for that endpoint.
         """
 
         response = api.request(
             cls.URL,
-            method='options',
+            method='OPTIONS',
         )
 
         if not response.status_code == 200:
@@ -74,13 +74,37 @@ class InventreeObject(object):
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logger.error(f"Error decoding JSON response for '{cls.URL}'")
+            logger.error(f"Error decoding OPTIONS response for '{cls.URL}'")
             return {}
 
-        actions = data.get('actions', {})
+        return data
+
+    @classmethod
+    def fields(cls, api):
+        """
+        Returns a list of available fields for this model.
+
+        Introspects the available fields using an OPTIONS request.
+        """
+
+        opts = cls.options(api)
+
+        actions = opts.get('actions', {})
         post = actions.get('POST', {})
 
         return post
+
+    @classmethod
+    def fieldInfo(cls, field_name, api):
+        """Return metadata for a specific field on a model"""
+
+        fields = cls.fields(api)
+
+        if field_name in fields:
+            return fields[field_name]
+        else:
+            logger.warning(f"Field '{field_name}' not found in OPTIONS request for {cls.URL}")
+            return {}
 
     @classmethod
     def fieldNames(cls, api):
