@@ -49,6 +49,34 @@ class PartTest(InvenTreeTestCase):
         self.assertIn('full_name', field_names)
         self.assertIn('IPN', field_names)
 
+    def test_options(self):
+        """Extends tests for OPTIONS model metadata"""
+
+        opts = Part.options(self.api)
+
+        # Check for field which does not exist
+        with self.assertLogs():
+            Part.fieldInfo('abcde', self.api)
+
+        active = Part.fieldInfo('active', self.api)
+
+        self.assertEqual(active['type'], 'boolean')
+        self.assertEqual(active['required'], True)
+        self.assertEqual(active['label'], 'Active')
+        self.assertEqual(active['default'], True)
+
+        for field_name in [
+            'name',
+            'description',
+            'component',
+            'assembly',
+        ]:
+            field = Part.fieldInfo(field_name, self.api)
+
+            # Check required field attributes
+            for attr in ['type', 'required', 'read_only', 'label', 'help_text']:
+                self.assertIn(attr, field)
+
     def test_part_cats(self):
         """
         Tests for category filtering
