@@ -3,6 +3,8 @@
 import os
 import sys
 
+from requests.exceptions import HTTPError
+
 try:
     import Image
 except ImportError:
@@ -142,13 +144,13 @@ class CompanyTest(InvenTreeTestCase):
         self.assertEqual(len(part.getParameters()), 10)
 
         # Attempt to create a duplicate parameter
-        parameter = company.ManufacturerPartParameter.create(self.api, {
-            'manufacturer_part': part.pk,
-            'name': 'param 0',
-            'value': 'some value',
-        })
+        with self.asssertRaises(HTTPError):
+            company.ManufacturerPartParameter.create(self.api, {
+                'manufacturer_part': part.pk,
+                'name': 'param 0',
+                'value': 'some value',
+            })
 
-        self.assertIsNone(parameter)
         self.assertEqual(len(part.getParameters()), 10)
 
         # Test that we can edit a ManufacturerPartParameter

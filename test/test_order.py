@@ -3,6 +3,8 @@
 import os
 import sys
 
+from requests.exceptions import HTTPError
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
@@ -110,12 +112,13 @@ class POTest(InvenTreeTestCase):
 
         for idx, sp in enumerate(supplier_parts):
 
-            line = po.addLineItem(part=sp.pk, quantity=idx)
 
             if idx == 0:
-                # This will have thrown an error, as quantity = 0
-                self.assertIsNone(line)
+                with self.assertRaises(HTTPError):
+                    line = po.addLineItem(part=sp.pk, quantity=idx)
                 continue
+
+            line = po.addLineItem(part=sp.pk, quantity=idx)
 
             self.assertEqual(line.getOrder().pk, po.pk)
 
