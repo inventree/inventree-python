@@ -53,6 +53,22 @@ class URLTests(unittest.TestCase):
             self.assertEqual(a.base_url, "http://a.b.co:80/sub/dir/")
             self.assertEqual(a.api_url, "http://a.b.co:80/sub/dir/api/")
 
+    def test_url_construction(self):
+        """Test that the API class correctly constructs URLs"""
+
+        a = api.InvenTreeAPI("http://localhost:1234", connect=False)
+
+        tests = {
+            'part': 'http://localhost:1234/api/part/',
+            '/part': 'http://localhost:1234/api/part/',
+            '/part/': 'http://localhost:1234/api/part/',
+            'order/so/shipment': 'http://localhost:1234/api/order/so/shipment/',
+        }
+
+        for endpoint, url in tests.items():
+            self.assertEqual(a.constructApiUrl(endpoint), url)
+
+
 class LoginTests(unittest.TestCase):
 
     def test_failed_logins(self):

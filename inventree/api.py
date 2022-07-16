@@ -121,10 +121,22 @@ class InvenTreeAPI(object):
         
         self.connected = True
 
-    def clean_url(self, url):
+    def constructApiUrl(self, endpoint_url):
+        """Construct an API endpoint URL based on the provided API URL.
 
-        url = os.path.join(self.api_url, url)
+        Arguments:
+            endpoint_url: The particular API endpoint (everything after "/api/")
 
+        Returns: A fully qualified URL for the subsequent request        
+        """
+
+        # Strip leading / character if provided
+        if endpoint_url.startswith("/"):
+            endpoint_url = endpoint_url[1:]
+
+        url = urljoin(self.api_url, endpoint_url)
+
+        # Ensure the API URL ends with a trailing slash
         if not url.endswith('/'):
             url += '/'
 
@@ -466,13 +478,9 @@ class InvenTreeAPI(object):
         return data
 
     def get(self, url, **kwargs):
-        """ Perform a GET request
+        """ Perform a GET request.
 
-        Args:
-            url - API url
-
-        kwargs:
-
+        For argument information, refer to the 'request' method
         """
 
         response = self.request(url, method='get', **kwargs)
@@ -499,13 +507,10 @@ class InvenTreeAPI(object):
         - If the "destination" is a directory, use the filename of the remote URL
         """
 
-        # Check that the provided URL is "absolute"
-        if not url.startswith(self.base_url):
+        if url.startswith('/'):
+            url = url[1:]
 
-            if url.startswith('/'):
-                url = url[1:]
-
-            url = os.path.join(self.base_url, url)
+        url = urljoin(self.base_url, url)
 
         if os.path.exists(destination) and os.path.isdir(destination):
 
