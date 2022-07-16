@@ -144,7 +144,7 @@ class CompanyTest(InvenTreeTestCase):
         self.assertEqual(len(part.getParameters()), 10)
 
         # Attempt to create a duplicate parameter
-        with self.asssertRaises(HTTPError):
+        with self.assertRaises(HTTPError):
             company.ManufacturerPartParameter.create(self.api, {
                 'manufacturer_part': part.pk,
                 'name': 'param 0',
