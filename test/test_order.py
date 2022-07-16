@@ -112,7 +112,6 @@ class POTest(InvenTreeTestCase):
 
         for idx, sp in enumerate(supplier_parts):
 
-
             if idx == 0:
                 with self.assertRaises(HTTPError):
                     line = po.addLineItem(part=sp.pk, quantity=idx)

@@ -56,7 +56,7 @@ class InvenTreeAPI(object):
         self.setHostName(host or os.environ.get('INVENTREE_API_HOST', None))
 
         # Check for environment variables
-        self.username = kwargs.get('username',  os.environ.get('INVENTREE_API_USERNAME', None))
+        self.username = kwargs.get('username', os.environ.get('INVENTREE_API_USERNAME', None))
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
 
@@ -127,7 +127,7 @@ class InvenTreeAPI(object):
         Arguments:
             endpoint_url: The particular API endpoint (everything after "/api/")
 
-        Returns: A fully qualified URL for the subsequent request        
+        Returns: A fully qualified URL for the subsequent request
         """
 
         # Strip leading / character if provided

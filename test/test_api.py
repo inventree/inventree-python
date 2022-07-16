@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from matplotlib.pyplot import connect
 import requests
 import sys
 import unittest
@@ -17,7 +16,6 @@ from inventree import stock  # noqa: E402
 SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:12345')
 USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'testuser')
 PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'testpassword')
-
 
 
 class URLTests(unittest.TestCase):
