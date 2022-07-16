@@ -4,6 +4,8 @@ import os
 import requests
 import sys
 
+from requests.exceptions import HTTPError
+
 try:
     import Image
 except ImportError:
@@ -467,10 +469,8 @@ class PartTest(InvenTreeTestCase):
         existingTemplates = len(ParameterTemplate.list(self.api))
         
         # Create new parameter template - this will fail, no name given
-        parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
-        
-        # result should be None
-        self.assertIsNone(parametertemplate)
+        with self.assertRaises(HTTPError):
+            parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
         
         # Now create a proper parameter template
         parametertemplate = ParameterTemplate.create(self.api, data={'name': f'Test parameter no {existingTemplates}', 'units': "kg A"})
@@ -488,16 +488,12 @@ class PartTest(InvenTreeTestCase):
         existingParameters = len(p.getParameters())
         
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
-        
-        # result should be None
-        self.assertIsNone(param)
-        
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
+            
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'part': p.pk, 'data': 10})
-        
-        # result should be None
-        self.assertIsNone(param)
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'data': 10})
         
         # Define w. required values - integer
         param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
@@ -507,10 +503,8 @@ class PartTest(InvenTreeTestCase):
         
         # Same parameter for same part - should fail
         # Define w. required values - string
-        param2 = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
-        
-        # result should be None
-        self.assertIsNone(param2)
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
         
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters + 1)
