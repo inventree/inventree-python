@@ -221,32 +221,27 @@ class InvenTreeAPI(object):
 
         return self.token
 
-    def request(self, url, **kwargs):
+    def request(self, api_url, **kwargs):
         """ Perform a URL request to the Inventree API """
 
-        # Remove leading slash
-        if url.startswith('/'):
-            url = url[1:]
+        if not self.connected:
+            # If we have not established a connection to the server yet, attempt now
+            self.connect()
 
-        api_url = os.path.join(self.api_url, url)
+        api_url = self.constructApiUrl(api_url)
 
-        if not api_url.endswith('/'):
-            api_url += '/'
-
-        method = kwargs.get('method', 'get')
-
-        params = kwargs.get('params', {})
-
-        json = kwargs.get('json', {})
-
+        data = kwargs.get('data', kwargs.get('json', {}))
         files = kwargs.get('files', {})
-
+        params = kwargs.get('params', {})
         headers = kwargs.get('headers', {})
 
-        search_term = kwargs.get('search', None)
+        search_term = kwargs.pop('search', None)
 
         if search_term is not None:
             params['search'] = search_term
+
+        # Use provided HTTP method
+        method = kwargs.get('method', 'get')
 
         methods = {
             'GET': requests.get,
@@ -263,31 +258,37 @@ class InvenTreeAPI(object):
 
         method = method.upper()
 
+        payload = {
+            'params': params,
+            'timeout': kwargs.get('timeout', 10),
+        }
+
         if self.use_token_auth and self.token:
             headers['AUTHORIZATION'] = f'Token {self.token}'
             auth = None
         else:
             auth = self.auth
+        
+        payload['headers'] = headers
+        payload['auth'] = auth
 
+        # If we are providing files, we cannot upload as a 'json' request
+        if files:
+            payload['data'] = data
+            payload['files'] = files
+        else:
+            payload['json'] = data
+
+        # Debug request information
         logger.debug("Sending Request:")
         logger.debug(f" - URL: {method} {api_url}")
-        logger.debug(f" - auth: {auth}")
-        logger.debug(f" - params: {params}")
-        logger.debug(f" - headers: {headers}")
-        logger.debug(f" - json: {json}")
-        logger.debug(f" - files: {files}")
+
+        for item, value in payload.items():
+            logger.debug(f" - {item}: {value}")
 
         # Send request to server!
         try:
-            response = methods[method](
-                api_url,
-                auth=auth,
-                params=params,
-                headers=headers,
-                json=json,
-                files=files,
-                timeout=10,
-            )
+            response = methods[method](api_url, **payload)
         except Exception as e:
             # Re-thrown any caught errors, and add a message to the log
             logger.critical(f"Error at api.request - {method} @ {api_url}")
@@ -320,8 +321,8 @@ class InvenTreeAPI(object):
             if files:
                 detail['files'] = files
             
-            if json:
-                detail['data'] = json
+            if data:
+                detail['data'] = data
 
             raise requests.exceptions.HTTPError(detail)
 
@@ -358,7 +359,7 @@ class InvenTreeAPI(object):
 
         return response
 
-    def post(self, url, data, files=None, **kwargs):
+    def post(self, url, data, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
 
         Args:
@@ -367,57 +368,15 @@ class InvenTreeAPI(object):
             files - Dict of file attachments
         """
 
-        url = self.clean_url(url)
-
-        headers = kwargs.get('headers', {})
-
-        if self.use_token_auth and self.token:
-            headers['AUTHORIZATION'] = f'Token {self.token}'
-            auth = None
-        else:
-            auth = self.auth
-
-        response = requests.post(url, data=data, headers=headers, auth=auth, files=files, **kwargs)
-
-        if response is None:
-            return None
-
-        if response.status_code not in [200, 201]:
-            logger.error(f"POST request failed at '{url}' - {response.status_code}")
-            logger.error(f"{response.text}")
-            return None
-        
-        try:
-            data = json.loads(response.text)
-        except json.decoder.JSONDecodeError:
-            logger.error(f"Error decoding JSON response - '{url}'")
-            return None
-
-        return data
-
-    def patch(self, url, data, files=None, **kwargs):
-        """
-        Perform a PATCH request.
-
-        Args:
-            url - API endpoint URL
-            data - JSON data
-            files - optional FILES struct
-        """
-
-        headers = kwargs.get('headers', {})
-
         params = {
-            'format': 'json',
+            'format': kwargs.pop('format', 'json')
         }
 
         response = self.request(
             url,
             json=data,
-            method='patch',
-            headers=headers,
+            method='post',
             params=params,
-            files=files,
             **kwargs
         )
 
@@ -437,7 +396,45 @@ class InvenTreeAPI(object):
 
         return data
 
-    def put(self, url, data, files=None, **kwargs):
+    def patch(self, url, data, **kwargs):
+        """
+        Perform a PATCH request.
+
+        Args:
+            url - API endpoint URL
+            data - JSON data
+            files - optional FILES struct
+        """
+
+        params = {
+            'format': kwargs.pop('format', 'json')
+        }
+
+        response = self.request(
+            url,
+            json=data,
+            method='patch',
+            params=params,
+            **kwargs
+        )
+
+        if response is None:
+            logger.error(f"PATCH returned null response at '{url}'")
+            return None
+
+        if response.status_code not in [200, 201]:
+            logger.error(f"PATCH request failed at '{url}' - {response.status_code}")
+            return None
+
+        try:
+            data = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            logger.error(f"Error decoding JSON response - '{url}'")
+            return None
+
+        return data
+
+    def put(self, url, data, **kwargs):
         """
         Perform a PUT request. Used to update existing records in the database.
 
@@ -446,19 +443,15 @@ class InvenTreeAPI(object):
             data - JSON data to PUT
         """
 
-        headers = kwargs.get('headers', {})
-
         params = {
-            'format': 'json',
+            'format': kwargs.pop('format', 'json')
         }
 
         response = self.request(
             url,
             json=data,
             method='put',
-            headers=headers,
             params=params,
-            files=files,
             **kwargs
         )
 
