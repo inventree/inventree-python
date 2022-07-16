@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import unittest
-import requests
-
 import os
+from matplotlib.pyplot import connect
+import requests
 import sys
+import unittest
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
@@ -18,6 +18,40 @@ SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:12345'
 USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'testuser')
 PASSWORD = os.environ.get('INVENTREE_PYTHON_TEST_PASSWORD', 'testpassword')
 
+
+
+class URLTests(unittest.TestCase):
+    """Class for testing URL functionality"""
+
+    def test_base_url(self):
+        """Test validation of URL provided to InvenTreeAPI class"""
+
+        # Each of these URLs should be invalid
+        for url in [
+            "test.com/123",
+            "http://:80/123",
+            "//xyz.co.uk",
+        ]:
+            with self.assertRaises(Exception):
+                a = api.InvenTreeAPI(url, connect=False)
+
+        # test for base URL construction
+        a = api.InvenTreeAPI('https://test.com', connect=False)
+        self.assertEqual(a.base_url, 'https://test.com/')
+        self.assertEqual(a.api_url, 'https://test.com/api/')
+
+        # more tests that the base URL is set correctly under specific conditions
+        urls = [
+            "http://a.b.co:80/sub/dir/api/",
+            "http://a.b.co:80/sub/dir/api",
+            "http://a.b.co:80/sub/dir/",
+            "http://a.b.co:80/sub/dir",
+        ]
+
+        for url in urls:
+            a = api.InvenTreeAPI(url, connect=False)
+            self.assertEqual(a.base_url, "http://a.b.co:80/sub/dir/")
+            self.assertEqual(a.api_url, "http://a.b.co:80/sub/dir/api/")
 
 class LoginTests(unittest.TestCase):
 

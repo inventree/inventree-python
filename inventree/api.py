@@ -5,12 +5,13 @@ The inventree_api module handles low level requests and authentication
 with the InvenTree database server.
 """
 
-
 import requests
-from requests.auth import HTTPBasicAuth
 import os
 import json
 import logging
+
+from requests.auth import HTTPBasicAuth
+from urllib.parse import urljoin, urlparse
 
 
 logger = logging.getLogger('inventree')
@@ -21,7 +22,7 @@ class InvenTreeAPI(object):
     Basic class for performing Inventree API requests.
     """
 
-    MIN_SUPPORTED_API_VERSION = 6
+    MIN_SUPPORTED_API_VERSION = 51
 
     @staticmethod
     def getMinApiVersion():
@@ -52,40 +53,60 @@ class InvenTreeAPI(object):
             INVENTREE_API_TOKEN - User access token
         """
 
-        self.base_url = host
+        self.setHostName(host or os.environ.get('INVENTREE_API_HOST', None))
 
-        if self.base_url is None:
-            self.base_url = os.environ.get('INVENTREE_API_HOST', None)
+        # Check for environment variables
+        self.username = kwargs.get('username',  os.environ.get('INVENTREE_API_USERNAME', None))
+        self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
+        self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
+
+        self.use_token_auth = kwargs.get('use_token_auth', True)
+        self.verbose = kwargs.get('verbose', False)
+
+        self.auth = None
+        self.connected = False
+
+        if kwargs.get('connect', True):
+            self.connect()
+
+    def setHostName(self, host):
+        """Validate that the provided base URL is valid"""
         
-        if self.base_url is None:
+        if host is None:
             raise AttributeError("InvenTreeAPI initialized without providing host address")
 
-        # Strip out trailing "/api/" (if provided)
-        if self.base_url.endswith("/api/"):
-            self.base_url = self.base_url[:-5]
+        # Ensure that the provided URL is valid
+        url = urlparse(host)
+
+        if not url.scheme:
+            raise Exception(f"Host '{host}' supplied without valid scheme")
+        
+        if not url.netloc or not url.hostname:
+            raise Exception(f"Host '{host}' supplied without valid hostname")
+
+        # Check if the path is provided with '/api/' at the end
+        ps = [el for el in url.path.split('/') if len(el) > 0]
+
+        if len(ps) > 0 and ps[-1] == 'api':
+            ps = ps[:-1]
+
+        path = '/'.join(ps)
+
+        # Re-construct the URL as required
+        self.base_url = f"{url.scheme}://{url.netloc}/{path}"
 
         if not self.base_url.endswith('/'):
             self.base_url += '/'
 
-        self.api_url = os.path.join(self.base_url, 'api/')
+        # Re-construct the API URL as required
+        self.api_url = urljoin(self.base_url, 'api/')
 
-        self.username = kwargs.get('username', None)
-        self.password = kwargs.get('password', None)
-        self.token = kwargs.get('token', None)
-        self.use_token_auth = kwargs.get('use_token_auth', True)
-        self.verbose = kwargs.get('verbose', False)
-
-        # Check for environment variables
-        if self.username is None:
-            self.username = os.environ.get('INVENTREE_API_USERNAME', None)
-        
-        if self.password is None:
-            self.password = os.environ.get('INVENTREE_API_PASSWORD', None)
-        
-        if self.token is None:
-            self.token = os.environ.get('INVENTREE_API_TOKEN', None)
+    def connect(self):
+        """Attempt a connection to the server"""
 
         logger.info(f"Connecting to server: {self.base_url}")
+
+        self.connected = False
 
         # Check if the server is there
         if not self.testServer():
@@ -97,6 +118,8 @@ class InvenTreeAPI(object):
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
+        
+        self.connected = True
 
     def clean_url(self, url):
 
