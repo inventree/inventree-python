@@ -221,8 +221,4 @@ class SalesOrderShipment(inventree.base.InventreeObject):
             'shipment': self.pk
         }
 
-        print(f"{data = }")
-
-        print(f"{type(data['items']) = }")
-
         return self._api.post(url, data)
