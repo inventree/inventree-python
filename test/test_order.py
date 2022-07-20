@@ -379,7 +379,7 @@ class SOTest(InvenTreeTestCase):
 
         # Create new shipment - minimal data, use SalesOrderShipment method
         shipment_1 = order.SalesOrderShipment.create(
-            self.api,data={
+            self.api, data={
                 'order': so.pk,
                 'reference': f'Package {num_shipments+1}'
             }
@@ -424,10 +424,10 @@ class SOTest(InvenTreeTestCase):
         notes = f'Test shipment number {num_shipments+1} for order {so.pk}'
         tracking_number = '93414134343'
         shipment_2 = so.addShipment(
-            reference = f'Package {num_shipments+1}',
-            order = 10103413,
-            notes = notes,
-            tracking_number = tracking_number
+            reference=f'Package {num_shipments+1}',
+            order=10103413,
+            notes=notes,
+            tracking_number=tracking_number
         )
 
         # Assert the shipment is created
@@ -456,7 +456,7 @@ class SOTest(InvenTreeTestCase):
 
                 # Get the stock items
                 for s in so_part.getPart().getStockItems():
-                    if s.quantity - s.allocated >= idx+1:
+                    if s.quantity - s.allocated >= idx + 1:
                         stock_pk = s.pk
                         continue
 
