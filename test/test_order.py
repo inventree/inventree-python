@@ -397,13 +397,13 @@ class SOTest(InvenTreeTestCase):
 
         # Create new shipment - use addShipment method.
         # Should fail because reference will not be unique
-        shipment_2 = so.addShipment(f'Package {num_shipments}')
+        with self.assertRaises(HTTPError):
+            shipment_2 = so.addShipment(f'Package {num_shipments}')
 
         # Assert the shipment is not created
         self.assertIsNone(shipment_2)
 
         # Create new shipment - use addShipment method. No extra data
-        # Should fail because reference will not be unique
         shipment_2 = so.addShipment(f'Package {num_shipments+1}')
 
         # Assert the shipment is not created
@@ -419,8 +419,9 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(len(so.getShipments()), num_shipments + 1)
         num_shipments = len(so.getShipments())
 
-        # Create another shipment - use addShipment method. With some extra data,
-        # including non-sense order (which should be overwritten)
+        # Create another shipment - use addShipment method.
+        # With some extra data, including non-sense order
+        # (which should be overwritten)
         notes = f'Test shipment number {num_shipments+1} for order {so.pk}'
         tracking_number = '93414134343'
         shipment_2 = so.addShipment(
@@ -464,12 +465,21 @@ class SOTest(InvenTreeTestCase):
                 shipment_items.append(
                     {
                         "line_item": so_part.pk,
-                        "quantity": min(idx + 1, so_part.getPart().unallocated_stock),
+                        "quantity": min(
+                            idx + 1, so_part.getPart().unallocated_stock
+                        ),
                         "stock_item": stock_pk
                     }
                 )
-        
+
         # Now, allocate all the items at once
         allocation = shipment_2.allocateItems(shipment_items)
-        
-        print(f"{allocation = }")
+
+        # Check return value
+        self.assertEqual(allocation, {shipment_items, 'shipment': shipment_2.pk})
+
+        # Complete the shipment, with minimum information
+        shipment_2.complete()
+
+        # Make sure date is not None
+        self.assertIsNotNone(shipment_2.shipment_date)
