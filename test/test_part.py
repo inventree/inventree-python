@@ -4,6 +4,8 @@ import os
 import requests
 import sys
 
+from requests.exceptions import HTTPError
+
 try:
     import Image
 except ImportError:
@@ -48,6 +50,32 @@ class PartTest(InvenTreeTestCase):
         self.assertIn('revision', field_names)
         self.assertIn('full_name', field_names)
         self.assertIn('IPN', field_names)
+
+    def test_options(self):
+        """Extends tests for OPTIONS model metadata"""
+
+        # Check for field which does not exist
+        with self.assertLogs():
+            Part.fieldInfo('abcde', self.api)
+
+        active = Part.fieldInfo('active', self.api)
+
+        self.assertEqual(active['type'], 'boolean')
+        self.assertEqual(active['required'], True)
+        self.assertEqual(active['label'], 'Active')
+        self.assertEqual(active['default'], True)
+
+        for field_name in [
+            'name',
+            'description',
+            'component',
+            'assembly',
+        ]:
+            field = Part.fieldInfo(field_name, self.api)
+
+            # Check required field attributes
+            for attr in ['type', 'required', 'read_only', 'label', 'help_text']:
+                self.assertIn(attr, field)
 
     def test_part_cats(self):
         """
@@ -144,6 +172,15 @@ class PartTest(InvenTreeTestCase):
         parts = cat.getParts()
 
         self.assertEqual(len(parts), n_parts + 10)
+
+    def test_pagination(self):
+        """ Test that we can paginate the queryset by specifying a 'limit' parameter"""
+
+        parts = Part.list(self.api, limit=5)
+        self.assertEqual(len(parts), 5)
+
+        for p in parts:
+            self.assertTrue(type(p) is Part)
 
     def test_part_list(self):
         """
@@ -432,10 +469,8 @@ class PartTest(InvenTreeTestCase):
         existingTemplates = len(ParameterTemplate.list(self.api))
         
         # Create new parameter template - this will fail, no name given
-        parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
-        
-        # result should be None
-        self.assertIsNone(parametertemplate)
+        with self.assertRaises(HTTPError):
+            parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
         
         # Now create a proper parameter template
         parametertemplate = ParameterTemplate.create(self.api, data={'name': f'Test parameter no {existingTemplates}', 'units': "kg A"})
@@ -453,16 +488,12 @@ class PartTest(InvenTreeTestCase):
         existingParameters = len(p.getParameters())
         
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
-        
-        # result should be None
-        self.assertIsNone(param)
-        
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
+            
         # Define parameter value for this part - without all required values
-        param = Parameter.create(self.api, data={'part': p.pk, 'data': 10})
-        
-        # result should be None
-        self.assertIsNone(param)
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'data': 10})
         
         # Define w. required values - integer
         param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
@@ -472,10 +503,8 @@ class PartTest(InvenTreeTestCase):
         
         # Same parameter for same part - should fail
         # Define w. required values - string
-        param2 = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
-        
-        # result should be None
-        self.assertIsNone(param2)
+        with self.assertRaises(HTTPError):
+            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
         
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters + 1)
@@ -491,3 +520,42 @@ class PartTest(InvenTreeTestCase):
         
         # Check count
         self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates)
+
+    def test_metadata(self):
+        """Test Part instance metadata"""
+
+        # Grab the first available part
+        part = Part.list(self.api, limit=1)[0]
+
+        part.setMetadata(
+            {
+                "foo": "bar",
+            },
+            overwrite=True,
+        )
+
+        metadata = part.getMetadata()
+
+        # Check that the metadata has been overwritten
+        self.assertEqual(len(metadata.keys()), 1)
+
+        self.assertEqual(metadata['foo'], 'bar')
+
+        # Now 'patch' in some metadata
+        part.setMetadata(
+            {
+                'hello': 'world',
+            },
+        )
+
+        part.setMetadata(
+            {
+                'foo': 'rab',
+            }
+        )
+
+        metadata = part.getMetadata()
+
+        self.assertEqual(len(metadata.keys()), 2)
+        self.assertEqual(metadata['foo'], 'rab')
+        self.assertEqual(metadata['hello'], 'world')

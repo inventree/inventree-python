@@ -5,7 +5,7 @@ import inventree.part
 import inventree.company
 
 
-class PurchaseOrder(inventree.base.InventreeObject):
+class PurchaseOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
@@ -92,7 +92,7 @@ class PurchaseOrderAttachment(inventree.base.Attachment):
     REQUIRED_KWARGS = ['order']
 
 
-class SalesOrder(inventree.base.InventreeObject):
+class SalesOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class respresenting the SalesOrder database model """
 
     URL = 'order/so'
@@ -151,7 +151,7 @@ class SalesOrder(inventree.base.InventreeObject):
 class SalesOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the SalesOrderLineItem database model """
 
-    URL = 'order/so-line/'
+    URL = 'order/so-line'
 
     def getPart(self):
         """

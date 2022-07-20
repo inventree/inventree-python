@@ -5,7 +5,7 @@ import logging
 import json
 
 
-INVENTREE_PYTHON_VERSION = "0.7.2"
+INVENTREE_PYTHON_VERSION = "0.7.3"
 
 
 logger = logging.getLogger('inventree')
@@ -55,16 +55,16 @@ class InventreeObject(object):
             self.reload()
 
     @classmethod
-    def fields(cls, api):
-        """
-        Returns a list of available fields for this model.
+    def options(cls, api):
+        """Perform an OPTIONS request for this model, to determine model information.
 
-        Introspects the available fields using an OPTIONS request.
+        InvenTree provides custom metadata for each API endpoint, accessed via a HTTP OPTIONS request.
+        This endpoint provides information on the various fields available for that endpoint.
         """
 
         response = api.request(
             cls.URL,
-            method='options',
+            method='OPTIONS',
         )
 
         if not response.status_code == 200:
@@ -74,13 +74,37 @@ class InventreeObject(object):
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logger.error(f"Error decoding JSON response for '{cls.URL}'")
+            logger.error(f"Error decoding OPTIONS response for '{cls.URL}'")
             return {}
 
-        actions = data.get('actions', {})
+        return data
+
+    @classmethod
+    def fields(cls, api):
+        """
+        Returns a list of available fields for this model.
+
+        Introspects the available fields using an OPTIONS request.
+        """
+
+        opts = cls.options(api)
+
+        actions = opts.get('actions', {})
         post = actions.get('POST', {})
 
         return post
+
+    @classmethod
+    def fieldInfo(cls, field_name, api):
+        """Return metadata for a specific field on a model"""
+
+        fields = cls.fields(api)
+
+        if field_name in fields:
+            return fields[field_name]
+        else:
+            logger.warning(f"Field '{field_name}' not found in OPTIONS request for {cls.URL}")
+            return {}
 
     @classmethod
     def fieldNames(cls, api):
@@ -135,6 +159,9 @@ class InventreeObject(object):
             return None
 
         items = []
+
+        if isinstance(response, dict) and response['results'] is not None:
+            response = response['results']
 
         for data in response:
             if 'pk' in data:
@@ -212,7 +239,7 @@ class InventreeObject(object):
                 logger.error(f"Error during reload at {self._url} - returned data is invalid")
 
         else:
-            raise ValueError(f"model.reload failed at '{self._url}': No API instance provided")
+            raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
         if name in self._data.keys():
@@ -311,10 +338,75 @@ class Currency(InventreeObject):
     URL = 'common/currency'
 
 
-class ImageMixin:
+class MetadataMixin:
+    """Mixin class for models which support a 'metadata' attribute.
+
+    - The 'metadata' is not used for any InvenTree business logic
+    - Instead it can be used by plugins for storing arbitrary information
+    - Internally it is stored as a JSON database field
+    - Metadata is accessed via the API by appending '/metadata/' to the API URL
+
+    Note: Requires server API version 49 or newer
+
     """
-    Mixin class for supporting image upload against a model,
-    which has a specific 'image' field associated
+
+    @property
+    def metdata_url(self):
+        return os.path.join(self._url, "metadata/")
+
+    def getMetadata(self):
+        """Read model instance metadata"""
+        if self._api:
+
+            if self._api.api_version < 49:
+                logger.error("API version 49 or newer required to access instance metadata")
+                return {}
+
+            response = self._api.get(self.metdata_url)
+
+            return response['metadata']
+        else:
+            raise AttributeError(f"model.getMetadata failed at '{self._url}': No API instance provided")
+
+    def setMetadata(self, data, overwrite=False):
+        """Write metadata to this particular model.
+        
+        Arguments:
+            data: The data to be written. Must be a dict object
+            overwrite: If true, provided data replaces existing data. If false (default) data is merged with any existing data.
+        """
+
+        if type(data) is not dict:
+            raise TypeError("Data provided to 'setMetadata' method must be a dict object")
+
+        if self._api:
+
+            if self._api.api_version < 49:
+                logger.error("API version 49 or newer required to access instance metadata")
+                return None
+
+            if overwrite:
+                return self._api.put(
+                    self.metdata_url,
+                    data={
+                        "metadata": data,
+                    }
+                )
+            else:
+                return self._api.patch(
+                    self.metdata_url,
+                    data={
+                        "metadata": data
+                    }
+                )
+        else:
+            raise AttributeError(f"model.setMetadata failed at '{self._url}': No API instance provided")
+
+
+class ImageMixin:
+    """Mixin class for supporting image upload against a model.
+
+    - The model must have a specific 'image' field associated
     """
 
     def uploadImage(self, image):
