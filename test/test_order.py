@@ -464,7 +464,7 @@ class SOTest(InvenTreeTestCase):
                 shipment_items.append(
                     {
                         "line_item": so_part.pk,
-                        "quantity": min(idx+1, so_part.getPart().unallocated_stock),
+                        "quantity": min(idx + 1, so_part.getPart().unallocated_stock),
                         "stock_item": stock_pk
                     }
                 )
