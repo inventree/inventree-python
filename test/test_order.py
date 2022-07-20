@@ -378,7 +378,12 @@ class SOTest(InvenTreeTestCase):
             shipment_1 = order.SalesOrderShipment.create(self.api)
 
         # Create new shipment - minimal data, use SalesOrderShipment method
-        shipment_1 = order.SalesOrderShipment.create(self.api, data={'order': so.pk, 'reference': f'Package {num_shipments+1}'})
+        shipment_1 = order.SalesOrderShipment.create(
+            self.api,data={
+                'order': so.pk,
+                'reference': f'Package {num_shipments+1}'
+            }
+        )
 
         # Assert the shipment is created
         self.assertIsNotNone(shipment_1)
@@ -407,20 +412,22 @@ class SOTest(InvenTreeTestCase):
         # Assert the shipment Order is equal to the expected one
         self.assertEqual(shipment_2.getOrder().pk, so.pk)
 
+        # Assert shipment reference is as expected
+        self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
+
         # Count number of current shipments
         self.assertEqual(len(so.getShipments()), num_shipments + 1)
         num_shipments = len(so.getShipments())
 
         # Create another shipment - use addShipment method. With some extra data,
         # including non-sense order (which should be overwritten)
+        notes = f'Test shipment number {num_shipments+1} for order {so.pk}'
+        tracking_number = '93414134343'
         shipment_2 = so.addShipment(
-            reference=f'Package {num_shipments + 1}',
-            data={
-                'order': 10103413,
-                'shipment_date': '2025-09-05',
-                'tracking_number': '93414134343',
-                'notes': f'Test shipment number 2 for order {so.pk}'
-            }
+            reference = f'Package {num_shipments+1}',
+            order = 10103413,
+            notes = notes,
+            tracking_number = tracking_number
         )
 
         # Assert the shipment is created
@@ -429,6 +436,40 @@ class SOTest(InvenTreeTestCase):
         # Assert the shipment Order is equal to the expected one
         self.assertEqual(shipment_2.getOrder().pk, so.pk)
 
+        # Assert shipment reference is as expected
+        self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
+
+        # Make sure extra data is also as expected
+        self.assertEqual(shipment_2.notes, notes)
+        self.assertEqual(shipment_2.tracking_number, tracking_number)
+
         # Count number of current shipments
         self.assertEqual(len(so.getShipments()), num_shipments + 1)
         num_shipments = len(so.getShipments())
+
+        # Assign all items in the SO to the shipment
+        shipment_items = list()
+        for idx, so_part in enumerate(so.getLineItems()):
+
+            # Check if stock items exist
+            if so_part.getPart().unallocated_stock > 0:
+
+                # Get the stock items
+                for s in so_part.getPart().getStockItems():
+                    if s.quantity - s.allocated >= idx+1:
+                        stock_pk = s.pk
+                        continue
+
+                # Assign first stock item
+                shipment_items.append(
+                    {
+                        "line_item": so_part.pk,
+                        "quantity": min(idx+1, so_part.getPart().unallocated_stock),
+                        "stock_item": stock_pk
+                    }
+                )
+        
+        # Now, allocate all the items at once
+        allocation = shipment_2.allocateItems(shipment_items)
+        
+        print(f"{allocation = }")

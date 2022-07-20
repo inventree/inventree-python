@@ -140,8 +140,9 @@ class SalesOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         return SalesOrderShipment.list(self._api, order=self.pk, **kwargs)
 
     def addShipment(self, reference, **kwargs):
-        """ Create (and return) new SalesOrderShipment against this SalesOrder """
-        
+        """ Create (and return) new SalesOrderShipment
+        against this SalesOrder """
+
         kwargs['order'] = self.pk
         kwargs['reference'] = reference
 
@@ -196,3 +197,32 @@ class SalesOrderShipment(inventree.base.InventreeObject):
         Return the SalesOrder to which this SalesOrderShipment belongs
         """
         return SalesOrder(self._api, self.order)
+    
+    def allocateItems(self, items=[]):
+        """
+        Function to allocate items to the current shipment
+        
+        items is expected to be a list containing dicts, one for each item
+        to be assigned. Each dict should contain three parameters, as
+        follows:
+            items = [{
+                "line_item": 25,
+                "quantity": 150,
+                "stock_item": 26
+            }
+        """
+
+        # Customise URL
+        url = f'order/so/{self.getOrder().pk}/allocate'
+
+        # Create data from given inputs
+        data = {
+            'items': items,
+            'shipment': self.pk
+        }
+
+        print(f"{data = }")
+
+        print(f"{type(data['items']) = }")
+
+        return self._api.post(url, data)
