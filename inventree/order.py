@@ -270,7 +270,7 @@ class SalesOrderShipment(inventree.base.InventreeObject):
         Return the SalesOrder to which this SalesOrderShipment belongs
         """
         return SalesOrder(self._api, self.order)
-    
+
     def allocateItems(self, items=[]):
         """
         Function to allocate items to the current shipment
@@ -292,6 +292,31 @@ class SalesOrderShipment(inventree.base.InventreeObject):
         data = {
             'items': items,
             'shipment': self.pk
+        }
+
+        return self._api.post(url, data)
+
+    def complete(
+        self,
+        shipment_date=None,
+        tracking_number='',
+        invoice_number='',
+        link=''
+    ):
+        """
+        Complete the shipment, with given shipment_date, or reasonable
+        defaults.
+        """
+
+        # Customise URL
+        url = f'order/so/shipment/{self.pk}/ship'
+
+        # Create data from given inputs
+        data = {
+            'shipment_date': shipment_date,
+            'tracking_number': tracking_number,
+            'invoice_number': invoice_number,
+            'link': link
         }
 
         return self._api.post(url, data)
