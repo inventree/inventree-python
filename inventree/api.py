@@ -310,13 +310,16 @@ class InvenTreeAPI(object):
         url = self.clean_url(url)
 
         headers = kwargs.get('headers', {})
+        kwargs.pop('headers')
 
         if self.use_token_auth and self.token:
             headers['AUTHORIZATION'] = f'Token {self.token}'
             auth = None
         else:
             auth = self.auth
-
+        
+        print(f"{data = }")
+        print(f"{type(data['items']) = }")
         response = requests.post(url, data=data, headers=headers, auth=auth, files=files, **kwargs)
 
         if response is None:
