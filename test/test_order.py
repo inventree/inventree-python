@@ -476,7 +476,7 @@ class SOTest(InvenTreeTestCase):
         allocation = shipment_2.allocateItems(shipment_items)
 
         # Check return value
-        self.assertEqual(allocation, {shipment_items, 'shipment': shipment_2.pk})
+        self.assertEqual(allocation, {'items': shipment_items, 'shipment': shipment_2.pk})
 
         # Complete the shipment, with minimum information
         shipment_2.complete()
