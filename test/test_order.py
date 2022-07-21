@@ -400,9 +400,6 @@ class SOTest(InvenTreeTestCase):
         with self.assertRaises(HTTPError):
             shipment_2 = so.addShipment(f'Package {num_shipments}')
 
-        # Assert the shipment is not created
-        self.assertIsNone(shipment_2)
-
         # Create new shipment - use addShipment method. No extra data
         shipment_2 = so.addShipment(f'Package {num_shipments+1}')
 
@@ -450,6 +447,8 @@ class SOTest(InvenTreeTestCase):
 
         # Assign all items in the SO to the shipment
         shipment_items = list()
+        # Remember for later test
+        allocated_quantities = dict()
         for idx, so_part in enumerate(so.getLineItems()):
 
             # Check if stock items exist
@@ -462,21 +461,26 @@ class SOTest(InvenTreeTestCase):
                         continue
 
                 # Assign first stock item
+                allocated_quantities[so_part.pk] = min(
+                    idx + 1, so_part.getPart().unallocated_stock
+                )
                 shipment_items.append(
                     {
                         "line_item": so_part.pk,
-                        "quantity": min(
-                            idx + 1, so_part.getPart().unallocated_stock
-                        ),
+                        "quantity": allocated_quantities[so_part.pk],
                         "stock_item": stock_pk
                     }
                 )
 
         # Now, allocate all the items at once
-        allocation = shipment_2.allocateItems(shipment_items)
+        shipment_2.allocateItems(shipment_items)
 
-        # Check return value
-        self.assertEqual(allocation, {'items': shipment_items, 'shipment': shipment_2.pk})
+        # Check saved values
+        for so_part in so.getLineItems():
+            if so_part.pk in allocated_quantities:
+                self.assertEqual(
+                    so_part.allocated, allocated_quantities[so_part.pk]
+                )
 
         # Complete the shipment, with minimum information
         shipment_2.complete()
