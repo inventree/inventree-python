@@ -237,7 +237,13 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         }
 
         # Send data
-        return self._api.post(url, data)
+        response = self._api.post(url, data)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
 
 
 class SalesOrderExtraLineItem(inventree.base.InventreeObject):
@@ -319,4 +325,11 @@ class SalesOrderShipment(inventree.base.InventreeObject):
             'link': link
         }
 
-        return self._api.post(url, data)
+        # Send data
+        response = self._api.post(url, data)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
