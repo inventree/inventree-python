@@ -3,6 +3,7 @@
 import os
 import logging
 
+import inventree.api
 import inventree.base
 import inventree.part
 
@@ -46,6 +47,79 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """
 
     URL = 'stock'
+
+    @classmethod
+    def adjustStock(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
+        """Perform a generic stock 'adjustment' action.
+        
+        Arguments:
+            api: InvenTreeAPI instance
+            method: Adjument method, e.g. 'count' / 'add'
+            items: List of items to include in the adjustment (see below)
+            kwargs: Additional kwargs to send with the adjustment
+        
+        Items:
+            Each 'item' in the 'items' list must be a dict object, containing the following fields:
+
+            item: The 'pk' (primary key) identifier for a StockItem instance
+            quantity: The quantity 
+        """
+
+        if method not in ['count', 'add', 'remove', 'transfer']:
+            raise ValueError(f"Stock adjustment method '{method}' not supported")
+        
+        url = f"stock/{method}/"
+
+        data = kwargs
+        data['items'] = items
+
+        return api.post(url, data=data)
+    
+    @classmethod
+    def countStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'count' adjustment for multiple stock items"""
+
+        return cls.adjustStock(
+            api,
+            'count',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def addStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'add' adjustment for multiple stock items"""
+
+        return cls.adjustStock(
+            api,
+            'add',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def removeStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'remove' adjustment for multiple stock items"""
+
+        return cls.adjustStock(
+            api,
+            'remove',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def transferStock(cls, api: inventree.api.InvenTreeAPI, items: list, location: int, **kwargs):
+        """Perform 'transfer' adjustment for multiple stock items"""
+
+        kwargs['location'] = location
+
+        return cls.adjustStock(
+            api,
+            'transfer',
+            items,
+            **kwargs
+        )
 
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
