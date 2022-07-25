@@ -488,7 +488,7 @@ class SOTest(InvenTreeTestCase):
 
                 # If order not complete, try to mark it as such
                 if o.status < 20:
-                    response = o.applymethod()
+                    response = getattr(so, applymethod)()
 
                 # Expected response is {} if order was marked as complete
                 # Status should now be 20, status_text is shipped
@@ -502,14 +502,14 @@ class SOTest(InvenTreeTestCase):
         # Go through sales orders, try to complete one
         check_helper(
             order.SalesOrder.list(self.api),
-            order.SalesOrder.complete,
+            'complete',
             20,
             'Shipped'
         )
         # Go through sales orders, try to cancel one
         check_helper(
             order.SalesOrder.list(self.api),
-            order.SalesOrder.cancel,
+            'cancel'
             40,
             'Cancelled'
         )
@@ -517,14 +517,14 @@ class SOTest(InvenTreeTestCase):
         # Go through purchase orders, try to complete one
         check_helper(
             order.PurchaseOrder.list(self.api),
-            order.PurchaseOrder.complete,
+            'complete',
             20,
             'Shipped'
         )
         # Go through purchase orders, try to cancel one
         check_helper(
             order.PurchaseOrder.list(self.api),
-            order.PurchaseOrder.cancel,
+            'cancel'
             40,
             'Cancelled'
         )
