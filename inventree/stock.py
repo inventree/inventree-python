@@ -49,7 +49,7 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     URL = 'stock'
 
     @classmethod
-    def adjustStock(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
+    def adjustStockItems(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
         """Perform a generic stock 'adjustment' action.
         
         Arguments:
@@ -76,10 +76,10 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         return api.post(url, data=data)
     
     @classmethod
-    def countStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+    def countStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
         """Perform 'count' adjustment for multiple stock items"""
 
-        return cls.adjustStock(
+        return cls.adjustStockItems(
             api,
             'count',
             items,
@@ -87,10 +87,10 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         )
 
     @classmethod
-    def addStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+    def addStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
         """Perform 'add' adjustment for multiple stock items"""
 
-        return cls.adjustStock(
+        return cls.adjustStockItems(
             api,
             'add',
             items,
@@ -98,10 +98,10 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         )
 
     @classmethod
-    def removeStock(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+    def removeStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
         """Perform 'remove' adjustment for multiple stock items"""
 
-        return cls.adjustStock(
+        return cls.adjustStockItems(
             api,
             'remove',
             items,
@@ -109,12 +109,12 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         )
 
     @classmethod
-    def transferStock(cls, api: inventree.api.InvenTreeAPI, items: list, location: int, **kwargs):
+    def transferStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, location: int, **kwargs):
         """Perform 'transfer' adjustment for multiple stock items"""
 
         kwargs['location'] = location
 
-        return cls.adjustStock(
+        return cls.adjustStockItems(
             api,
             'transfer',
             items,
