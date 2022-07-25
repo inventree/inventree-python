@@ -472,3 +472,59 @@ class SOTest(InvenTreeTestCase):
 
         # Make sure date is not None
         self.assertIsNotNone(shipment_2.shipment_date)
+
+    def test_order_cancel_complete(self):
+
+        def check_helper(
+            orderlist,
+            applymethod,
+            target_status,
+            target_status_text
+        ):
+            """Apply function to order list, check for status and
+            status_text until one is confirmed - then quit
+            """
+            for o in orderlist:
+
+                # If order not complete, try to mark it as such
+                if o.status < 20:
+                    response = o.applymethod()
+
+                # Expected response is {} if order was marked as complete
+                # Status should now be 20, status_text is shipped
+                if isinstance(response, dict) and len(response) == 0:
+                    self.assertIsEqual(o.status, target_status)
+                    self.assertIsEqual(o.status_text, target_status_text)
+
+                    # exit the function
+                    return None
+
+        # Go through sales orders, try to complete one
+        check_helper(
+            order.SalesOrder.list(self.api),
+            order.SalesOrder.complete,
+            20,
+            'Shipped'
+        )
+        # Go through sales orders, try to cancel one
+        check_helper(
+            order.SalesOrder.list(self.api),
+            order.SalesOrder.cancel,
+            40,
+            'Cancelled'
+        )
+
+        # Go through purchase orders, try to complete one
+        check_helper(
+            order.PurchaseOrder.list(self.api),
+            order.PurchaseOrder.complete,
+            20,
+            'Shipped'
+        )
+        # Go through purchase orders, try to cancel one
+        check_helper(
+            order.PurchaseOrder.list(self.api),
+            order.PurchaseOrder.cancel,
+            40,
+            'Cancelled'
+        )

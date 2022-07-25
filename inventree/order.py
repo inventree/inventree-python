@@ -332,3 +332,7 @@ class SalesOrderShipment(
 
         # Return
         return self._statusupdate(status='ship', data=data)
+
+    def ship(self, *args, **kwargs):
+        """Alias for complete function"""
+        self.complete(*args, **kwargs)
