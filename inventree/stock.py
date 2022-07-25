@@ -121,6 +121,75 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             **kwargs
         )
 
+    def count(self, quantity, notes=None):
+        """Perform a count (stocktake) action for this StockItem"""
+
+        self.countStockItems(
+            self._api,
+            [
+                {
+                    'item': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            notes=notes,
+        )
+
+    def addStock(self, quantity, notes=None):
+        """Manually add the specified quantity to this StockItem"""
+
+        self.addStockItems(
+            self._api,
+            [
+                {
+                    'item': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            notes=notes,
+        )
+
+    def removeStock(self, quantity, notes=None):
+        """Manually remove the specified quantity to this StockItem"""
+
+        self.removeStockItems(
+            self._api,
+            [
+                {
+                    'item': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            notes=notes,
+        )
+
+    def transferStock(self, location, quantity=None, notes=None):
+        """Transfer this StockItem into the specified location.
+        
+        Arguments:
+            location: A StockLocation instance or integer ID value
+            quantity: Optionally specify quantity to transfer. If None, entire quantity is transferred
+            notes: Optional transaction notes
+        """
+
+        if isinstance(location, StockLocation):
+            location = location.pk
+        
+        if quantity is None:
+            quantity = self.quantity
+
+        self.transferStockItems(
+            self._api,
+            [
+                {
+                    'item': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            location=location,
+            notes=notes,
+        )
+
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
         return inventree.part.Part(self._api, self.part)
