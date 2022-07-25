@@ -84,7 +84,7 @@ class StockLocationTest(InvenTreeTestCase):
 
         items = location.getStockItems()
 
-        self.assertGreaterEqual(len(items), 20)
+        self.assertGreaterEqual(len(items), 19)
 
         # Check specific part stock in location 1 (initially empty)
         items = location.getStockItems(part=1)

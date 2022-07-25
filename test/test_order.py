@@ -349,3 +349,126 @@ class SOTest(InvenTreeTestCase):
 
         attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
         self.assertEqual(len(attachments), n + 1)
+
+    def test_so_shipment(self):
+        """
+        Test shipment functionality for a SalesOrder
+        """
+
+        # Grab the last available SalesOrder - should not have a shipment yet
+        orders = order.SalesOrder.list(self.api)
+
+        if len(orders) > 0:
+            so = orders[-1]
+        else:
+            so = order.SalesOrder.create(self.api, {
+                'customer': 4,
+                'reference': "My new sales order",
+                "description": "Selling some stuff",
+            })
+
+        # The shipments list should return something which is not none
+        self.assertIsNotNone(so.getShipments())
+
+        # Count number of current shipments
+        num_shipments = len(so.getShipments())
+
+        # Create a new shipment - without data, use SalesOrderShipment method
+        with self.assertRaises(TypeError):
+            shipment_1 = order.SalesOrderShipment.create(self.api)
+
+        # Create new shipment - minimal data, use SalesOrderShipment method
+        shipment_1 = order.SalesOrderShipment.create(
+            self.api, data={
+                'order': so.pk,
+                'reference': f'Package {num_shipments+1}'
+            }
+        )
+
+        # Assert the shipment is created
+        self.assertIsNotNone(shipment_1)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_1.getOrder().pk, so.pk)
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
+
+        # Create new shipment - use addShipment method.
+        # Should fail because reference will not be unique
+        with self.assertRaises(HTTPError):
+            shipment_2 = so.addShipment(f'Package {num_shipments}')
+
+        # Create new shipment - use addShipment method. No extra data
+        shipment_2 = so.addShipment(f'Package {num_shipments+1}')
+
+        # Assert the shipment is not created
+        self.assertIsNotNone(shipment_2)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_2.getOrder().pk, so.pk)
+
+        # Assert shipment reference is as expected
+        self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
+
+        # Create another shipment - use addShipment method.
+        # With some extra data, including non-sense order
+        # (which should be overwritten)
+        notes = f'Test shipment number {num_shipments+1} for order {so.pk}'
+        tracking_number = '93414134343'
+        shipment_2 = so.addShipment(
+            reference=f'Package {num_shipments+1}',
+            order=10103413,
+            notes=notes,
+            tracking_number=tracking_number
+        )
+
+        # Assert the shipment is created
+        self.assertIsNotNone(shipment_2)
+
+        # Assert the shipment Order is equal to the expected one
+        self.assertEqual(shipment_2.getOrder().pk, so.pk)
+
+        # Assert shipment reference is as expected
+        self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
+
+        # Make sure extra data is also as expected
+        self.assertEqual(shipment_2.notes, notes)
+        self.assertEqual(shipment_2.tracking_number, tracking_number)
+
+        # Count number of current shipments
+        self.assertEqual(len(so.getShipments()), num_shipments + 1)
+        num_shipments = len(so.getShipments())
+
+        # Remember for later test
+        allocated_quantities = dict()
+        
+        # Assign each line item to this shipment
+        for si in so.getLineItems():
+            response = si.allocateToShipment(shipment_2)
+            # Remember what we are doing for later check
+            # a response of None means nothing was allocated
+            if response is not None:
+                allocated_quantities[si.pk] = (
+                    {x['stock_item']: float(x['quantity']) for x in response['items']}
+                )
+
+        # Check saved values
+        for so_part in so.getLineItems():
+            if so_part.pk in allocated_quantities:
+                if len(allocated_quantities[so_part.pk]) > 0:
+                    self.assertEqual(
+                        {x['item']: float(x['quantity']) for x in shipment_2.allocations if x['line'] == so_part.pk},
+                        allocated_quantities[so_part.pk]
+                    )
+
+        # Complete the shipment, with minimum information
+        shipment_2.complete()
+
+        # Make sure date is not None
+        self.assertIsNotNone(shipment_2.shipment_date)
