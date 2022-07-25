@@ -230,20 +230,9 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
                 # Append
                 items.append(thisitem)
 
-        # Create data from given inputs
-        data = {
-            'items': items,
-            'shipment': shipment.pk
-        }
-
-        # Send data
-        response = self._api.post(url, data)
-
-        # Reload
-        self.reload()
-
-        # Return
-        return response
+        # Use SalesOrderShipment method to perform allocation
+        if len(items) > 0:
+            return shipment.allocateItems(items)
 
 
 class SalesOrderExtraLineItem(inventree.base.InventreeObject):
@@ -300,7 +289,14 @@ class SalesOrderShipment(inventree.base.InventreeObject):
             'shipment': self.pk
         }
 
-        return self._api.post(url, data)
+        # Send data
+        response = self._api.post(url, data)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
 
     def complete(
         self,
