@@ -180,10 +180,11 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         To limit how many items are assigned, supply a quantity to the
         argument quantity. This can also be used to over-assign the items,
         as no check for the amounts in the sales order is performed.
-        """
 
-        # Customise URL
-        url = f'order/so/{self.getOrder().pk}/allocate'
+        This function returns a list of items assigned during this call.
+        If nothing is returned, this means that nothing was assigned,
+        possibly because no stock items are available.
+        """
 
         # If stockitems are not defined, get the list
         if stockitems is None:

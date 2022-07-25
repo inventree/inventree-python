@@ -454,9 +454,9 @@ class SOTest(InvenTreeTestCase):
             # Remember what we are doing for later check
             # a response of None means nothing was allocated
             if response is not None:
-                    allocated_quantities[si.pk] = (
-                        {x['stock_item']: float(x['quantity']) for x in response['items']}
-                    )
+                allocated_quantities[si.pk] = (
+                    {x['stock_item']: float(x['quantity']) for x in response['items']}
+                )
 
         # Check saved values
         for so_part in so.getLineItems():
