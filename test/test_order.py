@@ -454,7 +454,7 @@ class SOTest(InvenTreeTestCase):
         for si in so.getLineItems():
             response = si.allocateToShipment(shipment_2)
             # Remember what we are doing for later check
-            allocated_quantities[si.pk] = {x['stock_item']: x['quantity'] for x in items}
+            allocated_quantities[si.pk] = {x['stock_item']: x['quantity'] for x in response['items']}
 
         # Check saved values
         for so_part in so.getLineItems():
