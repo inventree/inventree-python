@@ -448,3 +448,49 @@ class ImageMixin:
             return self._api.downloadFile(self.image, destination, **kwargs)
         else:
             raise ValueError(f"Part '{self.name}' does not have an associated image")
+
+
+class StatusMixin:
+    """Class adding functionality to assign a new status by calling
+    - complete
+    - cancel
+    on supported items.
+    
+    Other functions, such as
+    - ship
+    - finish
+    - issue
+    can be reached through _statusupdate function
+    """
+
+    def _statusupdate(self, status: str, data=None, **kwargs):
+
+        # Check status
+        if status not in [
+            'complete',
+            'cancel',
+            'ship',
+            'issue',
+            'finish',
+        ]:
+            raise ValueError(f"Order stats {status} not supported.")
+
+        # Set the url
+        URL = self.URL + f"/{self.pk}/{status}"
+
+        # Send data
+        response = self._api.post(URL, data, **kwargs)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
+
+    def complete(self, **kwargs):
+        
+        return self._statusupdate(status='complete')
+
+    def cancel(self, **kwargs):
+        
+        return self._statusupdate(status='cancel')
