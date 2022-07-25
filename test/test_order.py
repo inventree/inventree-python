@@ -445,8 +445,6 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(len(so.getShipments()), num_shipments + 1)
         num_shipments = len(so.getShipments())
 
-        # Assign all items in the SO to the shipment
-        shipment_items = list()
         # Remember for later test
         allocated_quantities = dict()
         
@@ -454,14 +452,16 @@ class SOTest(InvenTreeTestCase):
         for si in so.getLineItems():
             response = si.allocateToShipment(shipment_2)
             # Remember what we are doing for later check
-            allocated_quantities[si.pk] = {x['stock_item']: x['quantity'] for x in response['items']}
+            allocated_quantities[si.pk] = (
+                {x['stock_item']: x['quantity'] for x in response['items']}
+            )
 
         # Check saved values
         for so_part in so.getLineItems():
             if so_part.pk in allocated_quantities:
                 if len(allocated_quantities[so_part.pk]) > 0:
                     self.assertEqual(
-                        {x['item']: x['quantity'] for x in shp.allocations if x['line'] == so_part.pk},
+                        {x['item']: x['quantity'] for x in shipment_2.allocations if x['line'] == so_part.pk},
                         allocated_quantities[so_part.pk]
                     )
 
