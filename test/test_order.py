@@ -449,38 +449,21 @@ class SOTest(InvenTreeTestCase):
         shipment_items = list()
         # Remember for later test
         allocated_quantities = dict()
-        for idx, so_part in enumerate(so.getLineItems()):
-
-            # Check if stock items exist
-            if so_part.getPart().unallocated_stock > 0:
-
-                # Get the stock items
-                for s in so_part.getPart().getStockItems():
-                    if s.quantity - s.allocated >= idx + 1:
-                        stock_pk = s.pk
-                        continue
-
-                # Assign first stock item
-                allocated_quantities[so_part.pk] = min(
-                    idx + 1, so_part.getPart().unallocated_stock
-                )
-                shipment_items.append(
-                    {
-                        "line_item": so_part.pk,
-                        "quantity": allocated_quantities[so_part.pk],
-                        "stock_item": stock_pk
-                    }
-                )
-
-        # Now, allocate all the items at once
-        shipment_2.allocateItems(shipment_items)
+        
+        # Assign each line item to this shipment
+        for si in so.getLineItems():
+            response = si.allocateToShipment(shipment_2)
+            # Remember what we are doing for later check
+            allocated_quantities[si.pk] = {x['stock_item']: x['quantity'] for x in items}
 
         # Check saved values
         for so_part in so.getLineItems():
             if so_part.pk in allocated_quantities:
-                self.assertEqual(
-                    so_part.allocated, allocated_quantities[so_part.pk]
-                )
+                if len(allocated_quantities[so_part.pk]) > 0:
+                    self.assertEqual(
+                        {x['item']: x['quantity'] for x in shp.allocations if x['line'] == so_part.pk},
+                        allocated_quantities[so_part.pk]
+                    )
 
         # Complete the shipment, with minimum information
         shipment_2.complete()
