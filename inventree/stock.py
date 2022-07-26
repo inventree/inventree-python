@@ -3,6 +3,7 @@
 import os
 import logging
 
+import inventree.api
 import inventree.base
 import inventree.part
 
@@ -47,6 +48,148 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
 
     URL = 'stock'
 
+    @classmethod
+    def adjustStockItems(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
+        """Perform a generic stock 'adjustment' action.
+        
+        Arguments:
+            api: InvenTreeAPI instance
+            method: Adjument method, e.g. 'count' / 'add'
+            items: List of items to include in the adjustment (see below)
+            kwargs: Additional kwargs to send with the adjustment
+        
+        Items:
+            Each 'item' in the 'items' list must be a dict object, containing the following fields:
+
+            pk: The 'pk' (primary key) identifier for a StockItem instance
+            quantity: The quantity of each stock item for the particular action
+        """
+
+        if method not in ['count', 'add', 'remove', 'transfer']:
+            raise ValueError(f"Stock adjustment method '{method}' not supported")
+        
+        url = f"stock/{method}/"
+
+        data = kwargs
+        data['items'] = items
+
+        return api.post(url, data=data)
+    
+    @classmethod
+    def countStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'count' adjustment for multiple stock items"""
+
+        return cls.adjustStockItems(
+            api,
+            'count',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def addStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'add' adjustment for multiple stock items"""
+
+        return cls.adjustStockItems(
+            api,
+            'add',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def removeStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
+        """Perform 'remove' adjustment for multiple stock items"""
+
+        return cls.adjustStockItems(
+            api,
+            'remove',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def transferStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, location: int, **kwargs):
+        """Perform 'transfer' adjustment for multiple stock items"""
+
+        kwargs['location'] = location
+
+        return cls.adjustStockItems(
+            api,
+            'transfer',
+            items,
+            **kwargs
+        )
+
+    def countStock(self, quantity, **kwargs):
+        """Perform a count (stocktake) action for this StockItem"""
+
+        self.countStockItems(
+            self._api,
+            [
+                {
+                    'pk': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            **kwargs
+        )
+
+    def addStock(self, quantity, **kwargs):
+        """Manually add the specified quantity to this StockItem"""
+
+        self.addStockItems(
+            self._api,
+            [
+                {
+                    'pk': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            **kwargs
+        )
+
+    def removeStock(self, quantity, **kwargs):
+        """Manually remove the specified quantity to this StockItem"""
+
+        self.removeStockItems(
+            self._api,
+            [
+                {
+                    'pk': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            **kwargs
+        )
+
+    def transferStock(self, location, quantity=None, **kwargs):
+        """Transfer this StockItem into the specified location.
+        
+        Arguments:
+            location: A StockLocation instance or integer ID value
+            quantity: Optionally specify quantity to transfer. If None, entire quantity is transferred
+            notes: Optional transaction notes
+        """
+
+        if isinstance(location, StockLocation):
+            location = location.pk
+        
+        if quantity is None:
+            quantity = self.quantity
+
+        self.transferStockItems(
+            self._api,
+            [
+                {
+                    'pk': self.pk,
+                    'quantity': quantity,
+                }
+            ],
+            location=location,
+            **kwargs
+        )
+
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
         return inventree.part.Part(self._api, self.part)
@@ -62,6 +205,11 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             return None
 
         return StockLocation(self._api, self.location)
+
+    def getTrackingEntries(self, **kwargs):
+        """Return list of StockItemTracking instances associated with this StockItem"""
+
+        return StockItemTracking.list(self._api, item=self.pk, **kwargs)
 
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import requests
 import sys
+
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
@@ -177,7 +179,7 @@ class StockTest(InvenTreeTestCase):
         item = StockItem(self.api, pk=1)
 
         self.assertEqual(item.pk, 1)
-        self.assertEqual(item.location, 3)
+        self.assertIsNotNone(item.location)
 
         # Get the Part reference
         prt = item.getPart()
@@ -185,9 +187,147 @@ class StockTest(InvenTreeTestCase):
         self.assertEqual(type(prt), part.Part)
         self.assertEqual(prt.pk, 1)
 
-        # Get the Location reference
+        # Move the item to a known location
+        item.transferStock(3)
+        item.reload()
+        
         location = item.getLocation()
 
         self.assertEqual(type(location), StockLocation)
         self.assertEqual(location.pk, 3)
         self.assertEqual(location.name, "Dining Room")
+
+
+class StockAdjustTest(InvenTreeTestCase):
+    """Unit tests for stock 'adjustment' actions"""
+
+    def test_count(self):
+        """Test the 'count' action"""
+
+        item = StockItem(self.api, pk=1)
+
+        # Count number of tracking entries
+        n_tracking = len(item.getTrackingEntries())
+
+        q = item.quantity
+
+        item.countStock(q + 100)
+        item.reload()
+
+        self.assertEqual(item.quantity, q + 100)
+
+        item.countStock(q, notes='Why hello there')
+        item.reload()
+        self.assertEqual(item.quantity, q)
+
+        # 2 tracking entries should have been added
+        self.assertEqual(
+            len(item.getTrackingEntries()),
+            n_tracking + 2
+        )
+
+        # The most recent tracking entry should have a note
+        t = item.getTrackingEntries()[0]
+        self.assertEqual(t.label, 'Stock counted')
+
+        # Check error conditions
+        with self.assertRaises(requests.exceptions.HTTPError):
+            item.countStock('not a number')
+    
+        with self.assertRaises(requests.exceptions.HTTPError):
+            item.countStock(-1)
+
+    def test_add_remove(self):
+        """Test the 'add' and 'remove' actions"""
+
+        item = StockItem(self.api, pk=1)
+
+        n_tracking = len(item.getTrackingEntries())
+
+        q = item.quantity
+
+        # Add some items
+        item.addStock(10)
+        item.reload()
+        self.assertEqual(item.quantity, q + 10)
+
+        # Remove the items again
+        item.removeStock(10)
+        item.reload()
+        self.assertEqual(item.quantity, q)
+
+        # 2 additional tracking entries should have been added
+        self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
+
+        # Test error conditions
+        for v in [-1, 'gg', None]:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.addStock(v)
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.removeStock(v)
+
+    def test_transfer(self):
+        """Unit test for 'transfer' action"""
+
+        item = StockItem(self.api, pk=2)
+
+        n_tracking = len(item.getTrackingEntries())
+
+        # Transfer to a StockLocation instance
+        location = StockLocation(self.api, pk=1)
+
+        item.transferStock(location)
+        item.reload()
+        self.assertEqual(item.location, 1)
+
+        # Transfer with a location ID
+        item.transferStock(2)
+        item.reload()
+        self.assertEqual(item.location, 2)
+
+        # 2 additional tracking entries should have been added
+        self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
+
+        # Attempt to transfer to an invalid location
+        for loc in [-1, 'qqq', 99999, None]:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.transferStock(loc)
+        
+        # Attempt to transfer with an invalid quantity
+        for q in [-1, None, 'hhhh']:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.transferStock(loc, quantity=q)
+
+    def test_transfer_multiple(self):
+        """Test transfer of *multiple* items"""
+
+        items = StockItem.list(self.api, location=1)
+        self.assertTrue(len(items) > 1)
+
+        # Construct data to send
+        data = []
+
+        for item in items:
+            data.append({
+                'pk': item.pk,
+                'quantity': item.quantity,
+            })
+
+        # Transfer all items into a new location
+        StockItem.transferStockItems(self.api, data, 2)
+
+        for item in items:
+            item.reload()
+            self.assertEqual(item.location, 2)
+
+        # Transfer back to the original location
+        StockItem.transferStockItems(self.api, data, 1)
+
+        for item in items:
+            item.reload()
+            self.assertEqual(item.location, 1)
+
+            history = item.getTrackingEntries()
+
+            self.assertTrue(len(history) >= 2)
+            self.assertEqual(history[0].label, 'Location changed')
