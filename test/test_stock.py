@@ -265,3 +265,38 @@ class StockAdjustTest(InvenTreeTestCase):
                 item.addStock(v)
             with self.assertRaises(requests.exceptions.HTTPError):
                 item.removeStock(v)
+
+    def test_transfer(self):
+        """Unit test for 'transfer' action"""
+
+        item = StockItem(self.api, pk=2)
+
+        n_tracking = len(item.getTrackingEntries())
+
+        # Transfer to a StockLocation instance
+        location = StockLocation(self.api, pk=1)
+
+        item.transferStock(location)
+        item.reload()
+        self.assertEqual(item.location, 1)
+
+        # Transfer with a location ID
+        item.transferStock(2)
+        item.reload()
+        self.assertEqual(item.location, 2)
+
+        # 2 additional tracking entries should have been added
+        self.assertEqual(
+            len(item.getTrackingEntries()),
+            n_tracking + 2
+        )
+
+        # Attempt to transfer to an invalid location
+        for loc in [-1, 'qqq', 99999, None]:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.transferStock(loc)
+        
+        # Attempt to transfer with an invalid quantity
+        for q in [-1, None, 'hhhh']:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.transferStock(loc, quantity=q)
