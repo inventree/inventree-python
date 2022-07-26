@@ -227,7 +227,7 @@ class StockAdjustTest(InvenTreeTestCase):
         )
 
         # The most recent tracking entry should have a note
-        t = item.getTrackingEntries()[-1]
+        t = item.getTrackingEntries()[0]
         self.assertEqual(t.label, 'Stock counted')
 
         # Check error conditions
