@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.stock import StockItem, StockItemTracking, StockLocation  # noqa: E402
+from inventree.stock import StockItem, StockLocation  # noqa: E402
 from inventree import part  # noqa: E402
 
 from test_api import InvenTreeTestCase  # noqa: E402
