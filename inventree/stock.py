@@ -62,7 +62,7 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             Each 'item' in the 'items' list must be a dict object, containing the following fields:
 
             pk: The 'pk' (primary key) identifier for a StockItem instance
-            quantity: The quantity 
+            quantity: The quantity of each stock item for the particular action
         """
 
         if method not in ['count', 'add', 'remove', 'transfer']:
