@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.stock import StockItem, StockLocation  # noqa: E402
+from inventree.stock import StockItem, StockItemTracking, StockLocation  # noqa: E402
 from inventree import part  # noqa: E402
 
 from test_api import InvenTreeTestCase  # noqa: E402
@@ -191,3 +191,32 @@ class StockTest(InvenTreeTestCase):
         self.assertEqual(type(location), StockLocation)
         self.assertEqual(location.pk, 3)
         self.assertEqual(location.name, "Dining Room")
+
+
+class StockAdjustTest(InvenTreeTestCase):
+    """Unit tests for stock 'adjustment' actions"""
+
+    def test_count(self):
+        """Test the 'count' action"""
+
+        item = StockItem(self.api, pk=1)
+
+        # Count number of tracking entries
+        n_tracking = len(item.getTrackingEntries())
+
+        n = item.quantity
+
+        item.count(n + 100)
+        item.reload()
+
+        self.assertEqual(item.quantity, n + 100)
+
+        item.count(n)
+        item.reload()
+        self.assertEqual(item.quantity, n)
+
+        # 2 tracking entries should have been added
+        self.assertEqual(
+            len(item.getTrackingEntries()),
+            n_tracking + 2
+        )

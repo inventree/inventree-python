@@ -61,7 +61,7 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
         Items:
             Each 'item' in the 'items' list must be a dict object, containing the following fields:
 
-            item: The 'pk' (primary key) identifier for a StockItem instance
+            pk: The 'pk' (primary key) identifier for a StockItem instance
             quantity: The quantity 
         """
 
@@ -121,49 +121,49 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             **kwargs
         )
 
-    def count(self, quantity, notes=None):
+    def count(self, quantity, **kwargs):
         """Perform a count (stocktake) action for this StockItem"""
 
         self.countStockItems(
             self._api,
             [
                 {
-                    'item': self.pk,
+                    'pk': self.pk,
                     'quantity': quantity,
                 }
             ],
-            notes=notes,
+            **kwargs
         )
 
-    def addStock(self, quantity, notes=None):
+    def addStock(self, quantity, **kwargs):
         """Manually add the specified quantity to this StockItem"""
 
         self.addStockItems(
             self._api,
             [
                 {
-                    'item': self.pk,
+                    'pk': self.pk,
                     'quantity': quantity,
                 }
             ],
-            notes=notes,
+            **kwargs
         )
 
-    def removeStock(self, quantity, notes=None):
+    def removeStock(self, quantity, **kwargs):
         """Manually remove the specified quantity to this StockItem"""
 
         self.removeStockItems(
             self._api,
             [
                 {
-                    'item': self.pk,
+                    'pk': self.pk,
                     'quantity': quantity,
                 }
             ],
-            notes=notes,
+            **kwargs
         )
 
-    def transferStock(self, location, quantity=None, notes=None):
+    def transferStock(self, location, quantity=None, **kwargs):
         """Transfer this StockItem into the specified location.
         
         Arguments:
@@ -182,12 +182,12 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             self._api,
             [
                 {
-                    'item': self.pk,
+                    'pk': self.pk,
                     'quantity': quantity,
                 }
             ],
             location=location,
-            notes=notes,
+            **kwargs
         )
 
     def getPart(self):
@@ -205,6 +205,11 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             return None
 
         return StockLocation(self._api, self.location)
+
+    def getTrackingEntries(self, **kwargs):
+        """Return list of StockItemTracking instances associated with this StockItem"""
+
+        return StockItemTracking.list(self._api, item=self.pk, **kwargs)
 
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
