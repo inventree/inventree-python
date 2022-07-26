@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import requests
 import sys
+
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
@@ -204,19 +206,62 @@ class StockAdjustTest(InvenTreeTestCase):
         # Count number of tracking entries
         n_tracking = len(item.getTrackingEntries())
 
-        n = item.quantity
+        q = item.quantity
 
-        item.count(n + 100)
+        item.countStock(q + 100)
         item.reload()
 
-        self.assertEqual(item.quantity, n + 100)
+        self.assertEqual(item.quantity, q + 100)
 
-        item.count(n)
+        item.countStock(q, notes='Why hello there')
         item.reload()
-        self.assertEqual(item.quantity, n)
+        self.assertEqual(item.quantity, q)
 
         # 2 tracking entries should have been added
         self.assertEqual(
             len(item.getTrackingEntries()),
             n_tracking + 2
         )
+
+        # The most recent tracking entry should have a note
+        t = item.getTrackingEntries()[-1]
+        self.assertEqual(t.label, 'Stock counted')
+
+        # Check error conditions
+        with self.assertRaises(requests.exceptions.HTTPError):
+            item.countStock('not a number')
+    
+        with self.assertRaises(requests.exceptions.HTTPError):
+            item.countStock(-1)
+
+    def test_add_remove(self):
+        """Test the 'add' and 'remove' actions"""
+
+        item = StockItem(self.api, pk=1)
+
+        n_tracking = len(item.getTrackingEntries())
+
+        q = item.quantity
+
+        # Add some items
+        item.addStock(10)
+        item.reload()
+        self.assertEqual(item.quantity, q + 10)
+
+        # Remove the items again
+        item.removeStock(10)
+        item.reload()
+        self.assertEqual(item.quantity, q)
+
+        # 2 additional tracking entries should have been added
+        self.assertEqual(
+            len(item.getTrackingEntries()),
+            n_tracking + 2
+        )
+
+        # Test error conditions
+        for v in [-1, 'gg', None]:
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.addStock(v)
+            with self.assertRaises(requests.exceptions.HTTPError):
+                item.removeStock(v)

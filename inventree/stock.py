@@ -121,7 +121,7 @@ class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
             **kwargs
         )
 
-    def count(self, quantity, **kwargs):
+    def countStock(self, quantity, **kwargs):
         """Perform a count (stocktake) action for this StockItem"""
 
         self.countStockItems(
