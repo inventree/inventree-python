@@ -8,7 +8,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree.base import InventreeObject  # noqa: E402
-from test_api import InvenTreeTestCase
+from test_api import InvenTreeTestCase  # noqa: E402
+
 
 class BaseModelTests(InvenTreeTestCase):
     """Simple unit tests for the InvenTreeObject class"""
@@ -29,7 +30,7 @@ class BaseModelTests(InvenTreeTestCase):
         with self.assertRaises(TypeError):
             InventreeObject(
                 None,
-                data = {
+                data={
                     'pk': 'seven',
                 }
             )
@@ -39,7 +40,7 @@ class BaseModelTests(InvenTreeTestCase):
 
         obj = InventreeObject(
             None,
-            data = {
+            data={
                 "pk": "10",
                 "hello": "world",
                 "name": "My name",
