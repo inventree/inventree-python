@@ -28,8 +28,8 @@ class InventreeObject(object):
         """ Instantiate this InvenTree object.
 
         Args:
-            pk - The ID (primary key) associated with this object on the server
             api - The request manager object
+            pk - The ID (primary key) associated with this object on the server
             data - JSON representation of the object
         """
 
@@ -52,8 +52,6 @@ class InventreeObject(object):
 
         if data is None:
             data = {}
-
-        data['pk'] = pk
 
         self._data = data
 
@@ -249,6 +247,7 @@ class InventreeObject(object):
             raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
+
         if name in self._data.keys():
             return self._data[name]
         else:
