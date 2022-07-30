@@ -47,13 +47,13 @@ class InventreeObject(object):
         if pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
-        data['pk'] = pk
-
         self._url = f"{self.URL}/{pk}/"
         self._api = api
 
         if data is None:
             data = {}
+
+        data['pk'] = pk
 
         self._data = data
 
