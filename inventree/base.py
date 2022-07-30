@@ -275,11 +275,58 @@ class InventreeObject(object):
             raise KeyError(f"Key '{name}' does not exist in dataset")
 
 
-class Attachment(InventreeObject):
+class BulkDeleteMixin:
+    """Mixin class for models which support 'bulk deletion'
+
+    - Perform a DELETE operation against the LIST endpoint for the model
+    - Provide a list of items to be deleted, or filters to apply
+
+    Requires API version 58
+    """
+
+    @classmethod
+    def bulkDelete(cls, api: inventree_api.InvenTreeAPI, items=None, filters=None):
+        """Perform bulk delete operation
+
+        Arguments:
+            api: InventreeAPI instance
+            items: Optional list of items (pk values) to be deleted
+            filters: Optional query filters to delete
+
+        Returns:
+            API response object
+        
+        Throws:
+            NotImplementError: The server API version is too old (requires v58)
+            ValueError: Neither items or filters are supplied
+
+        """
+
+        if api.api_version < 58:
+            raise NotImplementedError("bulkDelete requires API version 58 or newer")
+
+        if not items and not filters:
+            raise ValueError("Must supply either 'items' or 'filters' argument")
+        
+        data = {}
+
+        if items:
+            data['items'] = items
+        
+        if filters:
+            data['filters'] = filters
+
+        return api.delete(
+            cls.URL,
+            json=data,
+        )
+
+
+class Attachment(BulkDeleteMixin, InventreeObject):
     """
     Class representing a file attachment object
     
-    Multiple sub-classes exist, representing various types of attachment models in the database
+    Multiple sub-classes exist, representing various types of attachment models in the database.
     """
 
     # List of required kwargs required for the particular subclass
@@ -463,50 +510,3 @@ class ImageMixin:
             return self._api.downloadFile(self.image, destination, **kwargs)
         else:
             raise ValueError(f"Part '{self.name}' does not have an associated image")
-
-
-class BulkDeleteMixin:
-    """Mixin class for models which support 'bulk deletion'
-
-    - Perform a DELETE operation against the LIST endpoint for the model
-    - Provide a list of items to be deleted, or filters to apply
-
-    Requires API version 58
-    """
-
-    @classmethod
-    def bulkDelete(cls, api: inventree_api.InvenTreeAPI, items=None, filters=None):
-        """Perform bulk delete operation
-
-        Arguments:
-            api: InventreeAPI instance
-            items: Optional list of items (pk values) to be deleted
-            filters: Optional query filters to delete
-
-        Returns:
-            API response object
-        
-        Throws:
-            NotImplementError: The server API version is too old (requires v58)
-            ValueError: Neither items or filters are supplied
-
-        """
-
-        if api.api_version < 58:
-            raise NotImplementedError("bulkDelete requires API version 58 or newer")
-
-        if not items and not filters:
-            raise ValueError("Must supply either 'items' or 'filters' argument")
-        
-        data = {}
-
-        if items:
-            data['items'] = items
-        
-        if filters:
-            data['filters'] = filters
-
-        return api.delete(
-            cls.URL,
-            json=data,
-        )
