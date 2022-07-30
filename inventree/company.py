@@ -63,8 +63,11 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
         )
 
 
-class SupplierPart(inventree.base.InventreeObject):
-    """ Class representing the SupplierPart database model """
+class SupplierPart(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+    """Class representing the SupplierPart database model
+
+    - Implements the BulkDeleteMixin
+    """
 
     URL = 'company/part'
 
@@ -74,9 +77,10 @@ class SupplierPart(inventree.base.InventreeObject):
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-class ManufacturerPart(inventree.base.InventreeObject):
-    """
-    Class representing the ManufacturerPart database model
+class ManufacturerPart(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+    """Class representing the ManufacturerPart database model
+
+    - Implements the BulkDeleteMixin
     """
 
     URL = 'company/part/manufacturer'
@@ -102,9 +106,10 @@ class ManufacturerPart(inventree.base.InventreeObject):
         )
 
 
-class ManufacturerPartParameter(inventree.base.InventreeObject):
-    """
-    Class representing the ManufacturerPartParameter database model.
+class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+    """Class representing the ManufacturerPartParameter database model.
+
+    - Implements the BulkDeleteMixin
     """
 
     URL = 'company/part/manufacturer/parameter'
