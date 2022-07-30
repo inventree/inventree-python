@@ -37,10 +37,17 @@ class InventreeObject(object):
         # extract it from the provided dataset
         if pk is None and data:
             pk = data.get('pk', None)
-        elif type(pk) is not int:
+        
+        # Convert to integer
+        try:
+            pk = int(pk)
+        except Exception:
             raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
-        elif pk <= 0:
+        
+        if pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
+
+        data['pk'] = pk
 
         self._url = f"{self.URL}/{pk}/"
         self._api = api
@@ -245,8 +252,7 @@ class InventreeObject(object):
         if name in self._data.keys():
             return self._data[name]
         else:
-            # return getattr(self, name)
-            return super().__getattr__(name)
+            return super().__getattribute__(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():
