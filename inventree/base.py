@@ -35,7 +35,7 @@ class InventreeObject(object):
 
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
-        if pk is None:
+        if pk is None and data:
             pk = data.get('pk', None)
         elif type(pk) is not int:
             raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
@@ -245,6 +245,7 @@ class InventreeObject(object):
         if name in self._data.keys():
             return self._data[name]
         else:
+            # return getattr(self, name)
             return super().__getattr__(name)
 
     def __getitem__(self, name):
