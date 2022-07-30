@@ -28,18 +28,23 @@ class InventreeObject(object):
         """ Instantiate this InvenTree object.
 
         Args:
-            pk - The ID (primary key) associated with this object on the server
             api - The request manager object
+            pk - The ID (primary key) associated with this object on the server
             data - JSON representation of the object
         """
 
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
-        if pk is None:
+        if pk is None and data:
             pk = data.get('pk', None)
-        elif type(pk) is not int:
+        
+        # Convert to integer
+        try:
+            pk = int(pk)
+        except Exception:
             raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
-        elif pk <= 0:
+        
+        if pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
         self._url = f"{self.URL}/{pk}/"
@@ -117,7 +122,14 @@ class InventreeObject(object):
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
-        return self._data.get('pk', None)
+        val = self._data.get('pk', None)
+
+        try:
+            val = int(val)
+        except ValueError:
+            pass
+    
+        return val
 
     @classmethod
     def create(cls, api, data, **kwargs):
@@ -242,10 +254,11 @@ class InventreeObject(object):
             raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
+
         if name in self._data.keys():
             return self._data[name]
         else:
-            return super().__getattr__(name)
+            return super().__getattribute__(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():
