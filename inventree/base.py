@@ -122,7 +122,14 @@ class InventreeObject(object):
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
-        return self._data.get('pk', None)
+        val = self._data.get('pk', None)
+
+        try:
+            val = int(val)
+        except ValueError:
+            pass
+    
+        return val
 
     @classmethod
     def create(cls, api, data, **kwargs):

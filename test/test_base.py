@@ -57,7 +57,7 @@ class BaseModelTests(InvenTreeTestCase):
 
         # Test __getitem__ access
         self.assertEqual(obj['description'], 'My description')
-        self.assertEqual(obj['pk'], 10)
+        self.assertEqual(obj['pk'], '10')
         self.assertEqual(obj['hello'], 'world')
 
         for k in ['fake', 'data', 'values']:
