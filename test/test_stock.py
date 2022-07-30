@@ -197,6 +197,28 @@ class StockTest(InvenTreeTestCase):
         self.assertEqual(location.pk, 3)
         self.assertEqual(location.name, "Dining Room")
 
+    def test_bulk_delete(self):
+        """Test bulk deletion of stock items"""
+
+        # Add some items to location 3
+        for i in range(10):
+            StockItem.create(self.api, {
+                'location': 3,
+                'part': 1,
+                'quantity': i + 50,
+            })
+
+        self.assertTrue(len(StockItem.list(self.api, location=3)) >= 10)
+
+        # Delete *all* items from location 3
+        StockItem.bulkDelete(self.api, filters={
+            'location': 3
+        })
+
+        loc = StockLocation(self.api, pk=3)
+        items = loc.getStockItems()
+        self.assertEqual(len(items), 0)
+
 
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
