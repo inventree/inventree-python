@@ -12,6 +12,20 @@ import inventree.build
 logger = logging.getLogger('inventree')
 
 
+class PartCategoryParameterTemplate(inventree.base.InventreeObject):
+    """A model which link a ParameterTemplate to a PartCategory"""
+
+    URL = 'part/category/parameters'
+
+    def getCategory(self):
+        """Return the referenced PartCategory instance"""
+        return PartCategory(self._api, self.category)
+    
+    def getTemplate(self):
+        """Return the referenced ParameterTemplate instance"""
+        return ParameterTemplate(self._api, self.parameter_template)
+
+
 class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
