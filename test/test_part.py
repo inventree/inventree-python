@@ -133,7 +133,7 @@ class PartCategoryTest(InvenTreeTestCase):
                     'units': 'uu',
                 })
 
-                PartCategoryParameterTemplate.create(
+                pcpt = PartCategoryParameterTemplate.create(
                     self.api,
                     data={
                         'category': electronics.pk,
@@ -141,6 +141,10 @@ class PartCategoryTest(InvenTreeTestCase):
                         'default_value': name,
                     }
                 )
+
+                # Check that model lookup functions work
+                self.assertEqual(pcpt.getCategory().pk, electronics.pk)
+                self.assertEqual(pcpt.getTemplate().pk, template.pk)
 
             # Reload
             templates = electronics.getCategoryParameterTemplates(fetch_parent=False)
