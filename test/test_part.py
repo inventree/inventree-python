@@ -118,6 +118,45 @@ class PartCategoryTest(InvenTreeTestCase):
 
         self.assertEqual(len(parts), n_parts + 10)
 
+    def test_part_category_parameter_templates(self):
+        """Unit tests for the PartCategoryParameterTemplate model"""
+
+        electronics = PartCategory(self.api, pk=3)
+
+        # Ensure there are some parameter templates associated with this category
+        templates = electronics.getCategoryParameterTemplates(fetch_parent=False)
+
+        if len(templates) == 0:
+            for name in ['wodth', 'lungth', 'herght']:
+                template = ParameterTemplate.create(self.api, data={
+                    'name': name,
+                    'units': 'uu',
+                })
+
+                PartCategoryParameterTemplate.create(
+                    self.api,
+                    data={
+                        'category': electronics.pk,
+                        'parameter_template': template.pk,
+                        'default_value': name,
+                    }
+                )
+
+            # Reload
+            templates = electronics.getCategoryParameterTemplates(fetch_parent=False)
+
+        self.assertTrue(len(templates) >= 3)
+
+        # Check child categories
+        childs = electronics.getChildCategories()
+
+        self.assertTrue(len(childs) > 0)
+
+        for child in childs:
+            child_templates = child.getCategoryParameterTemplates(fetch_parent=True)
+            self.assertTrue(len(child_templates) >= 3)
+
+
 class PartTest(InvenTreeTestCase):
     """Tests for Part models"""
 
