@@ -43,7 +43,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
     def getChildCategories(self, **kwargs):
         return PartCategory.list(self._api, parent=self.pk, **kwargs)
 
-    def getCategoryParameterTemplates(self, fetch_parent: bool = True) -> list[PartCategoryParameterTemplate]:
+    def getCategoryParameterTemplates(self, fetch_parent: bool = True) -> list:
         """Fetch a list of default parameter templates associated with this category
 
         Arguments:
