@@ -96,5 +96,5 @@ class BuildOrderTest(InvenTreeTestCase):
         build.cancel()
 
         # Check status
-        self.assertEqual(build.status, 40)
+        self.assertEqual(build.status, 30)
         self.assertEqual(build.status_text, 'Cancelled')
