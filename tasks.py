@@ -121,6 +121,16 @@ def start_server(c, debug=False):
 
 
 @task
+def stop_server(c, debug=False):
+    """
+    Stop a running InvenTree test server docker container
+    """
+
+    # Stop the server
+    c.run('docker-compose -f test/docker-compose.yml down', hide=None if debug else 'both')
+
+
+@task
 def test(c, source=None, update=False, reset=False, debug=False):
     """
     Run the unit tests for the python bindings.
@@ -145,6 +155,7 @@ def test(c, source=None, update=False, reset=False, debug=False):
         update_image(c, debug=debug)
 
     if reset:
+        stop_server(c, debug=debug)
         reset_data(c, debug=debug)
     
     # Launch the InvenTree server (dockerized)
