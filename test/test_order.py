@@ -25,8 +25,6 @@ def status_check_helper(
     """
     for o in orderlist:
 
-        print(f"Ref: {o.reference}, starting status {o.status} {o.status_text}")
-
         # If order not complete, try to mark it as such
         if o.status < target_status:
             try:
@@ -34,9 +32,7 @@ def status_check_helper(
                 # to next step - errors can occur due to orders
                 # which are not ready for completion yet
                 response = getattr(o, applymethod)()
-                
-                print(response)
-                print(f"Ref: {o.reference}, new status {o.status} {o.status_text}")
+
             except HTTPError:
                 continue
             else:
@@ -429,7 +425,7 @@ class SOTest(InvenTreeTestCase):
         else:
             so = order.SalesOrder.create(self.api, {
                 'customer': 4,
-                'reference': "My new sales order",
+                'reference': "SO-4444",
                 "description": "Selling some stuff",
             })
 
@@ -516,13 +512,17 @@ class SOTest(InvenTreeTestCase):
         
         # Assign each line item to this shipment
         for si in so.getLineItems():
-            response = si.allocateToShipment(shipment_2)
-            # Remember what we are doing for later check
-            # a response of None means nothing was allocated
-            if response is not None:
-                allocated_quantities[si.pk] = (
-                    {x['stock_item']: float(x['quantity']) for x in response['items']}
-                )
+            # If there is no stock available, delete this line
+            if si.available_stock == 0:
+                si.delete()
+            else:
+                response = si.allocateToShipment(shipment_2)
+                # Remember what we are doing for later check
+                # a response of None means nothing was allocated
+                if response is not None:
+                    allocated_quantities[si.pk] = (
+                        {x['stock_item']: float(x['quantity']) for x in response['items']}
+                    )
 
         # Check saved values
         for so_part in so.getLineItems():
@@ -539,19 +539,30 @@ class SOTest(InvenTreeTestCase):
         # Make sure date is not None
         self.assertIsNotNone(shipment_2.shipment_date)
 
-    def test_order_cancel_complete(self):
-        """Test cancel and completing sales orders"""
-        # Go through sales orders, try to complete one
-        self.assertTrue(status_check_helper(
-            order.SalesOrder.list(self.api),
-            'complete',
-            20,
-            'Shipped'
-        ))
-        # Go through sales orders, try to cancel one
-        self.assertTrue(status_check_helper(
-            order.SalesOrder.list(self.api),
-            'cancel',
-            40,
-            'Cancelled'
-        ))
+        # Try to complete this order
+        # Ship remaining shipments first
+        for shp in so.getShipments():
+            # Delete shipment if it has no allocations
+            if len(shp.allocations) == 0:
+                shp.delete()
+                continue
+            # If the shipment has no date, try to mark it shipped
+            if shp.shipment_date is None:
+                shp.ship()
+        so.complete()
+        self.assertEqual(so.status, 20)
+        self.assertEqual(so.status_text, 'Shipped')
+
+    def test_order_cancel(self):
+        """Test cancel sales order"""
+        
+        so = order.SalesOrder.create(self.api, {
+            'customer': 4,
+            'reference': "SO-4444",
+            "description": "Selling some stuff",
+        })
+
+        so.cancel()
+
+        self.assertEqual(so.status, 40)
+        self.assertEqual(so.status_text, 'Cancelled')

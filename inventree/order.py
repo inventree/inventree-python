@@ -52,8 +52,12 @@ class PurchaseOrder(
         )
 
     def issue(self):
-        return self._statusupdate(status='issue')
+        """
+        Issue the purchase order
+        """
 
+        # Return
+        return self._statusupdate(status='issue')
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
