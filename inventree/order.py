@@ -59,6 +59,7 @@ class PurchaseOrder(
         # Return
         return self._statusupdate(status='issue')
 
+
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
 

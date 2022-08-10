@@ -558,8 +558,7 @@ class SOTest(InvenTreeTestCase):
         
         so = order.SalesOrder.create(self.api, {
             'customer': 4,
-            'reference': "SO-4444",
-            "description": "Selling some stuff",
+            "description": "Selling some more stuff",
         })
 
         so.cancel()

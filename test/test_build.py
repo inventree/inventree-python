@@ -72,3 +72,28 @@ class BuildOrderTest(InvenTreeTestCase):
         self.assertEqual(response['comment'], 'A self referencing upload!')
 
         self.assertEqual(len(build.getAttachments()), n + 1)
+
+    def test_build_cancel(self):
+        """
+        Test cancelling a build order.
+        """
+
+        n = len(Build.list(self.api))
+
+        # Create a new build order
+        build = Build.create(
+            self.api,
+            {
+                "title": "Automated test build",
+                "part": 25,
+                "quantity": 100,
+                "reference": f"BO-{n+1:04d}"
+            }
+        )
+
+        # Cancel
+        build.cancel()
+
+        # Check status
+        self.assertEqual(build.status, 40)
+        self.assertEqual(build.status_text, 'Cancelled')
