@@ -24,7 +24,7 @@ class Build(
 
     def complete(
         self,
-        accept_overallocated=False,
+        accept_overallocated='reject',
         accept_unallocated=False,
         accept_incomplete=False,
     ):
