@@ -127,7 +127,7 @@ def test(c, source=None, update=False, reset=False, debug=False):
     Performs the following steps:
 
     - Ensure the docker container is up and running
-    - Reset the database to a known state
+    - Reset the database to a known state (if --reset flag is given)
     - Perform unit testing
     """
 
