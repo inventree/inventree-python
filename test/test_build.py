@@ -144,6 +144,7 @@ class BuildOrderTest(InvenTreeTestCase):
         self.assertEqual(build.status, 30)
         self.assertEqual(build.status_text, 'Cancelled')
 
+
     def test_build_complete(self):
         """
         Test completing a build order.
