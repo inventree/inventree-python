@@ -34,9 +34,10 @@ class BuildOrderTest(InvenTreeTestCase):
             build = Build.create(
                 self.api,
                 {
+                    "title": "Automated test build",
                     "part": 25,
                     "quantity": 100,
-                    "reference": f"{n+1}"
+                    "reference": f"BO-{n+1:04d}",
                 }
             )
         else:
