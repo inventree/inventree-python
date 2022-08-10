@@ -15,67 +15,12 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.part import Part, PartAttachment, PartCategory, Parameter, ParameterTemplate  # noqa: E402
+from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 
 
-class PartTest(InvenTreeTestCase):
-    """
-    Test for PartCategory and Part objects.
-    """
-
-    def test_access_erors(self):
-        """
-        Test that errors are flagged when we try to access an invalid part
-        """
-
-        with self.assertRaises(TypeError):
-            Part(self.api, 'hello')
-        
-        with self.assertRaises(ValueError):
-            Part(self.api, -1)
-
-        # Try to access a Part which does not exist
-        with self.assertRaises(requests.exceptions.HTTPError):
-            Part(self.api, 9999999999999)
-
-    def test_fields(self):
-        """
-        Test field names via OPTIONS request
-        """
-
-        field_names = Part.fieldNames(self.api)
-
-        self.assertIn('active', field_names)
-        self.assertIn('revision', field_names)
-        self.assertIn('full_name', field_names)
-        self.assertIn('IPN', field_names)
-
-    def test_options(self):
-        """Extends tests for OPTIONS model metadata"""
-
-        # Check for field which does not exist
-        with self.assertLogs():
-            Part.fieldInfo('abcde', self.api)
-
-        active = Part.fieldInfo('active', self.api)
-
-        self.assertEqual(active['type'], 'boolean')
-        self.assertEqual(active['required'], True)
-        self.assertEqual(active['label'], 'Active')
-        self.assertEqual(active['default'], True)
-
-        for field_name in [
-            'name',
-            'description',
-            'component',
-            'assembly',
-        ]:
-            field = Part.fieldInfo(field_name, self.api)
-
-            # Check required field attributes
-            for attr in ['type', 'required', 'read_only', 'label', 'help_text']:
-                self.assertIn(attr, field)
+class PartCategoryTest(InvenTreeTestCase):
+    """Tests for PartCategory models"""
 
     def test_part_cats(self):
         """
@@ -172,6 +117,105 @@ class PartTest(InvenTreeTestCase):
         parts = cat.getParts()
 
         self.assertEqual(len(parts), n_parts + 10)
+
+    def test_part_category_parameter_templates(self):
+        """Unit tests for the PartCategoryParameterTemplate model"""
+
+        electronics = PartCategory(self.api, pk=3)
+
+        # Ensure there are some parameter templates associated with this category
+        templates = electronics.getCategoryParameterTemplates(fetch_parent=False)
+
+        if len(templates) == 0:
+            for name in ['wodth', 'lungth', 'herght']:
+                template = ParameterTemplate.create(self.api, data={
+                    'name': name,
+                    'units': 'uu',
+                })
+
+                pcpt = PartCategoryParameterTemplate.create(
+                    self.api,
+                    data={
+                        'category': electronics.pk,
+                        'parameter_template': template.pk,
+                        'default_value': name,
+                    }
+                )
+
+                # Check that model lookup functions work
+                self.assertEqual(pcpt.getCategory().pk, electronics.pk)
+                self.assertEqual(pcpt.getTemplate().pk, template.pk)
+
+            # Reload
+            templates = electronics.getCategoryParameterTemplates(fetch_parent=False)
+
+        self.assertTrue(len(templates) >= 3)
+
+        # Check child categories
+        childs = electronics.getChildCategories()
+
+        self.assertTrue(len(childs) > 0)
+
+        for child in childs:
+            child_templates = child.getCategoryParameterTemplates(fetch_parent=True)
+            self.assertTrue(len(child_templates) >= 3)
+
+
+class PartTest(InvenTreeTestCase):
+    """Tests for Part models"""
+
+    def test_access_erors(self):
+        """
+        Test that errors are flagged when we try to access an invalid part
+        """
+
+        with self.assertRaises(TypeError):
+            Part(self.api, 'hello')
+        
+        with self.assertRaises(ValueError):
+            Part(self.api, -1)
+
+        # Try to access a Part which does not exist
+        with self.assertRaises(requests.exceptions.HTTPError):
+            Part(self.api, 9999999999999)
+
+    def test_fields(self):
+        """
+        Test field names via OPTIONS request
+        """
+
+        field_names = Part.fieldNames(self.api)
+
+        self.assertIn('active', field_names)
+        self.assertIn('revision', field_names)
+        self.assertIn('full_name', field_names)
+        self.assertIn('IPN', field_names)
+
+    def test_options(self):
+        """Extends tests for OPTIONS model metadata"""
+
+        # Check for field which does not exist
+        with self.assertLogs():
+            Part.fieldInfo('abcde', self.api)
+
+        active = Part.fieldInfo('active', self.api)
+
+        self.assertEqual(active['type'], 'boolean')
+        self.assertEqual(active['required'], True)
+        self.assertEqual(active['label'], 'Active')
+        self.assertEqual(active['default'], True)
+
+        for field_name in [
+            'name',
+            'description',
+            'component',
+            'assembly',
+        ]:
+            field = Part.fieldInfo(field_name, self.api)
+
+            # Check required field attributes
+            for attr in ['type', 'required', 'read_only', 'label', 'help_text']:
+                self.assertIn(attr, field)
 
     def test_pagination(self):
         """ Test that we can paginate the queryset by specifying a 'limit' parameter"""

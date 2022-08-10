@@ -4,8 +4,10 @@ import os
 import logging
 import json
 
+from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.8.0"
+
+INVENTREE_PYTHON_VERSION = "0.8.2"
 
 
 logger = logging.getLogger('inventree')
@@ -28,18 +30,23 @@ class InventreeObject(object):
         """ Instantiate this InvenTree object.
 
         Args:
-            pk - The ID (primary key) associated with this object on the server
             api - The request manager object
+            pk - The ID (primary key) associated with this object on the server
             data - JSON representation of the object
         """
 
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
-        if pk is None:
+        if pk is None and data:
             pk = data.get('pk', None)
-        elif type(pk) is not int:
+        
+        # Convert to integer
+        try:
+            pk = int(pk)
+        except Exception:
             raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
-        elif pk <= 0:
+        
+        if pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
         self._url = f"{self.URL}/{pk}/"
@@ -117,7 +124,14 @@ class InventreeObject(object):
     @property
     def pk(self):
         """ Convenience method for accessing primary-key field """
-        return self._data.get('pk', None)
+        val = self._data.get('pk', None)
+
+        try:
+            val = int(val)
+        except ValueError:
+            pass
+    
+        return val
 
     @classmethod
     def create(cls, api, data, **kwargs):
@@ -242,10 +256,11 @@ class InventreeObject(object):
             raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
     def __getattr__(self, name):
+
         if name in self._data.keys():
             return self._data[name]
         else:
-            return super().__getattr__(name)
+            return super().__getattribute__(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():
@@ -260,11 +275,58 @@ class InventreeObject(object):
             raise KeyError(f"Key '{name}' does not exist in dataset")
 
 
-class Attachment(InventreeObject):
+class BulkDeleteMixin:
+    """Mixin class for models which support 'bulk deletion'
+
+    - Perform a DELETE operation against the LIST endpoint for the model
+    - Provide a list of items to be deleted, or filters to apply
+
+    Requires API version 58
+    """
+
+    @classmethod
+    def bulkDelete(cls, api: inventree_api.InvenTreeAPI, items=None, filters=None):
+        """Perform bulk delete operation
+
+        Arguments:
+            api: InventreeAPI instance
+            items: Optional list of items (pk values) to be deleted
+            filters: Optional query filters to delete
+
+        Returns:
+            API response object
+        
+        Throws:
+            NotImplementError: The server API version is too old (requires v58)
+            ValueError: Neither items or filters are supplied
+
+        """
+
+        if api.api_version < 58:
+            raise NotImplementedError("bulkDelete requires API version 58 or newer")
+
+        if not items and not filters:
+            raise ValueError("Must supply either 'items' or 'filters' argument")
+        
+        data = {}
+
+        if items:
+            data['items'] = items
+        
+        if filters:
+            data['filters'] = filters
+
+        return api.delete(
+            cls.URL,
+            json=data,
+        )
+
+
+class Attachment(BulkDeleteMixin, InventreeObject):
     """
     Class representing a file attachment object
     
-    Multiple sub-classes exist, representing various types of attachment models in the database
+    Multiple sub-classes exist, representing various types of attachment models in the database.
     """
 
     # List of required kwargs required for the particular subclass

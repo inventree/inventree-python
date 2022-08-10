@@ -34,17 +34,8 @@ class StockLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItem(inventree.base.MetadataMixin, inventree.base.InventreeObject):
-    """ Class representing the StockItem database model.
-    
-    Stock items can be filtered by:
-    
-    - location: Where the stock item is stored
-    - category: The category of the part this stock item points to
-    - supplier: Who supplied this stock item
-    - part: The part referenced by this stock item
-    - supplier_part: Matching SupplierPart object
-    """
+class StockItem(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+    """Class representing the StockItem database model."""
 
     URL = 'stock'
 
@@ -256,8 +247,8 @@ class StockItemTracking(inventree.base.InventreeObject):
     URL = 'stock/track'
 
 
-class StockItemTestResult(inventree.base.InventreeObject):
-    """ Class representing a StockItemTestResult object """
+class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+    """Class representing a StockItemTestResult object"""
 
     URL = 'stock/test'
 
