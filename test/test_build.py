@@ -118,7 +118,6 @@ class BuildOrderTest(InvenTreeTestCase):
         # All attachments for this Build should have been deleted
         self.assertEqual(len(BuildAttachment.list(self.api, build=build.pk)), 0)
 
-
     def test_build_cancel(self):
         """
         Test cancelling a build order.
@@ -143,7 +142,6 @@ class BuildOrderTest(InvenTreeTestCase):
         # Check status
         self.assertEqual(build.status, 30)
         self.assertEqual(build.status_text, 'Cancelled')
-
 
     def test_build_complete(self):
         """
