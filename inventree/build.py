@@ -3,7 +3,10 @@
 import inventree.base
 
 
-class Build(inventree.base.InventreeObject):
+class Build(
+    inventree.base.InventreeObject,
+    inventree.base.StatusMixin,
+):
     """ Class representing the Build database model """
 
     URL = 'build'
@@ -18,6 +21,30 @@ class Build(inventree.base.InventreeObject):
             comment=comment,
             build=self.pk
         )
+
+    def complete(
+        self,
+        accept_overallocated='reject',
+        accept_unallocated=False,
+        accept_incomplete=False,
+    ):
+        """Finish a build order. Takes the following flags:
+        - accept_overallocated
+        - accept_unallocated
+        - accept_incomplete
+        """
+        return self._statusupdate(
+            status='finish',
+            data={
+                'accept_overallocated': accept_overallocated,
+                'accept_unallocated': accept_unallocated,
+                'accept_incomplete': accept_incomplete,
+            }
+        )
+
+    def finish(self, *args, **kwargs):
+        """Alias for complete"""
+        return self.complete(*args, **kwargs)
 
 
 class BuildAttachment(inventree.base.Attachment):

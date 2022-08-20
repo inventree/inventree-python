@@ -5,7 +5,11 @@ import inventree.part
 import inventree.company
 
 
-class PurchaseOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class PurchaseOrder(
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject,
+    inventree.base.StatusMixin
+):
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
@@ -46,6 +50,14 @@ class PurchaseOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject
             comment=comment,
             order=self.pk,
         )
+
+    def issue(self):
+        """
+        Issue the purchase order
+        """
+
+        # Return
+        return self._statusupdate(status='issue')
 
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
@@ -92,7 +104,11 @@ class PurchaseOrderAttachment(inventree.base.Attachment):
     REQUIRED_KWARGS = ['order']
 
 
-class SalesOrder(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class SalesOrder(
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject,
+    inventree.base.StatusMixin
+):
     """ Class respresenting the SalesOrder database model """
 
     URL = 'order/so'
@@ -256,7 +272,10 @@ class SalesOrderAttachment(inventree.base.Attachment):
     REQUIRED_KWARGS = ['order']
 
 
-class SalesOrderShipment(inventree.base.InventreeObject):
+class SalesOrderShipment(
+    inventree.base.InventreeObject,
+    inventree.base.StatusMixin
+):
     """Class representing a shipment for a SalesOrder"""
 
     URL = 'order/so/shipment'
@@ -311,9 +330,6 @@ class SalesOrderShipment(inventree.base.InventreeObject):
         defaults.
         """
 
-        # Customise URL
-        url = f'order/so/shipment/{self.pk}/ship'
-
         # Create data from given inputs
         data = {
             'shipment_date': shipment_date,
@@ -322,11 +338,9 @@ class SalesOrderShipment(inventree.base.InventreeObject):
             'link': link
         }
 
-        # Send data
-        response = self._api.post(url, data)
-
-        # Reload
-        self.reload()
-
         # Return
-        return response
+        return self._statusupdate(status='ship', data=data)
+
+    def ship(self, *args, **kwargs):
+        """Alias for complete function"""
+        self.complete(*args, **kwargs)
