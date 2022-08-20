@@ -7,6 +7,7 @@ import inventree.base
 import inventree.stock
 import inventree.company
 import inventree.build
+import inventree.label
 
 
 logger = logging.getLogger('inventree')
@@ -57,10 +58,14 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
         )
 
 
-class Part(inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.base.InventreeObject):
+class Part(inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
+
+    # Setup for Label printing
+    LABELNAME = 'part'
+    LABELITEM = 'parts'
 
     def getCategory(self):
         """ Return the part category associated with this part """
