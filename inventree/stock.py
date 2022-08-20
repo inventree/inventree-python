@@ -6,6 +6,7 @@ import logging
 import inventree.api
 import inventree.base
 import inventree.part
+import inventree.label
 
 
 class StockLocation(inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
