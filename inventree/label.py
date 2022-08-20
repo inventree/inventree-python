@@ -31,7 +31,7 @@ class LabelPrintingMixing:
 
         if plugin is not None:
             # Append profile
-            URL += f'plugin={plugin}'
+            URL += f'&plugin={plugin}'
 
             # Get response
             return self._api.get(URL)
