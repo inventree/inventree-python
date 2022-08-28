@@ -18,7 +18,8 @@ def status_check_helper(
     orderlist,
     applymethod,
     target_status,
-    target_status_text
+    target_status_text,
+    **kwargs
 ):
     """Apply function to order list, check for status and
     status_text until one is confirmed - then quit
@@ -31,7 +32,7 @@ def status_check_helper(
                 # Use try-else so that only successful calls lead
                 # to next step - errors can occur due to orders
                 # which are not ready for completion yet
-                response = getattr(o, applymethod)()
+                response = getattr(o, applymethod)(**kwargs)
 
             except HTTPError:
                 continue
@@ -212,7 +213,8 @@ class POTest(InvenTreeTestCase):
             order.PurchaseOrder.list(self.api),
             'complete',
             30,
-            'Complete'
+            'Complete',
+            accept_incomplete=True,
         ))
         # Go through purchase orders, try to cancel one
         self.assertTrue(status_check_helper(
