@@ -32,9 +32,11 @@ def reset_data(c, debug=False):
     # Reset the database to a known state
     print("Reset test database to a known state (this might take a little while...)")
 
-    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=None if debug else 'both')
-    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke delete-data -f", hide=None if debug else 'both')
-    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=None if debug else 'both')
+    hide = None if debug else 'both'
+
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke delete-data -f", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=hide)
 
 
 @task(post=[reset_data])
@@ -45,7 +47,10 @@ def update_image(c, debug=True):
 
     print("Pulling latest InvenTree image from docker hub (maybe grab a coffee!)")
     
-    c.run("docker-compose -f test/docker-compose.yml pull", hide=None if debug else 'both')
+    hide = None if debug else 'both'
+
+    c.run("docker-compose -f test/docker-compose.yml pull", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke update", hide=hide)
 
 
 @task
