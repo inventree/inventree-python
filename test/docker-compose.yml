@@ -17,14 +17,11 @@ services:
     environment:
       - INVENTREE_DEBUG=True
       - INVENTREE_DB_ENGINE=sqlite
-      - INVENTREE_DB_NAME=/home/inventree/data/db/test_db.sqlite3
+      - INVENTREE_DB_NAME=/home/inventree/data/test_db.sqlite3
       - INVENTREE_DEBUG_LEVEL=error
       - INVENTREE_ADMIN_USER=testuser
       - INVENTREE_ADMIN_PASSWORD=testpassword
       - INVENTREE_ADMIN_EMAIL=test@test.com
     restart: unless-stopped
     volumes:
-      # Note: media and static files are ephemeral
-      - ./data/media:/home/inventree/data/media/
-      - ./data/static:/home/inventree/data/static/
-      - ./data/db:/home/inventree/data/db/
+      - ./data:/home/inventree/data
