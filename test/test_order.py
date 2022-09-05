@@ -164,9 +164,13 @@ class POTest(InvenTreeTestCase):
     def test_order_cancel(self):
         """Test that we can cancel a PurchaseOrder via the API"""
         
+        n = len(order.PurchaseOrder.list(self.api)) + 1
+        ref = f"PO-{n}"
+
         # Create a new PO
         po = order.PurchaseOrder.create(self.api, data={
             'supplier': 1,
+            'reference': ref,
             'description': 'Some new order'
         })
 
@@ -182,9 +186,13 @@ class POTest(InvenTreeTestCase):
     def test_order_complete(self):
         """Test that we can complete an order via the API"""
 
+        n = len(order.PurchaseOrder.list(self.api)) + 1
+        ref = f"PO-{n}"
+
         # First, let's create a new PurchaseOrder
         po = order.PurchaseOrder.create(self.api, data={
             'supplier': 1,
+            'reference': ref,
             'description': 'A new purchase order',
         })
 
