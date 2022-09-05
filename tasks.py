@@ -75,11 +75,14 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
                 print("Error:", str(e))
         
         if response is None:
-            timeout -= 1
 
-            time.sleep(1)
+            if timeout > 0:
+                if debug:
+                    print(f"No response from server. {timeout} seconds remaining")
+                timeout -= 1
+                time.sleep(1)
         
-            if timeout <= 0:
+            else:
                 return False
 
     if response.status_code != 200:
