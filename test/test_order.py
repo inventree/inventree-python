@@ -163,7 +163,21 @@ class POTest(InvenTreeTestCase):
 
     def test_order_cancel(self):
         """Test that we can cancel a PurchaseOrder via the API"""
-        ...
+        
+        # Create a new PO
+        po = order.PurchaseOrder.create(self.api, data={
+            'supplier': 1,
+            'description': 'Some new order'
+        })
+
+        self.assertEqual(po.status, 10)
+        self.assertEqual(po.status_text, "Pending")
+
+        # Cancel the order
+        po.cancel()
+
+        self.assertEqual(po.status, 40)
+        self.assertEqual(po.status_text, "Cancelled")
 
     def test_order_complete(self):
         """Test that we can complete an order via the API"""
