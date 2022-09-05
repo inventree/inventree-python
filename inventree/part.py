@@ -74,9 +74,9 @@ class Part(inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.ba
         """ Return the supplier parts associated with this part """
         return inventree.company.SupplierPart.list(self._api, part=self.pk)
 
-    def getBomItems(self):
+    def getBomItems(self, **kwargs):
         """ Return the items required to make this part """
-        return BomItem.list(self._api, part=self.pk)
+        return BomItem.list(self._api, part=self.pk, **kwargs)
 
     def isUsedIn(self):
         """ Return a list of all the parts this part is used in """
@@ -86,9 +86,9 @@ class Part(inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.ba
         """ Return the builds associated with this part """
         return inventree.build.Build.list(self._api, part=self.pk, **kwargs)
 
-    def getStockItems(self):
+    def getStockItems(self, **kwargs):
         """ Return the stock items associated with this part """
-        return inventree.stock.StockItem.list(self._api, part=self.pk)
+        return inventree.stock.StockItem.list(self._api, part=self.pk, **kwargs)
 
     def getParameters(self):
         """ Return parameters associated with this part """
