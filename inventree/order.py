@@ -51,13 +51,13 @@ class PurchaseOrder(
             order=self.pk,
         )
 
-    def issue(self):
+    def issue(self, **kwargs):
         """
         Issue the purchase order
         """
 
         # Return
-        return self._statusupdate(status='issue')
+        return self._statusupdate(status='issue', **kwargs)
 
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
@@ -202,9 +202,9 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         possibly because no stock items are available.
         """
 
-        # If stockitems are not defined, get the list
+        # If stockitems are not defined, get the list of available stock items
         if stockitems is None:
-            stockitems = self.getPart().getStockItems()
+            stockitems = self.getPart().getStockItems(include_variants=False, in_stock=True, available=True)
 
         # If no quantity is defined, calculate the number of required items
         # This is the number of sold items not yet allocated, but can not
@@ -225,6 +225,7 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
         # Look through stock items, assign items until the required amount
         # is reached
         items = list()
+
         for SI in stockitems:
             
             # Check if we are done
@@ -323,7 +324,8 @@ class SalesOrderShipment(
         shipment_date=None,
         tracking_number='',
         invoice_number='',
-        link=''
+        link='',
+        **kwargs
     ):
         """
         Complete the shipment, with given shipment_date, or reasonable
@@ -339,7 +341,7 @@ class SalesOrderShipment(
         }
 
         # Return
-        return self._statusupdate(status='ship', data=data)
+        return self._statusupdate(status='ship', data=data, **kwargs)
 
     def ship(self, *args, **kwargs):
         """Alias for complete function"""

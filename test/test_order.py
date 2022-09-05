@@ -12,44 +12,7 @@ from test_api import InvenTreeTestCase  # noqa: E402
 from inventree import part  # noqa: E402
 from inventree import order  # noqa: E402
 from inventree import company  # noqa: E402
-
-
-def status_check_helper(
-    orderlist,
-    applymethod,
-    target_status,
-    target_status_text,
-    **kwargs
-):
-    """Apply function to order list, check for status and
-    status_text until one is confirmed - then quit
-    """
-    for o in orderlist:
-
-        # If order not complete, try to mark it as such
-        if o.status < target_status:
-            try:
-                # Use try-else so that only successful calls lead
-                # to next step - errors can occur due to orders
-                # which are not ready for completion yet
-                response = getattr(o, applymethod)(**kwargs)
-
-            except HTTPError:
-                continue
-            else:
-
-                # Expected response is {} if order was marked as complete
-                # Status should now be 20, status_text is shipped
-                if isinstance(response, dict) and len(response) == 0:
-                    if (
-                        o.status == target_status and o.status_text == target_status_text
-                    ):
-                        # exit the function
-                        return True
-
-    # End of loop reached without exit - this means function
-    # has not been completed successfully, which is not good
-    return False
+from inventree import stock  # noqa: E402
 
 
 class POTest(InvenTreeTestCase):
@@ -198,31 +161,57 @@ class POTest(InvenTreeTestCase):
         # Now there should be 0 lines left
         self.assertEqual(len(po.getExtraLineItems()), 0)
 
-    def test_order_cancel_complete(self):
-        """Test cancel and completing purchase orders"""
+    def test_order_cancel(self):
+        """Test that we can cancel a PurchaseOrder via the API"""
+        ...
 
-        # Go through purchase orders, try to issue one
-        self.assertTrue(status_check_helper(
-            order.PurchaseOrder.list(self.api),
-            'issue',
-            20,
-            'Placed'
-        ))
-        # Go through purchase orders, try to complete one
-        self.assertTrue(status_check_helper(
-            order.PurchaseOrder.list(self.api),
-            'complete',
-            30,
-            'Complete',
-            accept_incomplete=True,
-        ))
-        # Go through purchase orders, try to cancel one
-        self.assertTrue(status_check_helper(
-            order.PurchaseOrder.list(self.api),
-            'cancel',
-            40,
-            'Cancelled'
-        ))
+    def test_order_complete(self):
+        """Test that we can complete an order via the API"""
+
+        # First, let's create a new PurchaseOrder
+        po = order.PurchaseOrder.create(self.api, data={
+            'supplier': 1,
+            'description': 'A new purchase order',
+        })
+
+        # Add some line items
+        for p in company.SupplierPart.list(self.api, supplier=1, limit=5):
+
+            po.addLineItem(
+                part=p.pk,
+                quantity=10,
+            )
+
+        # Check that lines have actually been added
+        lines = po.getLineItems()
+        self.assertTrue(len(lines) > 0)
+
+        # Initial status code is "PENDING"
+        self.assertEqual(po.status, 10)
+        self.assertEqual(po.status_text, "Pending")
+
+        # Issue the order
+        po.issue()
+        po.reload()
+
+        self.assertEqual(po.status, 20)
+        self.assertEqual(po.status_text, "Placed")
+
+        # Try to complete the order (should fail, as lines have not been received)
+        with self.assertRaises(HTTPError):
+            po.complete()
+    
+        po.reload()
+
+        # Check that order status has *not* changed
+        self.assertEqual(po.status, 20)
+
+        # Now, try to complete the order again, accepting incomplete
+        po.complete(accept_incomplete=True)
+        po.reload()
+
+        # Check that the order is now complete
+        self.assertEqual(po.status, 30)
 
     def test_purchase_order_delete(self):
         """
@@ -415,21 +404,36 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(len(attachments), n + 1)
 
     def test_so_shipment(self):
-        """
-        Test shipment functionality for a SalesOrder
-        """
+        """Test shipment functionality for a SalesOrder."""
 
-        # Grab the last available SalesOrder - should not have a shipment yet
-        orders = order.SalesOrder.list(self.api)
+        # Construct a new SalesOrder instance
+        so = order.SalesOrder.create(self.api, {
+            'customer': 4,
+            "description": "Selling some stuff",
+        })
 
-        if len(orders) > 0:
-            so = orders[-1]
-        else:
-            so = order.SalesOrder.create(self.api, {
-                'customer': 4,
-                'reference': "SO-4444",
-                "description": "Selling some stuff",
-            })
+        # Add some line items to the SalesOrder
+        for p in part.Part.list(self.api, is_template=False, salable=True, limit=5):
+            
+            # Create a line item matching the part
+            order.SalesOrderLineItem.create(
+                self.api,
+                data={
+                    'part': p.pk,
+                    'order': so.pk,
+                    'quantity': 10,
+                }
+            )
+
+            # Ensure there is available stock
+            stock.StockItem.create(
+                self.api,
+                data={
+                    'part': p.pk,
+                    'quantity': 25,
+                    'location': 1,
+                }
+            )
 
         # The shipments list should return something which is not none
         self.assertIsNotNone(so.getShipments())
@@ -485,6 +489,7 @@ class SOTest(InvenTreeTestCase):
         # (which should be overwritten)
         notes = f'Test shipment number {num_shipments+1} for order {so.pk}'
         tracking_number = '93414134343'
+
         shipment_2 = so.addShipment(
             reference=f'Package {num_shipments+1}',
             order=10103413,
@@ -535,7 +540,7 @@ class SOTest(InvenTreeTestCase):
                         allocated_quantities[so_part.pk]
                     )
 
-        # Complete the shipment, with minimum information
+        # Attempt to complete the shipment, but no items have been allocated
         shipment_2.complete()
 
         # Make sure date is not None

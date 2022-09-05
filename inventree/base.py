@@ -525,7 +525,7 @@ class StatusMixin:
     can be reached through _statusupdate function
     """
 
-    def _statusupdate(self, status: str, data=None, **kwargs):
+    def _statusupdate(self, status: str, reload=True, data=None, **kwargs):
 
         # Check status
         if status not in [
@@ -540,19 +540,25 @@ class StatusMixin:
         # Set the url
         URL = self.URL + f"/{self.pk}/{status}"
 
+        if data is None:
+            data = {}
+
+        data.update(kwargs)
+
         # Send data
-        response = self._api.post(URL, data, **kwargs)
+        response = self._api.post(URL, data)
 
         # Reload
-        self.reload()
+        if reload:
+            self.reload()
 
         # Return
         return response
 
     def complete(self, **kwargs):
         
-        return self._statusupdate(status='complete')
+        return self._statusupdate(status='complete', **kwargs)
 
     def cancel(self, **kwargs):
         
-        return self._statusupdate(status='cancel')
+        return self._statusupdate(status='cancel', **kwargs)
