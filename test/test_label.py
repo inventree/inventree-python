@@ -86,6 +86,8 @@ class LabelTest(InvenTreeTestCase):
         # Make sure the files exist
         self.assertTrue(os.path.isfile("partlabel_1.pdf"))
         self.assertTrue(os.path.isfile("partlabel_2.pdf"))
+        os.remove("partlabel_1.pdf")
+        os.remove("partlabel_2.pdf")
 
         # StockItem
         # Object and label - get first in list
@@ -100,6 +102,8 @@ class LabelTest(InvenTreeTestCase):
         # Make sure the files exist
         self.assertTrue(os.path.isfile("stocklabel_1.pdf"))
         self.assertTrue(os.path.isfile("stocklabel_2.pdf"))
+        os.remove("stocklabel_1.pdf")
+        os.remove("stocklabel_2.pdf")
 
         # StockLocation
         # Object and label - get first in list
@@ -114,3 +118,5 @@ class LabelTest(InvenTreeTestCase):
         # Make sure the files exist
         self.assertTrue(os.path.isfile("locationlabel_1.pdf"))
         self.assertTrue(os.path.isfile("locationlabel_2.pdf"))
+        os.remove("locationlabel_1.pdf")
+        os.remove("locationlabel_2.pdf")
