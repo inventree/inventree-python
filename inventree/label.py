@@ -15,7 +15,7 @@ class LabelPrintingMixing:
         """Print the label belonging to the given item.
         
         Set the label with 'label' argument, as the ID of the corresponding
-        label.
+        label. A corresponding label object can also be given.
         
         If a plugin is given, the plugin will determine
         how the label is printed, and a message is returned.
@@ -26,8 +26,13 @@ class LabelPrintingMixing:
         If neither plugin nor destination is given, nothing will be done
         """
 
+        if isinstance(label, (LabelPart, LabelStock, LabelLocation)):
+            label_id = label.pk
+        else:
+            label_id = label
+
         # Set URL to use
-        URL = f'label/{self.LABELNAME}/{label}/print/?{self.LABELITEM}[]={self.pk}'
+        URL = f'label/{self.LABELNAME}/{label_id}/print/?{self.LABELITEM}[]={self.pk}'
 
         if plugin is not None:
             # Append profile
