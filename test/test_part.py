@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from email.policy import HTTP
 import os
 import requests
 import sys
