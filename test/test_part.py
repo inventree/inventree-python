@@ -603,3 +603,36 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(len(metadata.keys()), 2)
         self.assertEqual(metadata['foo'], 'rab')
         self.assertEqual(metadata['hello'], 'world')
+
+
+class PartBarcodeTest(InvenTreeTestCase):
+    """Tests for Part barcode functionality"""
+
+    def test_barcode_assign(self):
+        """Tests for assigning barcodes to Part instances"""
+
+        # Grab a part from the database
+        part_1 = Part(self.api, pk=1)
+
+        # First ensure that there is *no* barcode assigned to this item
+        part_1.unassignBarcode()
+
+        # Assign a barcode to this part (should auto-reload)
+        response = part_1.assignBarcode('hello world')
+
+        self.assertEqual(response['success'], 'Assigned barcode to part instance')
+        self.assertEqual(response['barcode_data'], 'hello world')
+        
+        # Attempt to assign the same barcode to a different part (should error)
+        part_2 = Part(self.api, pk=2)
+
+        with self.assertRaises(HTTPError):
+            response = part_2.assignBarcode('hello world')
+
+        # Unassign from part_1
+        part_1.unassignBarcode()
+
+        # Now assign to part_2
+        response = part_2.assignBarcode('hello world')
+        self.assertEqual(response['barcode_data'], 'hello world')
+    
