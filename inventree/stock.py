@@ -9,7 +9,7 @@ import inventree.part
 import inventree.label
 
 
-class StockLocation(inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
+class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -39,7 +39,7 @@ class StockLocation(inventree.base.MetadataMixin, inventree.label.LabelPrintingM
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItem(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
+class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
     """Class representing the StockItem database model."""
 
     URL = 'stock'

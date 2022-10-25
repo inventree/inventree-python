@@ -63,7 +63,7 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
         )
 
 
-class SupplierPart(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
     """Class representing the SupplierPart database model
 
     - Implements the BulkDeleteMixin
