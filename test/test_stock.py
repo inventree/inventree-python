@@ -250,6 +250,7 @@ class StockTest(InvenTreeTestCase):
 
             item.unassignBarcode()
 
+
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
 
