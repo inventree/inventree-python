@@ -562,3 +562,57 @@ class StatusMixin:
     def cancel(self, **kwargs):
         
         return self._statusupdate(status='cancel', **kwargs)
+
+
+class BarcodeMixin:
+    """Adds barcode scanning functionality to various data types.
+
+    Any class which inherits from this mixin can assign (or un-assign) barcode data.
+    """
+
+    @classmethod
+    def barcodeModelType(cls):
+        """Return the model type name required for barcode assignment.
+        
+        Default value is the lower-case class name ()
+        """
+        return cls.__name__.lower()
+
+    def assignBarcode(self, barcode_data: str, reload=True):
+        """Assign an arbitrary barcode to this object (in the database).
+        
+        Arguments:
+            barcode_data: A string containing arbitrary barcode data
+        """
+
+        model_type = self.barcodeModelType()
+
+        response = self._api.post(
+            '/barcode/link/',
+            {
+                'barcode': barcode_data,
+                model_type: self.pk,
+            }
+        )
+
+        if reload:
+            self.reload()
+
+        return response
+
+    def unassignBarcode(self, reload=True):
+        """Unassign a barcode from this object"""
+
+        model_type = self.barcodeModelType()
+
+        response = self._api.post(
+            '/barcode/unlink/',
+            {
+                model_type: self.pk,
+            }
+        )
+
+        if reload:
+            self.reload()
+
+        return response

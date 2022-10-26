@@ -555,3 +555,15 @@ class InvenTreeAPI(object):
 
         logger.info(f"Downloaded '{url}' to '{destination}'")
         return True
+
+    def scanBarcode(self, barcode_data):
+        """Scan a barcode to see if it matches a known object"""
+
+        response = self.post(
+            '/barcode/',
+            {
+                'barcode': barcode_data,
+            }
+        )
+
+        return response

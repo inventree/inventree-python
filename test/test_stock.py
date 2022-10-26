@@ -219,6 +219,37 @@ class StockTest(InvenTreeTestCase):
         items = loc.getStockItems()
         self.assertEqual(len(items), 0)
 
+    def test_barcode_support(self):
+        """Test barcode support for the StockItem model"""
+
+        items = StockItem.list(self.api, limit=10)
+
+        for item in items:
+            # Delete any existing barcode
+            item.unassignBarcode()
+
+            # Perform lookup based on 'internal' barcode
+            response = self.api.scanBarcode(
+                {
+                    'stockitem': item.pk,
+                }
+            )
+
+            self.assertEqual(response['stockitem']['pk'], item.pk)
+            self.assertEqual(response['plugin'], 'InvenTreeInternalBarcode')
+
+            # Assign a custom barcode to this StockItem
+            barcode = f"custom-stock-item-{item.pk}"
+            item.assignBarcode(barcode)
+
+            response = self.api.scanBarcode(barcode)
+
+            self.assertEqual(response['stockitem']['pk'], item.pk)
+            self.assertEqual(response['plugin'], 'InvenTreeExternalBarcode')
+            self.assertEqual(response['barcode_data'], barcode)
+
+            item.unassignBarcode()
+
 
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
