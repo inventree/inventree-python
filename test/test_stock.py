@@ -236,7 +236,7 @@ class StockTest(InvenTreeTestCase):
             )
 
             self.assertEqual(response['stockitem']['pk'], item.pk)
-            self.assertEqual(response['plugin'], 'InvenTreeInternalBarcode')
+            self.assertEqual(response['plugin'], 'InvenTreeBarcode')
 
             # Assign a custom barcode to this StockItem
             barcode = f"custom-stock-item-{item.pk}"
@@ -245,7 +245,7 @@ class StockTest(InvenTreeTestCase):
             response = self.api.scanBarcode(barcode)
 
             self.assertEqual(response['stockitem']['pk'], item.pk)
-            self.assertEqual(response['plugin'], 'InvenTreeExternalBarcode')
+            self.assertEqual(response['plugin'], 'InvenTreeBarcode')
             self.assertEqual(response['barcode_data'], barcode)
 
             item.unassignBarcode()
