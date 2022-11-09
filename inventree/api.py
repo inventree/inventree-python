@@ -490,7 +490,7 @@ class InvenTreeAPI(object):
 
         return data
 
-    def downloadFile(self, url, destination, overwrite=False):
+    def downloadFile(self, url, destination, overwrite=False, params=None):
         """
         Download a file from the InvenTree server.
 
@@ -526,7 +526,7 @@ class InvenTreeAPI(object):
             headers = {}
             auth = self.auth
 
-        with requests.get(url, stream=True, auth=auth, headers=headers) as response:
+        with requests.get(url, stream=True, auth=auth, headers=headers, params=params) as response:
 
             # Error code
             if response.status_code >= 300:
