@@ -32,14 +32,17 @@ class LabelPrintingMixing:
             label_id = label
 
         # Set URL to use
-        URL = f'label/{self.LABELNAME}/{label_id}/print/?{self.LABELITEM}[]={self.pk}'
+        URL = f'label/{self.LABELNAME}/{label_id}/print/'
+        params = {
+            f'{self.LABELITEM}[]': self.pk
+        }
 
         if plugin is not None:
             # Append profile
-            URL += f'&plugin={plugin}'
+            params['plugin'] = plugin
 
             # Get response
-            return self._api.get(URL)
+            return self._api.get(URL, params=params)
 
         if destination is not None:
             if os.path.exists(destination) and os.path.isdir(destination):
@@ -51,7 +54,7 @@ class LabelPrintingMixing:
                 )
 
             # Use downloadFile method to get the file
-            return self._api.downloadFile(url=f'api/{URL}', destination=destination, *args, **kwargs)
+            return self._api.downloadFile(url=f'api/{URL}', destination=destination, params=params, *args, **kwargs)
 
         return False
 
