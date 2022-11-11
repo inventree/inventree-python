@@ -150,8 +150,21 @@ class InventreeObject(object):
         return cls(api, data=response)
 
     @classmethod
+    def count(cls, api, **kwargs):
+        """Return a count of all items of this class in the database"""
+
+        params = kwargs
+
+        # By limiting to a single result, we perform a fast query, but get a total number of results
+        params['limit'] = 1
+
+        response = api.get(url=cls.URL, params=params, **kwargs)
+
+        return response['count']
+
+    @classmethod
     def list(cls, api, **kwargs):
-        """ Return a list of all items in this class on the database.
+        """Return a list of all items in this class on the database.
 
         Requires:
 

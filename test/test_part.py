@@ -32,6 +32,9 @@ class PartCategoryTest(InvenTreeTestCase):
         n = len(cats)
         self.assertTrue(len(cats) >= 9)
 
+        # Check that the 'count' method returns the same result
+        self.assertEqual(n, PartCategory.count(self.api))
+
         # Filtered categories must be fewer than *all* categories
         cats = PartCategory.list(self.api, parent=1)
 
