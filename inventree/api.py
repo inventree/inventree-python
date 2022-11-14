@@ -544,7 +544,7 @@ class InvenTreeAPI(object):
 
             headers = response.headers
 
-            if 'text/html' in headers['Content-Type']:
+            if 'Content-Type' in headers and 'text/html' in headers['Content-Type']:
                 logger.error(f"Error downloading file '{url}': Server return invalid response (text/html)")
                 return False
 
