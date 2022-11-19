@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from inventree.stock import StockItem, StockLocation  # noqa: E402
 from inventree import part  # noqa: E402
+from inventree import company  # noqa: E402
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
@@ -384,3 +385,25 @@ class StockAdjustTest(InvenTreeTestCase):
 
             self.assertTrue(len(history) >= 2)
             self.assertEqual(history[0].label, 'Location changed')
+
+    def test_assign_stock(self):
+        """Test assigning stock to customer"""
+
+        items = StockItem.list(self.api)
+        self.assertTrue(len(items) > 1)
+
+        # Get first Company which is a customer
+        customer = company.Company.list(self.api, is_customer=True)[0]
+
+        # Go through items until we find an item which is not assigned yet
+        item_assigned = False
+        for item in items:
+            if item.customer is False:
+                # Assign this item
+                item.assignStock(customer=customer, notes='Sell on the side')
+
+                # Check the item is assigned
+                if item.customer == customer.pk:
+                    item_assigned = True
+
+        self.assertTrue(item_assigned)
