@@ -395,15 +395,23 @@ class StockAdjustTest(InvenTreeTestCase):
         # Get first Company which is a customer
         customer = company.Company.list(self.api, is_customer=True)[0]
 
-        # Go through items until we find an item which is not assigned yet
-        item_assigned = False
-        for item in items:
-            if item.customer is False:
-                # Assign this item
-                item.assignStock(customer=customer, notes='Sell on the side')
+        # Get first part which is salable
+        assignpart = part.Part.list(self.api, salable=True)[0]
 
-                # Check the item is assigned
-                if item.customer == customer.pk:
-                    item_assigned = True
+        # Create stock item which can be assigned
+        assignitem = StockItem.create(
+            self.api,
+            {
+                "part": assignpart.pk,
+                "quantity": 10,
+            }
+        )
 
-        self.assertTrue(item_assigned)
+        # Assign the item
+        assignitem.assignStock(customer=customer, notes='Sell on the side')
+
+        # Reload the item
+        assignitem.reload()
+
+        # Check the item is assigned
+        self.assertTrue(assignitem.customer == customer.pk)
