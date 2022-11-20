@@ -7,6 +7,7 @@ import inventree.api
 import inventree.base
 import inventree.part
 import inventree.label
+import inventree.company
 
 
 class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
@@ -65,7 +66,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
             quantity: The quantity of each stock item for the particular action
         """
 
-        if method not in ['count', 'add', 'remove', 'transfer']:
+        if method not in ['count', 'add', 'remove', 'transfer', 'assign']:
             raise ValueError(f"Stock adjustment method '{method}' not supported")
         
         url = f"stock/{method}/"
@@ -117,6 +118,19 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
         return cls.adjustStockItems(
             api,
             'transfer',
+            items,
+            **kwargs
+        )
+
+    @classmethod
+    def assignStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, customer: int, **kwargs):
+        """Perform 'assign' adjustment for multiple stock items"""
+
+        kwargs['customer'] = customer
+
+        return cls.adjustStockItems(
+            api,
+            'assign',
             items,
             **kwargs
         )
@@ -187,6 +201,27 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
                 }
             ],
             location=location,
+            **kwargs
+        )
+
+    def assignStock(self, customer, **kwargs):
+        """Assign this stock item to a customer (by company PK)
+
+        Arguments:
+            customer: A Company instance or integer ID value
+            notes: Optional transaction notes"""
+
+        if isinstance(customer, inventree.company.Company):
+            customer = customer.pk
+
+        self.assignStockItems(
+            self._api,
+            [
+                {
+                    'item': self.pk,  # In assign API, item is used instead of item
+                }
+            ],
+            customer=customer,
             **kwargs
         )
 
