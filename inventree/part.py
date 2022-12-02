@@ -77,7 +77,10 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
 
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
-        return inventree.company.SupplierPart.list(self._api, part=self.pk)
+        if self.purchaseable:
+            return inventree.company.SupplierPart.list(self._api, part=self.pk)
+        else:
+            return list()
 
     def getBomItems(self, **kwargs):
         """ Return the items required to make this part """
@@ -220,11 +223,9 @@ class Parameter(inventree.base.InventreeObject):
     URL = 'part/parameter'
 
     def getunits(self):
-        """ Get the dimension and units for this parameter """
+        """ Get the units for this parameter """
 
-        return [element for element
-                in ParameterTemplate.list(self._api)
-                if element['pk'] == self._data['template']]
+        return self._data['template_detail']['units']
 
 
 class ParameterTemplate(inventree.base.InventreeObject):
