@@ -15,9 +15,9 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.build import Build
-from inventree.company import SupplierPart
-from inventree.stock import StockItem
+from inventree.build import Build  # noqa: E402
+from inventree.company import SupplierPart  # noqa: E402
+from inventree.stock import StockItem  # noqa: E402
 from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate, PartTestTemplate, PartRelated, BomItem  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 
@@ -191,14 +191,13 @@ class PartTest(InvenTreeTestCase):
                 'getInternalPriceList': InternalPrice,
                 'getAttachments': PartAttachment,
             }
-            for fnc,res in functions.items():
-                A = getattr(p,fnc)()
+            for fnc, res in functions.items():
+                A = getattr(p, fnc)()
                 # Make sure a list is returned
-                self.assertIsInstance(A,list)
+                self.assertIsInstance(A, list)
                 for a in A:
                     # Make sure any result is of the right class
-                    self.assertIsInstance(a,res)
-
+                    self.assertIsInstance(a, res)
 
     def test_access_erors(self):
         """
@@ -579,7 +578,7 @@ class PartTest(InvenTreeTestCase):
         param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
 
         # Unit should be equal
-        self.assertEqual(param.getunits(),'kg A')
+        self.assertEqual(param.getunits(), 'kg A')
 
         # result should not be None
         self.assertIsNotNone(param)
