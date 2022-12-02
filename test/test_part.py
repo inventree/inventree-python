@@ -643,6 +643,21 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(metadata['foo'], 'rab')
         self.assertEqual(metadata['hello'], 'world')
 
+    def test_part_related(self):
+        """Test add related function"""
+
+        parts = Part.list(self.api)
+
+        # Take two parts, make them related
+        # Try with pk values
+        ret = PartRelated.add_related(self.api, parts[0].pk, parts[1].pk)
+        self.assertTrue(ret)
+
+        # Take two parts, make them related
+        # Try with Part object
+        ret = PartRelated.add_related(self.api, parts[2], parts[3])
+        self.assertTrue(ret)
+
 
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""

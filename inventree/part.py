@@ -204,9 +204,19 @@ class PartRelated(inventree.base.InventreeObject):
     @classmethod
     def add_related(cls, api, part1, part2):
     
+        if isinstance(part1,Part):
+            pk_1 = part1.pk
+        else:
+            pk_1 = int(part1)
+        if isinstance(part2,Part):
+            pk_2 = part2.pk
+        else:
+            pk_2 = int(part2)
+        
+    
         data = {
-            'part_1': part1,
-            'part_2': part2,
+            'part_1': pk_1,
+            'part_2': pk_2,
         }
         # Send the data to the server
         if api.post(cls.URL, data):
