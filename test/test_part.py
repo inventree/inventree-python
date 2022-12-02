@@ -15,7 +15,10 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate  # noqa: E402
+from inventree.build import Build  # noqa: E402
+from inventree.company import SupplierPart  # noqa: E402
+from inventree.stock import StockItem  # noqa: E402
+from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate, PartTestTemplate, PartRelated, BomItem  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 
 
@@ -166,6 +169,35 @@ class PartCategoryTest(InvenTreeTestCase):
 
 class PartTest(InvenTreeTestCase):
     """Tests for Part models"""
+
+    def test_part_get_functions(self):
+        """Test various functions of Part class, mostly starting with get...
+        These are wrappers for other functions, so the testing of details of the function should
+        be done elsewhere."""
+
+        # Get list of parts
+        parts = Part.list(self.api)
+
+        # For each part in list, test some functions
+        for p in parts:
+            functions = {
+                'getSupplierParts': SupplierPart,
+                'getBomItems': BomItem,
+                'isUsedIn': BomItem,
+                'getBuilds': Build,
+                'getStockItems': StockItem,
+                'getParameters': Parameter,
+                'getRelated': PartRelated,
+                'getInternalPriceList': InternalPrice,
+                'getAttachments': PartAttachment,
+            }
+            for fnc, res in functions.items():
+                A = getattr(p, fnc)()
+                # Make sure a list is returned
+                self.assertIsInstance(A, list)
+                for a in A:
+                    # Make sure any result is of the right class
+                    self.assertIsInstance(a, res)
 
     def test_access_erors(self):
         """
@@ -544,7 +576,10 @@ class PartTest(InvenTreeTestCase):
         
         # Define w. required values - integer
         param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
-        
+
+        # Unit should be equal
+        self.assertEqual(param.getunits(), 'kg A')
+
         # result should not be None
         self.assertIsNotNone(param)
         
@@ -607,6 +642,25 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(metadata['foo'], 'rab')
         self.assertEqual(metadata['hello'], 'world')
 
+    def test_part_related(self):
+        """Test add related function"""
+
+        parts = Part.list(self.api)
+
+        # Take two parts, make them related
+        # Try with pk values
+        ret = PartRelated.add_related(self.api, parts[0].pk, parts[1].pk)
+        self.assertTrue(ret)
+
+        # Take two parts, make them related
+        # Try with Part object
+        ret = PartRelated.add_related(self.api, parts[2], parts[3])
+        self.assertTrue(ret)
+
+        # Take the same part twice, should fail
+        with self.assertRaises(HTTPError):
+            ret = PartRelated.add_related(self.api, parts[3], parts[3])
+
 
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""
@@ -660,3 +714,17 @@ class PartBarcodeTest(InvenTreeTestCase):
         # Scanning this time should yield no results
         with self.assertRaises(HTTPError):
             response = self.api.scanBarcode(barcode)
+
+
+class PartTestTemplateTest(InvenTreeTestCase):
+    """Tests for PartTestTemplate functionality"""
+    
+    def test_generateKey(self):
+        """Tests for generating a key for a PartTestTemplate"""
+
+        self.assertEqual(PartTestTemplate.generateTestKey('bob'), 'bob')
+        self.assertEqual(PartTestTemplate.generateTestKey('bob%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('bo b%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('BO B%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('      %  '), '')
+        self.assertEqual(PartTestTemplate.generateTestKey(''), '')

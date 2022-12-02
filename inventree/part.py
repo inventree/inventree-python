@@ -77,7 +77,10 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
 
     def getSupplierParts(self):
         """ Return the supplier parts associated with this part """
-        return inventree.company.SupplierPart.list(self._api, part=self.pk)
+        if self.purchaseable:
+            return inventree.company.SupplierPart.list(self._api, part=self.pk)
+        else:
+            return list()
 
     def getBomItems(self, **kwargs):
         """ Return the items required to make this part """
@@ -200,19 +203,23 @@ class PartRelated(inventree.base.InventreeObject):
 
     @classmethod
     def add_related(cls, api, part1, part2):
-    
-        data = {
-            'part_1': part1,
-            'part_2': part2,
-        }
-        # Send the data to the server
-        if api.post(cls.URL, data):
-            logging.info("Related OK")
-            ret = True
+
+        if isinstance(part1, Part):
+            pk_1 = part1.pk
         else:
-            logging.warning("Related failed")
-            ret = False
-        return ret
+            pk_1 = int(part1)
+        if isinstance(part2, Part):
+            pk_2 = part2.pk
+        else:
+            pk_2 = int(part2)
+
+        data = {
+            'part_1': pk_1,
+            'part_2': pk_2,
+        }
+
+        # Send the data to the server
+        return api.post(cls.URL, data)
 
 
 class Parameter(inventree.base.InventreeObject):
@@ -220,11 +227,9 @@ class Parameter(inventree.base.InventreeObject):
     URL = 'part/parameter'
 
     def getunits(self):
-        """ Get the dimension and units for this parameter """
+        """ Get the units for this parameter """
 
-        return [element for element
-                in ParameterTemplate.list(self._api)
-                if element['pk'] == self._data['template']]
+        return self._data['template_detail']['units']
 
 
 class ParameterTemplate(inventree.base.InventreeObject):
