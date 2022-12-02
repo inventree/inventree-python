@@ -658,6 +658,10 @@ class PartTest(InvenTreeTestCase):
         ret = PartRelated.add_related(self.api, parts[2], parts[3])
         self.assertTrue(ret)
 
+        # Take the same part twice, should fail
+        with self.assertRaises(HTTPError):
+            ret = PartRelated.add_related(self.api, parts[3], parts[3])
+
 
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""
@@ -719,9 +723,9 @@ class PartTestTemplateTest(InvenTreeTestCase):
     def test_generateKey(self):
         """Tests for generating a key for a PartTestTemplate"""
 
-        self.assertEqual(PartTestTemplate.generateTestKey('bob'),'bob')
-        self.assertEqual(PartTestTemplate.generateTestKey('bob%35'),'bob35')
-        self.assertEqual(PartTestTemplate.generateTestKey('bo b%35'),'bob35')
-        self.assertEqual(PartTestTemplate.generateTestKey('BO B%35'),'bob35')
-        self.assertEqual(PartTestTemplate.generateTestKey('      %  '),'')
-        self.assertEqual(PartTestTemplate.generateTestKey(''),'')
+        self.assertEqual(PartTestTemplate.generateTestKey('bob'), 'bob')
+        self.assertEqual(PartTestTemplate.generateTestKey('bob%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('bo b%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('BO B%35'), 'bob35')
+        self.assertEqual(PartTestTemplate.generateTestKey('      %  '), '')
+        self.assertEqual(PartTestTemplate.generateTestKey(''), '')
