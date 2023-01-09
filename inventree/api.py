@@ -164,9 +164,6 @@ class InvenTreeAPI(object):
 
         try:
             response = requests.get(self.api_url, timeout=self.timeout)
-        except requests.exceptions.Timeout as e:
-            logger.fatal(f"Server timeout: {str(type(e))}")
-            return False
         except requests.exceptions.ConnectionError as e:
             logger.fatal(f"Server connection error: {str(type(e))}")
             return False
