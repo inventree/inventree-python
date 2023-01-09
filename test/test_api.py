@@ -118,7 +118,7 @@ class Timeout(unittest.TestCase):
         """
         # Attempt connection with short timeout
         with self.assertRaises(requests.exceptions.ReadTimeout):
-            a = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD, timeout=0.001)
+            a = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD, timeout=0.001)  # noqa: F841
 
 
 class InvenTreeTestCase(unittest.TestCase):
