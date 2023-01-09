@@ -117,7 +117,7 @@ class Timeout(unittest.TestCase):
         This unrealistically short timeout should lead to a timeout error
         """
         # Attempt connection with short timeout
-        with self.assertRaises(Timeout):
+        with self.assertRaises(requests.exceptions.ReadTimeout):
             a = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD, timeout=0.001)
 
 
