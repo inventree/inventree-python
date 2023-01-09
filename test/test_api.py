@@ -161,6 +161,14 @@ class TestCreate(InvenTreeTestCase):
 
     def test_create_stuff(self):
 
+        with self.assertRaises(requests.exceptions.ReadTimeout):
+            # Test short timeout for a specific function
+            c = part.PartCategory.create(self.api, {
+                'parent': None,
+                'name': 'My custom category',
+                'description': 'A part category',
+            }, timeout=0.001)
+
         # Create a custom category
         c = part.PartCategory.create(self.api, {
             'parent': None,
