@@ -118,7 +118,7 @@ class InvenTreeAPI(object):
         except Timeout as e:
             # Send the Timeout error further
             raise e
-        except Exception as e:
+        except Exception:
             raise ConnectionRefusedError("Could not connect to InvenTree server")
 
         # Basic authentication
