@@ -261,6 +261,9 @@ class POTest(InvenTreeTestCase):
         self.assertEqual(new_stock_item.quantity, 5)
         self.assertEqual(new_stock_item.status, 50)
 
+        # Receive the rest of this item, with defaults
+        po_line_0.receive()
+
         # Receive all line items
         # Use the ID of the location here
         result = po.receiveAll(location=use_location.pk)
