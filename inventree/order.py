@@ -3,7 +3,6 @@
 import inventree.base
 import inventree.part
 import inventree.company
-from inventree.stock import StockLocation
 
 
 class PurchaseOrder(
@@ -80,10 +79,10 @@ class PurchaseOrder(
                     85 RETURNED
         """
 
-        # Check if location is a StockLocation item or an integer
-        if isinstance(location, StockLocation):
+        # Check if location is a model - or try to get an integer
+        try:
             location_id = location.pk
-        else:
+        except:  # noqa:E722
             location_id = int(location)
 
         # Prepare request data
@@ -179,10 +178,10 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         if location is None:
             location_id = self.destination
         else:
-            # Check if location is a StockLocation item or an integer
-            if isinstance(location, StockLocation):
+            # Check if location is a model - or try to get an integer
+            try:
                 location_id = location.pk
-            else:
+            except:  # noqa:E722
                 location_id = int(location)
 
         # Now check so that location is not None

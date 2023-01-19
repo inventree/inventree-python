@@ -234,7 +234,7 @@ class POTest(InvenTreeTestCase):
         self.assertEqual(po.status, 20)
 
         # Get first location
-        use_location = stock.StockLocation.list(api, limit=1)[0]
+        use_location = stock.StockLocation.list(self.api, limit=1)[0]
 
         # Prepare one line item for special treatment
         po_line_0 = po.getLineItems()[0]
@@ -244,18 +244,18 @@ class POTest(InvenTreeTestCase):
         pks_before = [x.pk for x in stock_items_before]
 
         # Now, receive some of one of the line item with status ATTENTION
-        po_line_0.receive(location=1, status=50, quantity=5)
+        po_line_0.receive(location=use_location.pk, status=50, quantity=5)
 
         # Get new list of stock items
         stock_items_after = stock.StockItem.list(self.api, supplier_part=po_line_0.part, location=use_location.pk)
         pks_after = [x.pk for x in stock_items_after]
 
         # make sure a stock item has been added
-        self.assertEqual(len(pks_after), len(pks_before)+1)
+        self.assertEqual(len(pks_after), len(pks_before) + 1)
 
         # Get the newly added PK and stock item
         newpk = list(set(pks_after) - set(pks_before))[0]
-        new_stock_item = stock.StockItem(api, pk=newpk)
+        new_stock_item = stock.StockItem(self.api, pk=newpk)
 
         # Check the last stock item for the expected quantity and status
         self.assertEqual(new_stock_item.quantity, 5)
