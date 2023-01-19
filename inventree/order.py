@@ -3,6 +3,7 @@
 import inventree.base
 import inventree.part
 import inventree.company
+from inventree.stock import StockLocation
 
 
 class PurchaseOrder(
@@ -59,6 +60,69 @@ class PurchaseOrder(
         # Return
         return self._statusupdate(status='issue', **kwargs)
 
+    def receiveAll(self, location, status=10):
+        """
+        Receive all of the purchase order items, into the given location.
+
+        Note that the location may be overwritten if a destination is saved in the PO for the line item.
+
+        By default, the status is set to OK (Code 10).
+
+        To modify the defaults, use the arguments:
+            status: Status code
+                    10 OK
+                    50 ATTENTION
+                    55 DAMAGED
+                    60 DESTROYED
+                    65 REJECTED
+                    70 LOST
+                    75 QUARANTINED
+                    85 RETURNED
+        """
+
+        # Check if location is a StockLocation item or an integer
+        if isinstance(location, StockLocation):
+            location_id = location.pk
+        else:
+            location_id = int(location)
+
+        # Prepare request data
+        items = list()
+        for li in self.getLineItems():
+            quantity_to_receive = li.quantity - li.received
+            # Make sure quantity > 0
+            if quantity_to_receive > 0:
+                items.append(
+                    {
+                        'line_item': li.pk,
+                        'supplier_part': li.part,
+                        'quantity': quantity_to_receive,
+                        'status': status,
+                        'location': location_id,
+                    }
+                )
+
+        # If nothing is left, quit here
+        if len(items) < 1:
+            return None
+
+        data = {
+            'items': items,
+            'location': location_id
+        }
+
+        # Set the url
+        URL = self.URL + f"/{self.pk}/receive/"
+
+        # Send data
+        response = self._api.post(URL, data)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
+
 
 class PurchaseOrderLineItem(inventree.base.InventreeObject):
     """ Class representing the PurchaseOrderLineItem database model """
@@ -82,6 +146,75 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         Return the PurchaseOrder to which this PurchaseOrderLineItem belongs
         """
         return PurchaseOrder(self._api, self.order)
+
+    def receive(self, quantity=None, status=10, location=None, batch_code='', serial_numbers=''):
+        """
+        Mark this line item as received.
+
+        By default, receives all remaining items in the order, and puts them in the destination defined in the PO.
+        The status is set to OK (Code 10).
+
+        To modify the defaults, use the arguments:
+            quantity: Number of units to receive. If None, will calculate the quantity not yet received and receive these.
+            status: Status code
+                    10 OK
+                    50 ATTENTION
+                    55 DAMAGED
+                    60 DESTROYED
+                    65 REJECTED
+                    70 LOST
+                    75 QUARANTINED
+                    85 RETURNED
+            location: Location ID, or a StockLocation item
+
+        If given, the following arguments are also sent as parameters:
+            batch_code
+            serial_numbers
+        """
+
+        if quantity is None:
+            # Substract number of already received lines from the order quantity
+            quantity = self.quantity - self.received
+
+        if location is None:
+            location_id = self.destination
+        else:
+            # Check if location is a StockLocation item or an integer
+            if isinstance(location, StockLocation):
+                location_id = location.pk
+            else:
+                location_id = int(location)
+
+        # Now check so that location is not None
+        assert location_id is not None, ValueError("No destination given.")
+
+        # Prepare request data
+        data = {
+            'items': [
+                {
+                    'line_item': self.pk,
+                    'supplier_part': self.part,
+                    'quantity': quantity,
+                    'status': status,
+                    'location': location_id,
+                    'batch_code': batch_code,
+                    'serial_numbers': serial_numbers
+                }
+            ],
+            'location': location_id
+        }
+
+        # Set the url
+        URL = self.getOrder().URL + f"/{self.getOrder().pk}/receive/"
+
+        # Send data
+        response = self._api.post(URL, data)
+
+        # Reload
+        self.reload()
+
+        # Return
+        return response
 
 
 class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
