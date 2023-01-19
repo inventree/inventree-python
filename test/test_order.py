@@ -272,7 +272,8 @@ class POTest(InvenTreeTestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('items', result)
         self.assertIn('location', result)
-        self.assertEqual(len(result['items']), len(po.getLineItems()))
+        # Check that all except one line were marked
+        self.assertEqual(len(result['items']), len(po.getLineItems())-1)
 
         # Receive all line items again - make sure answer is None
         # use the StockLocation item here
