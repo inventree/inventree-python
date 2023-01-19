@@ -184,9 +184,6 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
             except:  # noqa:E722
                 location_id = int(location)
 
-        # Now check so that location is not None
-        assert location_id is not None, ValueError("No destination given.")
-
         # Prepare request data
         data = {
             'items': [

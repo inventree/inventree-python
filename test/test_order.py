@@ -197,12 +197,15 @@ class POTest(InvenTreeTestCase):
             'description': 'A purchase order with items to be received',
         })
 
+        # Get first location
+        use_location = stock.StockLocation.list(self.api, limit=1)[0]
+
         # Add some line items
         for p in company.SupplierPart.list(self.api, supplier=1, limit=5):
-
             po.addLineItem(
                 part=p.pk,
                 quantity=10,
+                destination=use_location.pk
             )
 
         # Check that lines have actually been added
@@ -233,9 +236,6 @@ class POTest(InvenTreeTestCase):
         # Check that order status has *not* changed
         self.assertEqual(po.status, 20)
 
-        # Get first location
-        use_location = stock.StockLocation.list(self.api, limit=1)[0]
-
         # Prepare one line item for special treatment
         po_line_0 = po.getLineItems()[0]
 
@@ -244,7 +244,7 @@ class POTest(InvenTreeTestCase):
         pks_before = [x.pk for x in stock_items_before]
 
         # Now, receive some of one of the line item with status ATTENTION
-        po_line_0.receive(location=use_location.pk, status=50, quantity=5)
+        po_line_0.receive(status=50, quantity=5)
 
         # Get new list of stock items
         stock_items_after = stock.StockItem.list(self.api, supplier_part=po_line_0.part, location=use_location.pk)
