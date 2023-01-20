@@ -201,7 +201,7 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         }
 
         # Set the url
-        URL = self.getOrder().URL + f"/{self.getOrder().pk}/receive/"
+        URL = f"{self.getOrder().URL}/{self.getOrder().pk}/receive/"
 
         # Send data
         response = self._api.post(URL, data)
