@@ -111,7 +111,7 @@ class PurchaseOrder(
         }
 
         # Set the url
-        URL =  f"{self.URL}/{self.pk}/receive/"
+        URL = f"{self.URL}/{self.pk}/receive/"
 
         # Send data
         response = self._api.post(URL, data)
