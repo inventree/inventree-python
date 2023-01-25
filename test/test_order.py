@@ -183,8 +183,112 @@ class POTest(InvenTreeTestCase):
         self.assertEqual(po.status, 40)
         self.assertEqual(po.status_text, "Cancelled")
 
+    def test_order_complete_with_receive(self):
+        """Test that we can complete an order via the API, after receiving
+        items via API"""
+
+        n = len(order.PurchaseOrder.list(self.api)) + 1
+        ref = f"PO-{n}"
+
+        # First, let's create a new PurchaseOrder
+        po = order.PurchaseOrder.create(self.api, data={
+            'supplier': 1,
+            'reference': ref,
+            'description': 'A purchase order with items to be received',
+        })
+
+        # Get first location
+        use_location = stock.StockLocation.list(self.api, limit=1)[0]
+
+        # Add some line items
+        for p in company.SupplierPart.list(self.api, supplier=1, limit=5):
+            po.addLineItem(
+                part=p.pk,
+                quantity=10,
+                destination=use_location.pk
+            )
+
+        # Check that lines have actually been added
+        lines = po.getLineItems()
+        self.assertTrue(len(lines) > 0)
+
+        # Initial status code is "PENDING"
+        self.assertEqual(po.status, 10)
+        self.assertEqual(po.status_text, "Pending")
+
+        # Receive lines too early, assert error
+        with self.assertRaises(HTTPError):
+            po.receiveAll(location=1)
+
+        # Issue the order
+        po.issue()
+        po.reload()
+
+        self.assertEqual(po.status, 20)
+        self.assertEqual(po.status_text, "Placed")
+
+        # Try to complete the order (should fail, as lines have not been received)
+        with self.assertRaises(HTTPError):
+            po.complete()
+    
+        po.reload()
+
+        # Check that order status has *not* changed
+        self.assertEqual(po.status, 20)
+
+        # Prepare one line item for special treatment
+        po_line_0 = po.getLineItems()[0]
+
+        # Get list of items currently in stock, for comparison later
+        stock_items_before = stock.StockItem.list(self.api, supplier_part=po_line_0.part, location=use_location.pk)
+        pks_before = [x.pk for x in stock_items_before]
+
+        # Now, receive some of one of the line item with status ATTENTION
+        po_line_0.receive(status=50, quantity=5)
+
+        # Get new list of stock items
+        stock_items_after = stock.StockItem.list(self.api, supplier_part=po_line_0.part, location=use_location.pk)
+        pks_after = [x.pk for x in stock_items_after]
+
+        # make sure a stock item has been added
+        self.assertEqual(len(pks_after), len(pks_before) + 1)
+
+        # Get the newly added PK and stock item
+        newpk = list(set(pks_after) - set(pks_before))[0]
+        new_stock_item = stock.StockItem(self.api, pk=newpk)
+
+        # Check the last stock item for the expected quantity and status
+        self.assertEqual(new_stock_item.quantity, 5)
+        self.assertEqual(new_stock_item.status, 50)
+
+        # Receive the rest of this item, with defaults
+        po_line_0.receive()
+
+        # Receive all line items
+        # Use the ID of the location here
+        result = po.receiveAll(location=use_location.pk)
+
+        # Check the result returned
+        self.assertIsInstance(result, dict)
+        self.assertIn('items', result)
+        self.assertIn('location', result)
+        # Check that all except one line were marked
+        self.assertEqual(len(result['items']), len(po.getLineItems()) - 1)
+
+        # Receive all line items again - make sure answer is None
+        # use the StockLocation item here
+        result = po.receiveAll(location=use_location)
+        self.assertIsNone(result)
+
+        # Complete the order, do not accept any incomplete lines
+        po.complete(accept_incomplete=False)
+        po.reload()
+
+        # Check that the order is now complete
+        self.assertEqual(po.status, 30)
+
     def test_order_complete(self):
-        """Test that we can complete an order via the API"""
+        """Test that we can complete an order via the API, with un-finished items remaining"""
 
         n = len(order.PurchaseOrder.list(self.api)) + 1
         ref = f"PO-{n}"
