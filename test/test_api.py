@@ -107,6 +107,20 @@ class Unauthenticated(unittest.TestCase):
             self.assertFalse(self.api.downloadFile('/media/part/files/1/test.pdf', 'test.pdf'))
 
 
+class Timeout(unittest.TestCase):
+    """
+    Test that short timeout leads to correct error
+    """
+
+    def test_timeout(self):
+        """
+        This unrealistically short timeout should lead to a timeout error
+        """
+        # Attempt connection with short timeout
+        with self.assertRaises(requests.exceptions.ReadTimeout):
+            a = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD, timeout=0.001)  # noqa: F841
+
+
 class InvenTreeTestCase(unittest.TestCase):
     """
     Base class for running InvenTree unit tests.
@@ -146,6 +160,14 @@ class TestCreate(InvenTreeTestCase):
     """
 
     def test_create_stuff(self):
+
+        with self.assertRaises(requests.exceptions.ReadTimeout):
+            # Test short timeout for a specific function
+            c = part.PartCategory.create(self.api, {
+                'parent': None,
+                'name': 'My custom category',
+                'description': 'A part category',
+            }, timeout=0.001)
 
         # Create a custom category
         c = part.PartCategory.create(self.api, {

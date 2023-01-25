@@ -11,6 +11,7 @@ import json
 import logging
 
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import Timeout
 from urllib.parse import urljoin, urlparse
 
 
@@ -45,12 +46,14 @@ class InvenTreeAPI(object):
             token - Authentication token (if provided, username/password are ignored)
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
+            timeout - Set timeout to use (in seconds). Default: 10
 
         Login details can be specified using environment variables, rather than being provided as arguments:
             INVENTREE_API_HOST - Host address e.g. "http://inventree.server.com:8000"
             INVENTREE_API_USERNAME - Username
             INVENTREE_API_PASSWORD - Password
             INVENTREE_API_TOKEN - User access token
+            INVENTREE_API_TIMEOUT - Timeout value, in seconds
         """
 
         self.setHostName(host or os.environ.get('INVENTREE_API_HOST', None))
@@ -59,6 +62,7 @@ class InvenTreeAPI(object):
         self.username = kwargs.get('username', os.environ.get('INVENTREE_API_USERNAME', None))
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
+        self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
@@ -109,7 +113,12 @@ class InvenTreeAPI(object):
         self.connected = False
 
         # Check if the server is there
-        if not self.testServer():
+        try:
+            self.connected = self.testServer()
+        except Timeout as e:
+            # Send the Timeout error further
+            raise e
+        except Exception:
             raise ConnectionRefusedError("Could not connect to InvenTree server")
 
         # Basic authentication
@@ -154,7 +163,7 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url, timeout=2.5)
+            response = requests.get(self.api_url, timeout=self.timeout)
         except requests.exceptions.ConnectionError as e:
             logger.fatal(f"Server connection error: {str(type(e))}")
             return False
@@ -260,7 +269,7 @@ class InvenTreeAPI(object):
 
         payload = {
             'params': params,
-            'timeout': kwargs.get('timeout', 10),
+            'timeout': kwargs.get('timeout', self.timeout),
         }
 
         if self.use_token_auth and self.token:
@@ -289,6 +298,10 @@ class InvenTreeAPI(object):
         # Send request to server!
         try:
             response = methods[method](api_url, **payload)
+        except Timeout as e:
+            # Re-throw Timeout, and add a message to the log
+            logger.critical(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
+            raise e
         except Exception as e:
             # Re-thrown any caught errors, and add a message to the log
             logger.critical(f"Error at api.request - {method} @ {api_url}")
@@ -526,7 +539,7 @@ class InvenTreeAPI(object):
             headers = {}
             auth = self.auth
 
-        with requests.get(url, stream=True, auth=auth, headers=headers, params=params) as response:
+        with requests.get(url, stream=True, auth=auth, headers=headers, params=params, timeout=self.timeout) as response:
 
             # Error code
             if response.status_code >= 300:
