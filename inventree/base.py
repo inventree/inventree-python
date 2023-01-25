@@ -158,7 +158,7 @@ class InventreeObject(object):
         # By limiting to a single result, we perform a fast query, but get a total number of results
         params['limit'] = 1
 
-        response = api.get(url=cls.URL, params=params, **kwargs)
+        response = api.get(url=cls.URL, params=params)
 
         return response['count']
 
@@ -171,16 +171,13 @@ class InventreeObject(object):
         URL - Base URL
         """
 
-        # Dict of query params to send to the API
-        params = kwargs
-
         # Check if custom URL is present in request arguments
         if 'url' in kwargs:
             url = kwargs.pop('url')
         else:
             url = cls.URL
 
-        response = api.get(url=url, params=params, **kwargs)
+        response = api.get(url=url, params=kwargs)
 
         if response is None:
             return None
