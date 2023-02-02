@@ -404,12 +404,6 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         return self._api.downloadFile(self.attachment, destination, **kwargs)
 
 
-class Currency(InventreeObject):
-    """ Class representing the Currency database model """
-
-    URL = 'common/currency'
-
-
 class MetadataMixin:
     """Mixin class for models which support a 'metadata' attribute.
 
