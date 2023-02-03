@@ -18,7 +18,7 @@ class CurrencyTest(InvenTreeTestCase):
         """Test that we can fetch currency data from the server"""
 
         mgr = CurrencyManager(self.api)
-        mgr.updatFromServer()
+        mgr.updateFromServer()
 
         self.assertIsNotNone(mgr.base_currency)
         self.assertIsNotNone(mgr.exchange_rates)

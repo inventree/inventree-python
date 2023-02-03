@@ -7,11 +7,8 @@ import logging
 logger = logging.getLogger('inventree')
 
 
-class CurrencyManger(object):
+class CurrencyManager(object):
     """Class for managing InvenTree currency suppport"""
-
-    # Currency API introduced v92
-    REQUIRED_API_VERSION = 92
 
     # Currency API endpoint
     CURRENCY_ENDPOINT = 'currency/exchange/'
@@ -28,8 +25,8 @@ class CurrencyManger(object):
     def updateFromServer(self):
         """Retrieve currency data from the server"""
 
-        if self.api.api_version < self.REQUIRED_API_VERSION:
-            raise ValueError(f"Server API version ({self.api.api_version}) is older than {self.REQUIRED_API_VERSION}, which is required for currency support")
+        if self.api.api_version < 92:
+            raise ValueError(f"Server API version ({self.api.api_version}) is older than v92, which is required for currency support")
 
         response = self.api.get(self.CURRENCY_ENDPOINT)
 
