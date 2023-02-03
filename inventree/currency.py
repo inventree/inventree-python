@@ -65,3 +65,33 @@ class CurrencyManager(object):
             self.updateFromServer()
         
         return self.exchange_rates
+
+    def convertCurrency(self, value, source_currency, target_currency, cache=True):
+        """Convert between currencies
+        
+        Arguments:
+            value: The numerical currency value to be converted
+            source_currency: The source currency code (e.g. 'USD')
+            target_currency: The target currency code (e.g. 'NZD')
+        """
+
+        # Shortcut if the currencies are the same
+        if source_currency == target_currency:
+            return value
+        
+        base = self.getBaseCurrency(cache=cache)
+        rates = self.getExchangeRates(cache=cache)
+
+        if base is None:
+            raise AttributeError("Base currency information is not available")
+        
+        if rates is None:
+            raise AttributeError("Exchange rate information is not available")
+        
+        if source_currency not in rates:
+            raise NameError(f"Source currency code '{source_currency}' not found in exchange rate data")
+        
+        if target_currency not in rates:
+            raise NameError(f"Target currency code '{target_currency}' not found in exchange rate data")
+        
+        return value / rates[source_currency] * rates[target_currency]
