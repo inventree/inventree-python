@@ -1,6 +1,5 @@
 """Manages currency / conversion support for InvenTree"""
 
-
 import logging
 
 
@@ -28,7 +27,7 @@ class CurrencyManager(object):
         if self.api.api_version < 93:
             raise ValueError(f"Server API version ({self.api.api_version}) is older than v93, which is required for manual exchange rate upates")
 
-        response = self.api.post('currency/refresh/', {})
+        return self.api.post('currency/refresh/', {})
 
     def updateFromServer(self):
         """Retrieve currency data from the server"""
@@ -66,4 +65,3 @@ class CurrencyManager(object):
             self.updateFromServer()
         
         return self.exchange_rates
-

@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.currency import CurrencyManager
+from inventree.currency import CurrencyManager  # noqa: E402
 
 
 class CurrencyTest(InvenTreeTestCase):
