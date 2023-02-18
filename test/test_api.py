@@ -172,7 +172,7 @@ class TestCreate(InvenTreeTestCase):
         # Create a custom category
         c = part.PartCategory.create(self.api, {
             'parent': None,
-            'name': 'My custom category',
+            'name': 'My custom category 2',
             'description': 'A part category',
         })
 
@@ -193,7 +193,7 @@ class TestCreate(InvenTreeTestCase):
 
         cat = p.getCategory()
         self.assertEqual(cat.pk, c.pk)
-        self.assertEqual(cat.name, 'My custom category')
+        self.assertEqual(cat.name, 'My custom category 2')
 
         s = stock.StockItem.create(self.api, {
             'part': p.pk,
