@@ -544,13 +544,13 @@ class InvenTreeAPI(object):
             auth = self.auth
 
         with requests.get(
-            url, 
-            stream=True, 
-            auth=auth, 
-            headers=headers, 
-            params=params, 
-            timeout=self.timeout,
-            proxies=self.proxies) as response:
+                url,
+                stream=True,
+                auth=auth,
+                headers=headers,
+                params=params,
+                timeout=self.timeout,
+                proxies=self.proxies) as response:
 
             # Error code
             if response.status_code >= 300:
