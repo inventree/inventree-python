@@ -47,6 +47,7 @@ class InvenTreeAPI(object):
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
             timeout - Set timeout to use (in seconds). Default: 10
+            proxies - Definition of proxies as a dict (defaults to an empty dict)
 
         Login details can be specified using environment variables, rather than being provided as arguments:
             INVENTREE_API_HOST - Host address e.g. "http://inventree.server.com:8000"
@@ -63,6 +64,7 @@ class InvenTreeAPI(object):
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
+        self.proxies = kwargs.get('proxies', dict())
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
@@ -163,7 +165,7 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url, timeout=self.timeout)
+            response = requests.get(self.api_url, timeout=self.timeout, proxies=self.proxies)
         except requests.exceptions.ConnectionError as e:
             logger.fatal(f"Server connection error: {str(type(e))}")
             return False
@@ -212,7 +214,7 @@ class InvenTreeAPI(object):
         # Request an auth token from the server
         token_url = os.path.join(self.api_url, 'user/token/')
         
-        reply = requests.get(token_url, auth=self.auth)
+        reply = requests.get(token_url, auth=self.auth, proxies=self.proxies)
 
         data = json.loads(reply.text)
 
@@ -243,6 +245,7 @@ class InvenTreeAPI(object):
         files = kwargs.get('files', {})
         params = kwargs.get('params', {})
         headers = kwargs.get('headers', {})
+        proxies = kwargs.get('proxies', self.proxies)
 
         search_term = kwargs.pop('search', None)
 
@@ -280,6 +283,7 @@ class InvenTreeAPI(object):
         
         payload['headers'] = headers
         payload['auth'] = auth
+        payload['proxies'] = proxies
 
         # If we are providing files, we cannot upload as a 'json' request
         if files:
@@ -503,7 +507,7 @@ class InvenTreeAPI(object):
 
         return data
 
-    def downloadFile(self, url, destination, overwrite=False, params=None):
+    def downloadFile(self, url, destination, overwrite=False, params=None, proxies=dict()):
         """
         Download a file from the InvenTree server.
 
@@ -539,7 +543,14 @@ class InvenTreeAPI(object):
             headers = {}
             auth = self.auth
 
-        with requests.get(url, stream=True, auth=auth, headers=headers, params=params, timeout=self.timeout) as response:
+        with requests.get(
+                url,
+                stream=True,
+                auth=auth,
+                headers=headers,
+                params=params,
+                timeout=self.timeout,
+                proxies=self.proxies) as response:
 
             # Error code
             if response.status_code >= 300:
