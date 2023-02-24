@@ -86,7 +86,6 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
         """ Return the manufacturer parts associated with this part """
         return inventree.company.ManufacturerPart.list(self._api, part=self.pk)
 
-
     def getBomItems(self, **kwargs):
         """ Return the items required to make this part """
         return BomItem.list(self._api, part=self.pk, **kwargs)
