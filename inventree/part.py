@@ -143,6 +143,17 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
             part=self.pk
         )
 
+    def getRequirements(self):
+        """
+        Get required amounts from requirements API endpoint for this part
+        """
+
+        # Set the url
+        URL = f"{self.URL}/{self.pk}/requirements/"
+
+        # Get data
+        return self._api.get(URL)
+
 
 class PartAttachment(inventree.base.Attachment):
     """ Class representing a file attachment for a Part """

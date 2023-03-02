@@ -661,6 +661,26 @@ class PartTest(InvenTreeTestCase):
         with self.assertRaises(HTTPError):
             ret = PartRelated.add_related(self.api, parts[3], parts[3])
 
+    def test_get_requirements(self):
+        """Test getRequirements function for parts"""
+
+        # Get first part
+        prt = Part.list(self.api, limit=1)[0]
+
+        # Get requirements list
+        req = prt.getRequirements()
+
+        # Check for expected content
+        self.assertIsInstance(req, dict)
+        self.assertIn('available_stock', req)
+        self.assertIn('on_order', req)
+        self.assertIn('required_build_order_quantity', req)
+        self.assertIn('allocated_build_order_quantity', req)
+        self.assertIn('required_sales_order_quantity', req)
+        self.assertIn('allocated_sales_order_quantity', req)
+        self.assertIn('allocated', req)
+        self.assertIn('required', req)
+
 
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""
