@@ -129,8 +129,6 @@ class InvenTreeAPI(object):
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
-        
-        self.connected = True
 
     def constructApiUrl(self, endpoint_url):
         """Construct an API endpoint URL based on the provided API URL.
