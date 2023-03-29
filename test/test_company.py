@@ -23,10 +23,12 @@ class ContactTest(InvenTreeTestCase):
     def test_contact_create(self):
         """Test that we can create a new contact"""
 
+        cmp = company.Company.list(self.api, limit=1)[0]
         n = company.Contact.count(self.api)
 
         for idx in range(3):
             company.Contact.create(self.api, data={
+                'company': cmp.pk,
                 'name': f"Random Name {idx}",
                 'role': f"Random Role {idx}",
             })
