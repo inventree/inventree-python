@@ -698,3 +698,126 @@ class SOTest(InvenTreeTestCase):
 
         self.assertEqual(so.status, 40)
         self.assertEqual(so.status_text, 'Cancelled')
+
+
+class ROTest(InvenTreeTestCase):
+    """Unit tests for ReturnOrder models"""
+
+    def test_ro_fields(self):
+        """Check the OPTIONS endpoints for return order models"""
+
+        field_names = order.ReturnOrder.fieldNames(self.api)
+
+        names = [
+            'contact',
+            'line_items',
+            'link',
+            'overdue',
+            'customer',
+            'status',
+            'reference'
+        ]
+
+        for name in names:
+            self.assertIn(name, field_names)
+        
+    def test_ro_create(self):
+        """Test that we can create a ReturnOrder"""
+
+        customer = company.Company(self.api, pk=4)
+        self.assertTrue(customer.is_customer)
+
+        n = len(order.ReturnOrder.list(self.api))
+        ref = f"RMA-00{n}"
+
+        # Create a new ReturnOrder
+        ro = customer.createReturnOrder(
+            reference=ref,
+            description="A new return order"
+        )
+
+        self.assertIsNotNone(ro)
+        self.assertIsNotNone(ro.pk)
+
+        # Check line items (should be zero)
+        items = ro.getLineItems()
+        self.assertEqual(len(items), 0)
+
+        # Check extra line items (should be zero)
+        items = ro.getExtraLineItems()
+        self.assertEqual(len(items), 0)
+
+        # Create some extra items
+        for idx in range(3):
+            ro.addExtraLineItem(
+                reference=f"ref {idx}",
+                notes="my notes",
+            )
+        
+        self.assertEqual(len(ro.getExtraLineItems()), 3)
+
+        for line in ro.getExtraLineItems():
+            lo = line.getOrder()
+            self.assertEqual(lo.pk, ro.pk)
+
+        self.assertEqual(ro.getCustomer().pk, 4)
+        self.assertIsNone(ro.getContact())
+    
+        # Test that we can "edit" the order
+        self.assertEqual(ro.reference, ref)
+
+        ro.save(data={
+            'reference': 'RMA-99999',
+        })
+
+        ro.reload()
+        self.assertEqual(ro.reference, 'RMA-99999')
+
+        # Now, delete it
+        ro.delete()
+
+        # Should throw an error, as it no longer exists
+        with self.assertRaises(HTTPError):
+            ro.reload()
+    
+    def test_ro_cancel(self):
+        """Test that an order can be cancelled"""
+        
+        ro = order.ReturnOrder.create(self.api, data={
+            'description': 'To be cancelled',
+            'customer': 4,
+        })
+        # Order should initially be 'pending'
+        self.assertEqual(ro.status, 10)
+        ro.cancel()
+        ro.reload()
+        # Order should now be 'cancelled'
+        self.assertEqual(ro.status, 40)
+    
+    def test_ro_issue(self):
+        """Test that an order can be issued"""
+    
+        ro = order.ReturnOrder.create(self.api, data={
+            'description': 'To be issued',
+            'customer': 4,
+        })
+
+        # Order should initially be 'pending'
+        self.assertEqual(ro.status, 10)
+        ro.issue()
+        ro.reload()
+        # Order should now be 'in progress'
+        self.assertEqual(ro.status, 20)
+
+    def test_ro_complete(self):
+        """Test that an order can be completed"""
+
+        ro = order.ReturnOrder.create(self.api, data={
+            'description': 'To be completed',
+            'customer': 4,
+        })
+        ro.issue()
+        ro.complete()
+        ro.reload()
+        # Order should now be 'complete'
+        self.assertEqual(ro.status, 30)

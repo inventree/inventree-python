@@ -132,7 +132,11 @@ class InvenTreeTestCase(unittest.TestCase):
         """
         Test case setup functions
         """
-        self.api = api.InvenTreeAPI(SERVER, username=USERNAME, password=PASSWORD)
+        self.api = api.InvenTreeAPI(
+            SERVER,
+            username=USERNAME, password=PASSWORD,
+            timeout=30,
+        )
 
 
 class InvenTreeAPITest(InvenTreeTestCase):

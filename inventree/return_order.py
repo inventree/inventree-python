@@ -40,7 +40,7 @@ class ReturnOrder(
 
     def getExtraLineItems(self, **kwargs):
         """Return the extra line items associated with this order"""
-        return ReturnOrderExtraLineItem(self._api, order=self.pk, **kwargs)
+        return ReturnOrderExtraLineItem.list(self._api, order=self.pk, **kwargs)
 
     def addExtraLineItem(self, **kwargs):
         """Create (and return) a new ReturnOrderExtraLineItem against this order"""
@@ -59,6 +59,18 @@ class ReturnOrder(
             comment=comment,
             order=self.pk
         )
+
+    def issue(self, **kwargs):
+        """Issue (send) this order"""
+        return self._statusupdate(status='issue', **kwargs)
+
+    def cancel(self, **kwargs):
+        """Cancel this order"""
+        return self._statusupdate(status='cancel', **kwargs)
+
+    def complete(self, **kwargs):
+        """Mark this order as complete"""
+        return self._statusupdate(status='complete', **kwargs)
 
 
 class ReturnOrderLineItem(inventree.base.InventreeObject):
