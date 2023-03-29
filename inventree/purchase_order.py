@@ -16,6 +16,17 @@ class PurchaseOrder(
 
     URL = 'order/po'
 
+    def getSupplier(self):
+        """Return the supplier (Company) associated with this order"""
+        return inventree.company.Company(self._api, self.supplier)
+
+    def getContact(self):
+        """Return the contact associated with this order"""
+        if self.contact is not None:
+            return inventree.company.Contact(self._api, self.contact)
+        else:
+            return None
+
     def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
         return PurchaseOrderLineItem.list(self._api, order=self.pk, **kwargs)

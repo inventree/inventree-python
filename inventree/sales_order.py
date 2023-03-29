@@ -16,6 +16,17 @@ class SalesOrder(
 
     URL = 'order/so'
 
+    def getCustomer(self):
+        """Return the customer associated with this order"""
+        return inventree.company.Company(self._api, self.customer)
+
+    def getContact(self):
+        """Return the contact associated with this order"""
+        if self.contact is not None:
+            return inventree.company.Contact(self._api, self.contact)
+        else:
+            return None
+
     def getLineItems(self, **kwargs):
         """ Return the line items associated with this order """
         return SalesOrderLineItem.list(self._api, order=self.pk, **kwargs)
