@@ -9,10 +9,22 @@ import inventree.order
 logger = logging.getLogger('inventree')
 
 
+class Contact(inventree.base.InventreeObject):
+    """Class representing the Contact model"""
+
+    URL = 'company/contact/'
+    REQUIRED_API_VERSION = 104
+
+
 class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
     URL = 'company'
+
+    def getContacts(self, **kwargs):
+        """Return contacts associated with this Company"""
+        kwargs['company'] = self.pk
+        return Contact.list(self._api, **kwargs)
 
     def getSuppliedParts(self, **kwargs):
         """

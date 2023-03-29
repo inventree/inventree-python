@@ -75,8 +75,6 @@ class InventreeObject(object):
             NotSupportedError if the server API version is too 'old'
         """
 
-        print("checkApiVersion", cls.REQUIRED_API_VERSION, api.api_version)
-
         if cls.REQUIRED_API_VERSION is not None:
             if cls.REQUIRED_API_VERSION > api.api_version:
                 raise NotImplementedError(f"Server API Version ({api.api_version}) is too old for the '{cls.__name__}' class, which requires API version {cls.REQUIRED_API_VERSION}")
@@ -194,8 +192,6 @@ class InventreeObject(object):
 
         URL - Base URL
         """
-
-        print("ok here we go")
         cls.checkApiVersion(api)
 
         # Check if custom URL is present in request arguments
