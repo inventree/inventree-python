@@ -55,6 +55,7 @@ def update_image(c, debug=True, reset=True):
     if reset:
         reset_data(c)
 
+
 @task
 def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True, timeout=30):
     """
