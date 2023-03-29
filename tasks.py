@@ -34,13 +34,13 @@ def reset_data(c, debug=False):
 
     hide = None if debug else 'both'
 
-    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=hide)
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke delete-data -f", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke migrate", hide=hide)
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke import-fixtures", hide=hide)
 
 
 @task(post=[reset_data])
-def update_image(c, debug=True):
+def update_image(c, debug=True, reset=True):
     """
     Update the InvenTree image to the latest version
     """
@@ -52,6 +52,8 @@ def update_image(c, debug=True):
     c.run("docker-compose -f test/docker-compose.yml pull", hide=hide)
     c.run("docker-compose -f test/docker-compose.yml run inventree-py-test-server invoke update", hide=hide)
 
+    if reset:
+        reset_data(c)
 
 @task
 def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True, timeout=30):
