@@ -16,7 +16,11 @@ logger = logging.getLogger('inventree')
 class InventreeObject(object):
     """ Base class for an InvenTree object """
 
+    # API URL (required) for the particular model type
     URL = ""
+    
+    # Minimum server version for the particular model type
+    REQUIRED_API_VERSION = None
 
     def __str__(self):
         """
@@ -34,6 +38,8 @@ class InventreeObject(object):
             pk - The ID (primary key) associated with this object on the server
             data - JSON representation of the object
         """
+
+        self.checkApiVersion(api)
 
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
@@ -62,12 +68,26 @@ class InventreeObject(object):
             self.reload()
 
     @classmethod
+    def checkApiVersion(cls, api):
+        """Check if the API version supports this particular model.
+        
+        Raises:
+            NotSupportedError if the server API version is too 'old'
+        """
+
+        if cls.REQUIRED_API_VERSION is not None:
+            if cls.REQUIRED_API_VERSION > api.api_version:
+                raise NotImplementedError(f"Server API Version ({api.api_version}) is too old for the '{cls.__name__}' class, which requires API version {cls.REQUIRED_API_VERSION}")
+
+    @classmethod
     def options(cls, api):
         """Perform an OPTIONS request for this model, to determine model information.
 
         InvenTree provides custom metadata for each API endpoint, accessed via a HTTP OPTIONS request.
         This endpoint provides information on the various fields available for that endpoint.
         """
+
+        cls.checkApiVersion(api)
 
         response = api.request(
             cls.URL,
@@ -137,6 +157,8 @@ class InventreeObject(object):
     def create(cls, api, data, **kwargs):
         """ Create a new database object in this class. """
 
+        cls.checkApiVersion(api)
+
         # Ensure the pk value is None so an existing object is not updated
         if 'pk' in data.keys():
             data.pop('pk')
@@ -170,6 +192,7 @@ class InventreeObject(object):
 
         URL - Base URL
         """
+        cls.checkApiVersion(api)
 
         # Check if custom URL is present in request arguments
         if 'url' in kwargs:
@@ -195,6 +218,9 @@ class InventreeObject(object):
 
     def delete(self):
         """ Delete this object from the database """
+
+        self.checkApiVersion(self._api)
+
         if self._api:
             return self._api.delete(self._url)
 
@@ -202,6 +228,8 @@ class InventreeObject(object):
         """
         Save this object to the database
         """
+
+        self.checkApiVersion(self._api)
         
         # If 'data' is not specified, then use *all* the data
         if data is None:
@@ -251,6 +279,9 @@ class InventreeObject(object):
 
     def reload(self):
         """ Reload object data from the database """
+
+        self.checkApiVersion(self._api)
+
         if self._api:
             data = self._api.get(self._url)
 

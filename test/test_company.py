@@ -17,6 +17,25 @@ from inventree.part import Part  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
 
 
+class ContactTest(InvenTreeTestCase):
+    """Tests for the 'Contact' model"""
+    
+    def test_contact_create(self):
+        """Test that we can create a new contact"""
+
+        cmp = company.Company.list(self.api, limit=1)[0]
+        n = company.Contact.count(self.api)
+
+        for idx in range(3):
+            company.Contact.create(self.api, data={
+                'company': cmp.pk,
+                'name': f"Random Name {idx}",
+                'role': f"Random Role {idx}",
+            })
+
+        self.assertEqual(company.Contact.count(self.api), n + 3)
+
+
 class CompanyTest(InvenTreeTestCase):
     """
     Test that Company related objects can be managed via the API

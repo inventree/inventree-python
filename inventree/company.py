@@ -9,10 +9,22 @@ import inventree.order
 logger = logging.getLogger('inventree')
 
 
+class Contact(inventree.base.InventreeObject):
+    """Class representing the Contact model"""
+
+    URL = 'company/contact/'
+    REQUIRED_API_VERSION = 104
+
+
 class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
     URL = 'company'
+
+    def getContacts(self, **kwargs):
+        """Return contacts associated with this Company"""
+        kwargs['company'] = self.pk
+        return Contact.list(self._api, **kwargs)
 
     def getSuppliedParts(self, **kwargs):
         """
@@ -30,7 +42,7 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
         """
         Return list of PurchaseOrder objects associated with this company
         """
-        return inventree.order.PurchaseOrder.list(self._api, supplier=self.pk)
+        return inventree.order.PurchaseOrder.list(self._api, supplier=self.pk, **kwargs)
 
     def createPurchaseOrder(self, **kwargs):
         """
@@ -48,7 +60,7 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
         """
         Return list of SalesOrder objects associated with this company
         """
-        return inventree.order.SalesOrder.list(self._api, customer=self.pk)
+        return inventree.order.SalesOrder.list(self._api, customer=self.pk, **kwargs)
 
     def createSalesOrder(self, **kwargs):
         """
@@ -61,6 +73,16 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
             self._api,
             data=kwargs
         )
+
+    def getReturnOrders(self, **kwargs):
+        """Return list of ReturnOrder objects associated with this company"""
+        return inventree.order.ReturnOrder.list(self._api, customer=self.pk, **kwargs)
+
+    def createReturnOrder(self, **kwargs):
+        """Create (and return) a new ReturnOrder against this company"""
+        kwargs['customer'] = self.pk
+
+        return inventree.order.ReturnOrder.create(self._api, data=kwargs)
 
 
 class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
