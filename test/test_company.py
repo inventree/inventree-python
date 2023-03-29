@@ -33,6 +33,7 @@ class ContactTest(InvenTreeTestCase):
 
         self.assertEqual(company.Contact.count(self.api), n + 3)
 
+
 class CompanyTest(InvenTreeTestCase):
     """
     Test that Company related objects can be managed via the API
