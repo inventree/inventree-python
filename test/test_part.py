@@ -184,7 +184,6 @@ class PartTest(InvenTreeTestCase):
                 'getSupplierParts': SupplierPart,
                 'getBomItems': BomItem,
                 'isUsedIn': BomItem,
-                'getBuilds': Build,
                 'getStockItems': StockItem,
                 'getParameters': Parameter,
                 'getRelated': PartRelated,
