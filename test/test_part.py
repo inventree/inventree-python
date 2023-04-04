@@ -15,7 +15,6 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.build import Build  # noqa: E402
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.stock import StockItem  # noqa: E402
 from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate, PartTestTemplate, PartRelated, BomItem  # noqa: E402
