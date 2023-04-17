@@ -125,7 +125,10 @@ class InvenTreeAPI(object):
 
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
-        
+
+        if not self.testAuth():
+            raise ConnectionError("Authentication at InvenTree server failed")
+
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
@@ -150,6 +153,33 @@ class InvenTreeAPI(object):
             url += '/'
 
         return url
+
+    def testAuth(self):
+        """
+        Checks if the set user credentials or the used token
+        are valid and raises an exception if not.
+        """
+        logger.info("Checking InvenTree user credentials")
+
+        if not self.connected:
+            logger.fatal("InvenTree server is not connected. Skipping authentication check")
+            return False
+
+        try:
+            response = self.get('/user/me/')
+        except requests.exceptions.HTTPError as e:
+            logger.fatal(f"Athentication error: {str(type(e))}")
+            return False
+        except Exception as e:
+            logger.fatal(f"Unhandled server error: {str(type(e))}")
+            # Re-throw the exception
+            raise e
+
+        # set user_name if not initially set
+        if not self.username:
+            self.username = response['username']
+
+        return True
 
     def testServer(self):
         """
