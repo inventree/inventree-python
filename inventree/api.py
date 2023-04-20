@@ -240,21 +240,17 @@ class InvenTreeAPI(object):
         logger.info("Requesting auth token from server...")
 
         # Request an auth token from the server
-        token_url = os.path.join(self.api_url, 'user/token/')
-        
-        reply = requests.get(token_url, auth=self.auth, proxies=self.proxies)
-
-        data = json.loads(reply.text)
-
-        if not reply.status_code == 200:
-            logger.error(f"Error requesting token: {reply.status_code} - {reply.text}")
+        try:
+            response = self.get('/user/token/')
+        except Exception as e:
+            logger.error(f"Error requesting token: {str(type(e))}")
             return None
 
-        if 'token' not in data.keys():
-            logger.error(f"Token not returned by server: {reply.text}")
+        if 'token' not in response:
+            logger.error(f"Token not returned by server: {response}")
             return None
 
-        self.token = json.loads(reply.text)['token']
+        self.token = response['token']
 
         logger.info(f"Authentication token: {self.token}")
 
