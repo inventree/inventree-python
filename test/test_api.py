@@ -76,10 +76,11 @@ class LoginTests(unittest.TestCase):
             a = api.InvenTreeAPI("http://127.0.0.1:9999", username="admin", password="password")
 
         # Attempt connection with invalid credentials
-        a = api.InvenTreeAPI(SERVER, username="abcde", password="********")
+        with self.assertRaises(Exception):
+            a = api.InvenTreeAPI(SERVER, username="abcde", password="********")
 
-        self.assertIsNotNone(a.server_details)
-        self.assertIsNone(a.token)
+            self.assertIsNotNone(a.server_details)
+            self.assertIsNone(a.token)
 
 
 class Unauthenticated(unittest.TestCase):
@@ -88,14 +89,14 @@ class Unauthenticated(unittest.TestCase):
     """
 
     def setUp(self):
-        self.api = api.InvenTreeAPI(SERVER, username="hello", password="world")
+        self.api = api.InvenTreeAPI(SERVER, username="hello", password="world", connect=False)
 
     def test_read_parts(self):
 
-        with self.assertRaises(requests.exceptions.HTTPError) as ar:
+        with self.assertRaises(Exception) as ar:
             part.Part.list(self.api)
 
-        self.assertIn('Invalid username/password', str(ar.exception))
+        self.assertIn('Authentication at InvenTree server failed', str(ar.exception))
 
     def test_file_download(self):
         """

@@ -125,7 +125,10 @@ class InvenTreeAPI(object):
 
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
-        
+
+        if not self.testAuth():
+            raise ConnectionError("Authentication at InvenTree server failed")
+
         if self.use_token_auth:
             if not self.token:
                 self.requestToken()
@@ -150,6 +153,33 @@ class InvenTreeAPI(object):
             url += '/'
 
         return url
+
+    def testAuth(self):
+        """
+        Checks if the set user credentials or the used token
+        are valid and raises an exception if not.
+        """
+        logger.info("Checking InvenTree user credentials")
+
+        if not self.connected:
+            logger.fatal("InvenTree server is not connected. Skipping authentication check")
+            return False
+
+        try:
+            response = self.get('/user/me/')
+        except requests.exceptions.HTTPError as e:
+            logger.fatal(f"Athentication error: {str(type(e))}")
+            return False
+        except Exception as e:
+            logger.fatal(f"Unhandled server error: {str(type(e))}")
+            # Re-throw the exception
+            raise e
+
+        # set user_name if not initially set
+        if not self.username:
+            self.username = response['username']
+
+        return True
 
     def testServer(self):
         """
@@ -209,22 +239,22 @@ class InvenTreeAPI(object):
 
         logger.info("Requesting auth token from server...")
 
+        if not self.connected:
+            logger.fatal("InvenTree server is not connected. Skipping token request")
+            return False
+
         # Request an auth token from the server
-        token_url = os.path.join(self.api_url, 'user/token/')
-        
-        reply = requests.get(token_url, auth=self.auth, proxies=self.proxies)
-
-        data = json.loads(reply.text)
-
-        if not reply.status_code == 200:
-            logger.error(f"Error requesting token: {reply.status_code} - {reply.text}")
+        try:
+            response = self.get('/user/token/')
+        except Exception as e:
+            logger.error(f"Error requesting token: {str(type(e))}")
             return None
 
-        if 'token' not in data.keys():
-            logger.error(f"Token not returned by server: {reply.text}")
+        if 'token' not in response:
+            logger.error(f"Token not returned by server: {response}")
             return None
 
-        self.token = json.loads(reply.text)['token']
+        self.token = response['token']
 
         logger.info(f"Authentication token: {self.token}")
 
