@@ -239,6 +239,10 @@ class InvenTreeAPI(object):
 
         logger.info("Requesting auth token from server...")
 
+        if not self.connected:
+            logger.fatal("InvenTree server is not connected. Skipping token request")
+            return False
+
         # Request an auth token from the server
         try:
             response = self.get('/user/token/')
