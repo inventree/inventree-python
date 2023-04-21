@@ -7,7 +7,7 @@ import json
 from . import api as inventree_api
 
 
-INVENTREE_PYTHON_VERSION = "0.11.1"
+INVENTREE_PYTHON_VERSION = "0.11.2"
 
 
 logger = logging.getLogger('inventree')
