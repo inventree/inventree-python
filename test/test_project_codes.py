@@ -1,9 +1,10 @@
 """Unit tests for the ProjectCode model"""
 
+import os
 import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.project_code import ProjectCode
+from inventree.project_code import ProjectCode  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
 
 
