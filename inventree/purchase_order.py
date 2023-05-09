@@ -136,7 +136,10 @@ class PurchaseOrder(
         return response
 
 
-class PurchaseOrderLineItem(inventree.base.InventreeObject):
+class PurchaseOrderLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the PurchaseOrderLineItem database model """
 
     URL = 'order/po-line'
@@ -226,7 +229,10 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         return response
 
 
-class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
+class PurchaseOrderExtraLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
     URL = 'order/po-extra-line'
@@ -238,7 +244,10 @@ class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
         return PurchaseOrder(self._api, self.order)
 
 
-class PurchaseOrderAttachment(inventree.base.Attachment):
+class PurchaseOrderAttachment(
+    inventree.base.Attachment,
+    inventree.base.MetadataMixin,
+):
     """Class representing a file attachment for a PurchaseOrder"""
 
     URL = 'order/po/attachment'
