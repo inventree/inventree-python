@@ -244,10 +244,7 @@ class PurchaseOrderExtraLineItem(
         return PurchaseOrder(self._api, self.order)
 
 
-class PurchaseOrderAttachment(
-    inventree.base.Attachment,
-    inventree.base.MetadataMixin,
-):
+class PurchaseOrderAttachment(inventree.base.Attachment):
     """Class representing a file attachment for a PurchaseOrder"""
 
     URL = 'order/po/attachment'

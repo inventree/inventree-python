@@ -185,10 +185,7 @@ class SalesOrderExtraLineItem(
         return SalesOrder(self._api, self.order)
 
 
-class SalesOrderAttachment(
-    inventree.base.Attachment,
-    inventree.base.MetadataMixin,
-):
+class SalesOrderAttachment(inventree.base.Attachment):
     """Class representing a file attachment for a SalesOrder"""
 
     URL = 'order/so/attachment'
