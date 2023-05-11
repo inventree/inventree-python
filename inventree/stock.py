@@ -225,6 +225,41 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
             **kwargs
         )
 
+    def installStock(self, item, quantity=1, **kwargs):
+        """Install the given item into this stock item
+
+        Arguments:
+            stockItem: A stockItem instance or integer ID value
+            quantity: quantity of installed items. defaults to 1.
+            notes: Optional transaction notes"""
+
+        if isinstance(item, StockItem):
+            item = item.pk
+        kwargs['quantity'] = quantity
+        kwargs['stock_item'] = item
+
+        url = f"stock/{self.pk}/install/"
+
+        return self._api.post(url, data=kwargs)
+
+    def uninstallStock(self, location, quantity=1, **kwargs):
+        """Uninstalls this item from any stock item
+
+        Arguments:
+            location: A StockLocation instance or integer ID value
+            quantity: quantity of removed items. defaults to 1.
+            notes: Optional transaction notes"""
+
+        if isinstance(location, StockLocation):
+            location = location.pk
+        kwargs['quantity'] = quantity
+        kwargs['stock_item'] = self.pk
+        kwargs['location'] = location
+
+        url = f"stock/{self.pk}/uninstall/"
+
+        return self._api.post(url, data=kwargs)
+
     def getPart(self):
         """ Return the base Part object associated with this StockItem """
         return inventree.part.Part(self._api, self.part)
