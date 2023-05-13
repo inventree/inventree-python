@@ -59,19 +59,19 @@ class LabelPrintingMixing:
         return False
 
 
-class LabelLocation(inventree.base.InventreeObject):
+class LabelLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Label/Location database model """
 
     URL = 'label/location'
 
 
-class LabelPart(inventree.base.InventreeObject):
+class LabelPart(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Label/Part database model """
 
     URL = 'label/part'
 
 
-class LabelStock(inventree.base.InventreeObject):
+class LabelStock(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Label/stock database model """
 
     URL = 'label/stock'
