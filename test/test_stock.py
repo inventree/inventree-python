@@ -415,3 +415,44 @@ class StockAdjustTest(InvenTreeTestCase):
 
         # Check the item is assigned
         self.assertTrue(assignitem.customer == customer.pk)
+
+    def test_install_stock(self):
+        """Test install and uninstall a stock item from another"""
+
+        items = StockItem.list(self.api, available=True)
+        self.assertTrue(len(items) > 1)
+
+        # get a parent and a child part
+        parent_part = part.Part.list(
+            self.api,
+            trackable=True,
+            assembly=True,
+            has_stock=True
+        )[0]
+        parent_stock = parent_part.getStockItems()[0]
+        child_stock = items[0]
+        child_part = child_stock.getPart()
+
+        # make sure the child is in the bom of the parent
+
+        items = parent_part.getBomItems(search=child_part.name)
+        if not items:
+            part.BomItem.create(
+                self.api, {
+                    'part': parent_part.pk,
+                    'sub_part': child_part.pk,
+                    'quantity': 1
+                }
+            )
+
+        # install the child into the parent
+        parent_stock.installStock(child_stock)
+
+        # and uninstall it again
+        location = StockLocation.list(self.api)[0]
+        child_stock.uninstallStock(location)
+
+        # check if the location is set correctly to confirm the uninstall
+        child_stock.reload()
+        new_location = child_stock.getLocation()
+        self.assertTrue(new_location.pk == location.pk)
