@@ -326,7 +326,7 @@ class StockItemTracking(inventree.base.InventreeObject):
     URL = 'stock/track'
 
 
-class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Class representing a StockItemTestResult object"""
 
     URL = 'stock/test'
