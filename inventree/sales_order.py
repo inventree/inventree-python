@@ -79,7 +79,10 @@ class SalesOrder(
         return SalesOrderShipment.create(self._api, data=kwargs)
 
 
-class SalesOrderLineItem(inventree.base.InventreeObject):
+class SalesOrderLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the SalesOrderLineItem database model """
 
     URL = 'order/so-line'
@@ -167,7 +170,10 @@ class SalesOrderLineItem(inventree.base.InventreeObject):
             return shipment.allocateItems(items)
 
 
-class SalesOrderExtraLineItem(inventree.base.InventreeObject):
+class SalesOrderExtraLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the SalesOrderExtraLineItem database model """
 
     URL = 'order/so-extra-line'
@@ -189,7 +195,8 @@ class SalesOrderAttachment(inventree.base.Attachment):
 
 class SalesOrderShipment(
     inventree.base.InventreeObject,
-    inventree.base.StatusMixin
+    inventree.base.StatusMixin,
+    inventree.base.MetadataMixin,
 ):
     """Class representing a shipment for a SalesOrder"""
 

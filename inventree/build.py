@@ -6,6 +6,7 @@ import inventree.base
 class Build(
     inventree.base.InventreeObject,
     inventree.base.StatusMixin,
+    inventree.base.MetadataMixin,
 ):
     """ Class representing the Build database model """
 

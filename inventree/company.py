@@ -16,7 +16,7 @@ class Contact(inventree.base.InventreeObject):
     REQUIRED_API_VERSION = 104
 
 
-class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
+class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
     URL = 'company'
@@ -85,7 +85,7 @@ class Company(inventree.base.ImageMixin, inventree.base.InventreeObject):
         return inventree.order.ReturnOrder.create(self._api, data=kwargs)
 
 
-class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Class representing the SupplierPart database model
 
     - Implements the BulkDeleteMixin
@@ -99,7 +99,7 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-class ManufacturerPart(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
+class ManufacturerPart(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Class representing the ManufacturerPart database model
 
     - Implements the BulkDeleteMixin

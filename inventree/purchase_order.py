@@ -136,7 +136,10 @@ class PurchaseOrder(
         return response
 
 
-class PurchaseOrderLineItem(inventree.base.InventreeObject):
+class PurchaseOrderLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the PurchaseOrderLineItem database model """
 
     URL = 'order/po-line'
@@ -226,7 +229,10 @@ class PurchaseOrderLineItem(inventree.base.InventreeObject):
         return response
 
 
-class PurchaseOrderExtraLineItem(inventree.base.InventreeObject):
+class PurchaseOrderExtraLineItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
     URL = 'order/po-extra-line'

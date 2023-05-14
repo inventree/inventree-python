@@ -184,7 +184,7 @@ class PartTestTemplate(inventree.base.InventreeObject):
         return PartTestTemplate.generateTestKey(self.test_name)
     
 
-class BomItem(inventree.base.InventreeObject):
+class BomItem(inventree.base.InventreeObject, inventree.base.MetadataMixin):
     """ Class representing the BomItem database model """
 
     URL = 'bom'
