@@ -47,7 +47,7 @@ class LabelPrintingMixing:
         else:
             # Perform API request, get response
             response = self._api.get(URL, params=params)
-            download_url = response.get('download_url', None)
+            download_url = response.get('file', None)
 
         # Label file is availble for download
         if download_url and destination is not None:
