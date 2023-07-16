@@ -60,7 +60,7 @@ class LabelPrintingMixing:
                 )
 
             # Use downloadFile method to get the file
-            return self._api.downloadFile(url=f'api/{URL}', destination=destination, params=params, *args, **kwargs)
+            return self._api.downloadFile(url=download_url, destination=destination, params=params, *args, **kwargs)
 
         else:
             return response
