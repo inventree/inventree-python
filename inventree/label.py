@@ -51,19 +51,20 @@ class LabelPrintingMixing:
 
         # Label file is availble for download
         if download_url and destination is not None:
-                if os.path.exists(destination) and os.path.isdir(destination):
-                    # No file name given, construct one
-                    # Otherwise, filename will be something like '?parts[]=37'
-                    destination = os.path.join(
-                        destination,
-                        f'Label_{self.LABELNAME}{label}_{self.pk}.pdf'
-                    )
+            if os.path.exists(destination) and os.path.isdir(destination):
+                # No file name given, construct one
+                # Otherwise, filename will be something like '?parts[]=37'
+                destination = os.path.join(
+                    destination,
+                    f'Label_{self.LABELNAME}{label}_{self.pk}.pdf'
+                )
 
-                # Use downloadFile method to get the file
-                return self._api.downloadFile(url=f'api/{URL}', destination=destination, params=params, *args, **kwargs)
+            # Use downloadFile method to get the file
+            return self._api.downloadFile(url=f'api/{URL}', destination=destination, params=params, *args, **kwargs)
 
         else:
             return response
+
 
 class LabelLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Label/Location database model """
