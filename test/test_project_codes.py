@@ -17,7 +17,7 @@ class ProjectCodeTest(InvenTreeTestCase):
         n = ProjectCode.count(self.api)
 
         ProjectCode.create(self.api, {
-            'code': 'TEST',
+            'code': f'TEST {n + 1}',
             'description': 'Test project code',
         })
 

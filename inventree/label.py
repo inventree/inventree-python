@@ -32,7 +32,8 @@ class LabelPrintingMixing:
             label_id = label
 
         # Set URL to use
-        URL = f'label/{self.LABELNAME}/{label_id}/print/'
+        URL = f'api/label/{self.LABELNAME}/{label_id}/print/'
+
         params = {
             f'{self.LABELITEM}[]': self.pk
         }
@@ -42,8 +43,8 @@ class LabelPrintingMixing:
             params['plugin'] = plugin
 
         # If API version less than 130, file download is provided directly
-        if self._api.api_version < 130:
-            download_url = f'api/{URL}'
+        if self._api.api_version < 130 and plugin is None:
+            download_url = URL
         else:
             # Perform API request, get response
             response = self._api.get(URL, params=params)
