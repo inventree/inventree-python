@@ -32,7 +32,7 @@ class LabelPrintingMixing:
             label_id = label
 
         # Set URL to use
-        URL = f'api/label/{self.LABELNAME}/{label_id}/print/'
+        URL = f'/label/{self.LABELNAME}/{label_id}/print/'
 
         params = {
             f'{self.LABELITEM}[]': self.pk
@@ -47,7 +47,7 @@ class LabelPrintingMixing:
             download_url = URL
         else:
             # Perform API request, get response
-            response = self._api.get(URL, params=params)
+            response = self._api.get(f'api/{URL}', params=params)
             download_url = response.get('file', None)
 
         # Label file is availble for download
