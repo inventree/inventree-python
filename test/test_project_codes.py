@@ -26,7 +26,7 @@ class ProjectCodeTest(InvenTreeTestCase):
         # Try to create a duplicate code
         with self.assertRaises(Exception):
             ProjectCode.create(self.api, {
-                'code': 'TEST',
+                'code': f'TEST {n + 1}',
                 'description': 'Test project code',
             })
 
