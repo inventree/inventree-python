@@ -32,7 +32,8 @@ class LabelPrintingMixing:
             label_id = label
 
         # Set URL to use
-        URL = f'label/{self.LABELNAME}/{label_id}/print/'
+        URL = f'api/label/{self.LABELNAME}/{label_id}/print/'
+
         params = {
             f'{self.LABELITEM}[]': self.pk
         }
@@ -41,10 +42,16 @@ class LabelPrintingMixing:
             # Append profile
             params['plugin'] = plugin
 
-            # Get response
-            return self._api.get(URL, params=params)
+        # If API version less than 130, file download is provided directly
+        if self._api.api_version < 130 and plugin is None:
+            download_url = URL
+        else:
+            # Perform API request, get response
+            response = self._api.get(URL, params=params)
+            download_url = response.get('file', None)
 
-        if destination is not None:
+        # Label file is availble for download
+        if download_url and destination is not None:
             if os.path.exists(destination) and os.path.isdir(destination):
                 # No file name given, construct one
                 # Otherwise, filename will be something like '?parts[]=37'
@@ -54,9 +61,10 @@ class LabelPrintingMixing:
                 )
 
             # Use downloadFile method to get the file
-            return self._api.downloadFile(url=f'api/{URL}', destination=destination, params=params, *args, **kwargs)
+            return self._api.downloadFile(url=download_url, destination=destination, params=params, *args, **kwargs)
 
-        return False
+        else:
+            return response
 
 
 class LabelLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject):
