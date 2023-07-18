@@ -32,7 +32,7 @@ class LabelPrintingMixing:
             label_id = label
 
         # Set URL to use
-        URL = f'api/label/{self.LABELNAME}/{label_id}/print/'
+        URL = f'/label/{self.LABELNAME}/{label_id}/print/'
 
         params = {
             f'{self.LABELITEM}[]': self.pk
