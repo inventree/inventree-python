@@ -296,6 +296,12 @@ class InventreeObject(object):
         else:
             raise AttributeError(f"model.reload failed at '{self._url}': No API instance provided")
 
+    def keys(self):
+        return self._data.keys()
+
+    def __contains__(self, name):
+        return name in self._data
+
     def __getattr__(self, name):
 
         if name in self._data.keys():
