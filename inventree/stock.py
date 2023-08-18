@@ -284,7 +284,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
 
-        return StockItemTestResult.list(self._api, stock_item=self.pk)
+        return StockItemTestResult.list(self._api, stock_item=self.pk, **kwargs)
 
     def uploadTestResult(self, test_name, test_result, **kwargs):
         """ Upload a test result against this StockItem """
