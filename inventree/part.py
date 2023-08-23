@@ -163,7 +163,7 @@ class PartAttachment(inventree.base.Attachment):
     REQUIRED_KWARGS = ['part']
 
 
-class PartTestTemplate(inventree.base.InventreeObject):
+class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing a test template for a Part """
 
     URL = 'part/test-template'
