@@ -171,7 +171,7 @@ class InvenTreeAPI(object):
 
         try:
             response = self.get('/user/me/')
-        except Exception as err:
+        except Exception:
             return False
         
         if 'username' not in response:
@@ -337,23 +337,20 @@ class InvenTreeAPI(object):
         try:
             response = methods[method](api_url, **payload)
             response.raise_for_status()
-        except Timeout as e:
-            # Re-throw Timeout, and add a message to the log
-            logger.exception(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
-            return None
+        except Timeout:
+            raise requests.exceptions.Timeout(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
         except Exception as err:
             # Re-thrown any caught errors, and add a message to the log
-            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url}")
+            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url} (status {err.response.status_code})")
             logger.error("Status Code: %s", err.response.status_code)
 
             for k, v in err.response.json().items():
                 logger.error(" - %s: %s", k, v)
 
-            return None
+            raise requests.exceptions.HTTPError(err)
 
         if response is None:
-            logger.error(f"Null response - {method} '{api_url}'")
-            return None
+            raise requests.exceptions.HTTPError(f"Null response - {method} '{api_url}'")
 
         logger.info(f"Request: {method} {api_url} - {response.status_code}")
 
