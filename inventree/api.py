@@ -167,13 +167,13 @@ class InvenTreeAPI(object):
 
         try:
             response = self.get('/user/me/')
-        except requests.exceptions.HTTPError as e:
-            logger.fatal(f"Athentication error: {str(type(e))}")
+            response.raise_for_status()
+        except Exception as err:
             return False
-        except Exception as e:
-            logger.fatal(f"Unhandled server error: {str(type(e))}")
-            # Re-throw the exception
-            raise e
+        
+        if 'username' not in response:
+            logger.fatal("Username not returned by server")
+            return False
 
         # set user_name if not initially set
         if not self.username:
@@ -330,14 +330,20 @@ class InvenTreeAPI(object):
         # Send request to server!
         try:
             response = methods[method](api_url, **payload)
+            response.raise_for_status()
         except Timeout as e:
             # Re-throw Timeout, and add a message to the log
-            logger.critical(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
-            raise e
-        except Exception as e:
+            logger.exception(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
+            return None
+        except Exception as err:
             # Re-thrown any caught errors, and add a message to the log
-            logger.critical(f"Error at api.request - {method} @ {api_url}")
-            raise e
+            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url}")
+            logger.error("Status Code: %s", err.response.status_code)
+
+            for k, v in err.response.json().items():
+                logger.error(" - %s: %s", k, v)
+
+            return None
 
         if response is None:
             logger.error(f"Null response - {method} '{api_url}'")
