@@ -44,6 +44,7 @@ class InvenTreeAPI(object):
             username - Login username
             password - Login password
             token - Authentication token (if provided, username/password are ignored)
+            token_name - Name of the token to request (default = 'inventree-python')
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
             timeout - Set timeout to use (in seconds). Default: 10
@@ -72,8 +73,6 @@ class InvenTreeAPI(object):
 
         self.auth = None
         self.connected = False
-
-        self.verbose = kwargs.get('verbose', False)
 
         logger.setLevel(logging.DEBUG if self.verbose else logging.INFO)
 
