@@ -154,7 +154,7 @@ class InvenTreeAPI(object):
         url = urljoin(self.api_url, endpoint_url)
 
         # Ensure the API URL ends with a trailing slash
-        if not url.endswith('/'):
+        if not url.endswith('/') and '?' not in url:
             url += '/'
 
         return url
