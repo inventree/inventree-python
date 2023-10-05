@@ -63,6 +63,7 @@ class InvenTreeAPI(object):
         self.username = kwargs.get('username', os.environ.get('INVENTREE_API_USERNAME', None))
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
+        self.token_name = kwargs.get('token_name', 'inventree-python')
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
 
@@ -71,6 +72,10 @@ class InvenTreeAPI(object):
 
         self.auth = None
         self.connected = False
+
+        self.verbose = kwargs.get('verbose', False)
+
+        logger.setLevel(logging.DEBUG if self.verbose else logging.INFO)
 
         if kwargs.get('connect', True):
             self.connect()
@@ -167,7 +172,6 @@ class InvenTreeAPI(object):
 
         try:
             response = self.get('/user/me/')
-            response.raise_for_status()
         except Exception as err:
             return False
         
@@ -236,7 +240,7 @@ class InvenTreeAPI(object):
 
         if not self.username or not self.password:
             raise AttributeError('Supply username and password to request token')
-
+        
         logger.info("Requesting auth token from server...")
 
         if not self.connected:
@@ -245,11 +249,14 @@ class InvenTreeAPI(object):
 
         # Request an auth token from the server
         try:
-            response = self.get('/user/token/')
+            url = '/user/token/'
+            if self.token_name:
+                url += f'?name={self.token_name}'
+            response = self.get(url)
         except Exception as e:
             logger.error(f"Error requesting token: {str(type(e))}")
             return None
-
+        
         if 'token' not in response:
             logger.error(f"Token not returned by server: {response}")
             return None
