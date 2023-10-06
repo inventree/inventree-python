@@ -336,18 +336,26 @@ class InvenTreeAPI(object):
         # Send request to server!
         try:
             response = methods[method](api_url, **payload)
-            response.raise_for_status()
+            # response.raise_for_status()
         except Timeout:
             raise requests.exceptions.Timeout(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
         except Exception as err:
             # Re-thrown any caught errors, and add a message to the log
-            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url} (status {err.response.status_code})")
-            logger.error("Status Code: %s", err.response.status_code)
+            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url} (status {err.response.status_code if err.response else 'None'})")
 
-            for k, v in err.response.json().items():
-                logger.error(" - %s: %s", k, v)
+            try:
+                data = response.json()
 
-            raise requests.exceptions.HTTPError(err)
+                if type(data) is dict:
+                    for k, v in err.response.json().items():
+                        logger.error(" - %s: %s", k, v)
+                else:
+                    logger.error(" - %s", data)
+            except (UnboundLocalError, AttributeError):
+                # No response object available
+                pass
+
+            raise err
 
         if response is None:
             raise requests.exceptions.HTTPError(f"Null response - {method} '{api_url}'")

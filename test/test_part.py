@@ -3,6 +3,7 @@
 import os
 import requests
 import sys
+import time
 
 from requests.exceptions import HTTPError
 
@@ -376,7 +377,7 @@ class PartTest(InvenTreeTestCase):
         p = Part.create(
             self.api,
             {
-                'name': 'Delete Me',
+                'name': f'Delete Me {n}',
                 'description': 'Not long for this world!',
                 'category': 1,
             }
@@ -644,6 +645,11 @@ class PartTest(InvenTreeTestCase):
         """Test add related function"""
 
         parts = Part.list(self.api)
+
+        # First, delete *all* related parts
+        for rp in PartRelated.list(self.api):
+            rp.delete()
+            time.sleep(0.05)
 
         # Take two parts, make them related
         # Try with pk values
