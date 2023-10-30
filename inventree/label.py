@@ -8,7 +8,7 @@ import os
 logger = logging.getLogger('inventree')
 
 
-class LabelPrintingMixing:
+class LabelPrintingMixin:
     """Mixin class for label printing"""
     
     def printlabel(self, label, plugin=None, destination=None, *args, **kwargs):

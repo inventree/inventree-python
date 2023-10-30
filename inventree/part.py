@@ -58,7 +58,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
         )
 
 
-class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
+class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
     """ Class representing the Part database model """
 
     URL = 'part'
