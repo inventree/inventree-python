@@ -30,14 +30,16 @@ class ProjectCodeTest(InvenTreeTestCase):
                 'description': 'Test project code',
             })
 
+        n = ProjectCode.count(self.api)
+
         # Create 5 more codes
         for idx in range(5):
             ProjectCode.create(self.api, {
-                'code': f'CODE-{idx}',
-                'description': f'Description {idx}',
+                'code': f'CODE-{idx + n}',
+                'description': f'Description {idx + n}',
             })
         
         # List all codes
         codes = ProjectCode.list(self.api)
 
-        self.assertEqual(len(codes), n + 6)
+        self.assertEqual(len(codes), n + 5)

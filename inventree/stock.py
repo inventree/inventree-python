@@ -10,7 +10,7 @@ import inventree.label
 import inventree.company
 
 
-class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
+class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -40,7 +40,7 @@ class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, i
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixing, inventree.base.InventreeObject):
+class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
     """Class representing the StockItem database model."""
 
     URL = 'stock'
@@ -225,17 +225,23 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
             **kwargs
         )
 
-    def installStock(self, item, quantity=1, **kwargs):
+    def installStock(self, item, **kwargs):
         """Install the given item into this stock item
 
         Arguments:
             stockItem: A stockItem instance or integer ID value
-            quantity: quantity of installed items. defaults to 1.
+        
+        kwargs:
+            quantity: quantity of installed items
             notes: Optional transaction notes"""
 
         if isinstance(item, StockItem):
+            quantity = kwargs.get('quantity', item.quantity)
             item = item.pk
-        kwargs['quantity'] = quantity
+        else:
+            quantity = kwargs.get('quantity', 1)
+        
+        kwargs['quantity'] = kwargs.get('quantity', quantity)
         kwargs['stock_item'] = item
 
         url = f"stock/{self.pk}/install/"
