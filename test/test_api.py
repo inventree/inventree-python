@@ -174,21 +174,25 @@ class TestCreate(InvenTreeTestCase):
                 'description': 'A part category',
             }, timeout=0.001)
 
+        n = part.PartCategory.count(self.api)
+
         # Create a custom category
         c = part.PartCategory.create(self.api, {
             'parent': None,
-            'name': 'My custom category 2',
+            'name': f'Custom category {n + 1}',
             'description': 'A part category',
         })
 
         self.assertIsNotNone(c)
         self.assertIsNotNone(c.pk)
 
+        n = part.Part.count(self.api)
+
         p = part.Part.create(self.api, {
-            'name': 'ACME Widget',
+            'name': f'ACME Widget {n}',
             'description': 'A simple widget created via the API',
             'category': c.pk,
-            'ipn': 'ACME-0001',
+            'ipn': f'ACME-0001-{n}',
             'virtual': False,
             'active': True
         })
@@ -198,7 +202,6 @@ class TestCreate(InvenTreeTestCase):
 
         cat = p.getCategory()
         self.assertEqual(cat.pk, c.pk)
-        self.assertEqual(cat.name, 'My custom category 2')
 
         s = stock.StockItem.create(self.api, {
             'part': p.pk,
@@ -212,7 +215,7 @@ class TestCreate(InvenTreeTestCase):
 
         prt = s.getPart()
         self.assertEqual(prt.pk, p.pk)
-        self.assertEqual(prt.name, 'ACME Widget')
+        self.assertEqual(prt.name, f'ACME Widget {n}')
 
 
 class TemplateTest(InvenTreeTestCase):

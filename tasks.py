@@ -59,7 +59,7 @@ def update_image(c, debug=True, reset=True):
 @task
 def check_server(c, host="http://localhost:12345", username="testuser", password="testpassword", debug=True, timeout=30):
     """
-    Check that we can ping the sevrer and get a token.
+    Check that we can ping the server and get a token.
     A generous timeout is applied here, to give the server time to activate
     """
 
@@ -169,7 +169,7 @@ def test(c, source=None, update=False, reset=False, debug=False):
         stop_server(c, debug=debug)
         reset_data(c, debug=debug)
     
-    # Launch the InvenTree server (dockerized)
+    # Launch the InvenTree server (in a docker container)
     start_server(c)
 
     # Wait until the docker server is running, and API is accessible
