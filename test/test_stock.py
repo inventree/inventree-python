@@ -177,16 +177,13 @@ class StockTest(InvenTreeTestCase):
         Refer to fixture data in InvenTree/stock/fixtures/stock.yaml
         """
 
-        item = StockItem(self.api, pk=1)
-
-        self.assertEqual(item.pk, 1)
-        self.assertIsNotNone(item.location)
+        # Grab the first available stock item
+        item = StockItem.list(self.api, in_stock=True, limit=1)[0]
 
         # Get the Part reference
         prt = item.getPart()
 
         self.assertEqual(type(prt), part.Part)
-        self.assertEqual(prt.pk, 1)
 
         # Move the item to a known location
         item.transferStock(3)
@@ -258,7 +255,8 @@ class StockAdjustTest(InvenTreeTestCase):
     def test_count(self):
         """Test the 'count' action"""
 
-        item = StockItem(self.api, pk=1)
+        # Find the first available stock item
+        item = StockItem.list(self.api, in_stock=True, limit=1)[0]
 
         # Count number of tracking entries
         n_tracking = len(item.getTrackingEntries())
@@ -294,7 +292,8 @@ class StockAdjustTest(InvenTreeTestCase):
     def test_add_remove(self):
         """Test the 'add' and 'remove' actions"""
 
-        item = StockItem(self.api, pk=1)
+        # Find the first available stock item
+        item = StockItem.list(self.api, in_stock=True, limit=1)[0]
 
         n_tracking = len(item.getTrackingEntries())
 
@@ -355,7 +354,8 @@ class StockAdjustTest(InvenTreeTestCase):
     def test_transfer_multiple(self):
         """Test transfer of *multiple* items"""
 
-        items = StockItem.list(self.api, location=1)
+        items = StockItem.list(self.api, in_stock=True, location=1)
+
         self.assertTrue(len(items) > 1)
 
         # Construct data to send
@@ -420,6 +420,7 @@ class StockAdjustTest(InvenTreeTestCase):
         """Test install and uninstall a stock item from another"""
 
         items = StockItem.list(self.api, available=True)
+
         self.assertTrue(len(items) > 1)
 
         # get a parent and a child part
@@ -445,8 +446,20 @@ class StockAdjustTest(InvenTreeTestCase):
                 }
             )
 
-        # install the child into the parent
-        parent_stock.installStock(child_stock)
+        self.assertIsNone(child_stock.belongs_to)
+
+        # Attempt to install with incorrect quantity
+        with self.assertRaises(requests.exceptions.HTTPError):
+            parent_stock.installStock(child_stock, quantity=child_stock.quantity * 2)
+
+        with self.assertRaises(requests.exceptions.HTTPError):
+            parent_stock.installStock(child_stock, quantity=-100)
+
+        # install the *entire* child item into the parent
+        parent_stock.installStock(child_stock, quantity=child_stock.quantity)
+        child_stock.reload()
+        self.assertIsNotNone(child_stock.belongs_to)
+        self.assertEqual(child_stock.belongs_to, parent_stock.pk)
 
         # and uninstall it again
         location = StockLocation.list(self.api)[0]
