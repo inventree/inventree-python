@@ -645,6 +645,10 @@ class PartTest(InvenTreeTestCase):
 
         parts = Part.list(self.api)
 
+        # First, ensure *all* related parts are deleted
+        for relation in PartRelated.list(self.api):
+            relation.delete()
+
         # Take two parts, make them related
         # Try with pk values
         ret = PartRelated.add_related(self.api, parts[0].pk, parts[1].pk)
