@@ -611,10 +611,13 @@ class InvenTreeAPI(object):
     def scanBarcode(self, barcode_data):
         """Scan a barcode to see if it matches a known object"""
 
+        if type(barcode_data) is dict:
+            barcode_data = json.dumps(barcode_data)
+
         response = self.post(
             '/barcode/',
             {
-                'barcode': barcode_data,
+                'barcode': str(barcode_data),
             }
         )
 
