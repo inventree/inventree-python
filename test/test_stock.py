@@ -229,7 +229,7 @@ class StockTest(InvenTreeTestCase):
             # Perform lookup based on 'internal' barcode
             response = self.api.scanBarcode(
                 {
-                    'stockitem': item.pk,
+                    "stockitem": item.pk,
                 }
             )
 
