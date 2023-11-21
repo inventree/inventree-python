@@ -6,9 +6,9 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
-from inventree.label import LabelPart, LabelStock, LabelLocation
-from inventree.part import Part
-from inventree.stock import StockItem, StockLocation
+from inventree.label import LabelPart, LabelStock, LabelLocation  # noqa: E402
+from inventree.part import Part  # noqa: E402
+from inventree.stock import StockItem, StockLocation  # noqa: E402
 
 
 class LabelTest(InvenTreeTestCase):
