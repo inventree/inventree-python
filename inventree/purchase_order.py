@@ -188,7 +188,7 @@ class PurchaseOrderLineItem(
         """
 
         if quantity is None:
-            # Substract number of already received lines from the order quantity
+            # Subtract number of already received lines from the order quantity
             quantity = self.quantity - self.received
 
         if location is None:

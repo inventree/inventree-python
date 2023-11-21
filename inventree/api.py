@@ -168,7 +168,7 @@ class InvenTreeAPI(object):
         try:
             response = self.get('/user/me/')
         except requests.exceptions.HTTPError as e:
-            logger.fatal(f"Athentication error: {str(type(e))}")
+            logger.fatal(f"Authentication error: {str(type(e))}")
             return False
         except Exception as e:
             logger.fatal(f"Unhandled server error: {str(type(e))}")

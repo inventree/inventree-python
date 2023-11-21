@@ -9,7 +9,16 @@ logger = logging.getLogger('inventree')
 
 
 class LabelPrintingMixin:
-    """Mixin class for label printing"""
+    """Mixin class for label printing.
+    
+    Classes which implement this mixin should define the following attributes:
+
+    LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
+    LABELITEM: The name of the label item (e.g. 'parts', 'items', 'locations')
+    """
+
+    LABELNAME = ''
+    LABELITEM = ''
     
     def printlabel(self, label, plugin=None, destination=None, *args, **kwargs):
         """Print the label belonging to the given item.
@@ -44,13 +53,14 @@ class LabelPrintingMixin:
 
         # If API version less than 130, file download is provided directly
         if self._api.api_version < 130 and plugin is None:
-            download_url = URL
+            # Ensure we prefix the URL with '/api'
+            download_url = f"/api{URL}"
         else:
             # Perform API request, get response
             response = self._api.get(URL, params=params)
             download_url = response.get('file', None)
 
-        # Label file is availble for download
+        # Label file is available for download
         if download_url and destination is not None:
             if os.path.exists(destination) and os.path.isdir(destination):
                 # No file name given, construct one

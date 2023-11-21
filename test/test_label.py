@@ -3,13 +3,12 @@
 import os
 import sys
 
-from test_api import InvenTreeTestCase  # noqa: E402
-from inventree.label import LabelPart, LabelStock, LabelLocation
-from inventree.part import Part
-from inventree.stock import StockItem, StockLocation
-
-
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+from test_api import InvenTreeTestCase  # noqa: E402
+from inventree.label import LabelPart, LabelStock, LabelLocation  # noqa: E402
+from inventree.part import Part  # noqa: E402
+from inventree.stock import StockItem, StockLocation  # noqa: E402
 
 
 class LabelTest(InvenTreeTestCase):
@@ -71,9 +70,10 @@ class LabelTest(InvenTreeTestCase):
         lbl_part = LabelPart.list(self.api)[0]
 
         # Attempt to print to file - use label object
-        prt.printlabel(label=lbl_part, plugin=None, destination="partlabel_1.pdf")
+        self.assertTrue(prt.printlabel(label=lbl_part, plugin=None, destination="partlabel_1.pdf"))
+
         # Attempt to print to file - use label ID directly
-        prt.printlabel(label=lbl_part.pk, plugin=None, destination="partlabel_2.pdf")
+        self.assertTrue(prt.printlabel(label=lbl_part.pk, plugin=None, destination="partlabel_2.pdf"))
 
         # Make sure the files exist
         self.assertTrue(os.path.isfile("partlabel_1.pdf"))
