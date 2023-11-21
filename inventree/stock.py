@@ -241,7 +241,12 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
         else:
             quantity = kwargs.get('quantity', 1)
         
-        kwargs['quantity'] = kwargs.get('quantity', quantity)
+        if self._api.api_version >= 148:
+            kwargs['quantity'] = kwargs.get('quantity', quantity)
+        else:
+            # Note that the 'quantity' parameter is not supported in API versions < 148
+            kwargs.pop('quantity')
+
         kwargs['stock_item'] = item
 
         url = f"stock/{self.pk}/install/"

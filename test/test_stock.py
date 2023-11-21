@@ -448,12 +448,15 @@ class StockAdjustTest(InvenTreeTestCase):
 
         self.assertIsNone(child_stock.belongs_to)
 
-        # Attempt to install with incorrect quantity
-        with self.assertRaises(requests.exceptions.HTTPError):
-            parent_stock.installStock(child_stock, quantity=child_stock.quantity * 2)
+        # The following checks only apply to API version 148 or higher
+        # Refer to the InvenTree API version notes for more information
+        if self.api.api_version >= 148:
+            # Attempt to install with incorrect quantity
+            with self.assertRaises(requests.exceptions.HTTPError):
+                parent_stock.installStock(child_stock, quantity=child_stock.quantity * 2)
 
-        with self.assertRaises(requests.exceptions.HTTPError):
-            parent_stock.installStock(child_stock, quantity=-100)
+            with self.assertRaises(requests.exceptions.HTTPError):
+                parent_stock.installStock(child_stock, quantity=-100)
 
         # install the *entire* child item into the parent
         parent_stock.installStock(child_stock, quantity=child_stock.quantity)
