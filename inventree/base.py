@@ -454,7 +454,7 @@ class MetadataMixin:
     """
 
     @property
-    def metdata_url(self):
+    def metadata_url(self):
         return os.path.join(self._url, "metadata/")
 
     def getMetadata(self):
@@ -465,7 +465,7 @@ class MetadataMixin:
                 logger.error("API version 49 or newer required to access instance metadata")
                 return {}
 
-            response = self._api.get(self.metdata_url)
+            response = self._api.get(self.metadata_url)
 
             return response['metadata']
         else:
@@ -490,14 +490,14 @@ class MetadataMixin:
 
             if overwrite:
                 return self._api.put(
-                    self.metdata_url,
+                    self.metadata_url,
                     data={
                         "metadata": data,
                     }
                 )
             else:
                 return self._api.patch(
-                    self.metdata_url,
+                    self.metadata_url,
                     data={
                         "metadata": data
                     }

@@ -12,7 +12,7 @@ class SalesOrder(
     inventree.base.InventreeObject,
     inventree.base.StatusMixin
 ):
-    """ Class respresenting the SalesOrder database model """
+    """ Class representing the SalesOrder database model """
 
     URL = 'order/so'
 

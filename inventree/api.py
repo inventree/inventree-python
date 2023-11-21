@@ -44,7 +44,6 @@ class InvenTreeAPI(object):
             username - Login username
             password - Login password
             token - Authentication token (if provided, username/password are ignored)
-            token_name - Name of the token to request (default = 'inventree-python')
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
             timeout - Set timeout to use (in seconds). Default: 10
@@ -64,7 +63,6 @@ class InvenTreeAPI(object):
         self.username = kwargs.get('username', os.environ.get('INVENTREE_API_USERNAME', None))
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
-        self.token_name = kwargs.get('token_name', 'inventree-python')
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
 
@@ -73,8 +71,6 @@ class InvenTreeAPI(object):
 
         self.auth = None
         self.connected = False
-
-        logger.setLevel(logging.DEBUG if self.verbose else logging.INFO)
 
         if kwargs.get('connect', True):
             self.connect()
@@ -153,7 +149,7 @@ class InvenTreeAPI(object):
         url = urljoin(self.api_url, endpoint_url)
 
         # Ensure the API URL ends with a trailing slash
-        if not url.endswith('/') and '?' not in url:
+        if not url.endswith('/'):
             url += '/'
 
         return url
@@ -171,12 +167,13 @@ class InvenTreeAPI(object):
 
         try:
             response = self.get('/user/me/')
-        except Exception:
+        except requests.exceptions.HTTPError as e:
+            logger.fatal(f"Authentication error: {str(type(e))}")
             return False
-        
-        if 'username' not in response:
-            logger.fatal("Username not returned by server")
-            return False
+        except Exception as e:
+            logger.fatal(f"Unhandled server error: {str(type(e))}")
+            # Re-throw the exception
+            raise e
 
         # set user_name if not initially set
         if not self.username:
@@ -239,7 +236,7 @@ class InvenTreeAPI(object):
 
         if not self.username or not self.password:
             raise AttributeError('Supply username and password to request token')
-        
+
         logger.info("Requesting auth token from server...")
 
         if not self.connected:
@@ -248,14 +245,11 @@ class InvenTreeAPI(object):
 
         # Request an auth token from the server
         try:
-            url = '/user/token/'
-            if self.token_name:
-                url += f'?name={self.token_name}'
-            response = self.get(url)
+            response = self.get('/user/token/')
         except Exception as e:
             logger.error(f"Error requesting token: {str(type(e))}")
             return None
-        
+
         if 'token' not in response:
             logger.error(f"Token not returned by server: {response}")
             return None
@@ -336,29 +330,18 @@ class InvenTreeAPI(object):
         # Send request to server!
         try:
             response = methods[method](api_url, **payload)
-            # response.raise_for_status()
-        except Timeout:
-            raise requests.exceptions.Timeout(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
-        except Exception as err:
+        except Timeout as e:
+            # Re-throw Timeout, and add a message to the log
+            logger.critical(f"Server timed out during api.request - {method} @ {api_url}. Timeout {payload['timeout']} s.")
+            raise e
+        except Exception as e:
             # Re-thrown any caught errors, and add a message to the log
-            logger.exception(f"{str(err.__class__.__name__)} error - {method} @ {api_url} (status {err.response.status_code if err.response else 'None'})")
-
-            try:
-                data = response.json()
-
-                if type(data) is dict:
-                    for k, v in err.response.json().items():
-                        logger.error(" - %s: %s", k, v)
-                else:
-                    logger.error(" - %s", data)
-            except (UnboundLocalError, AttributeError):
-                # No response object available
-                pass
-
-            raise err
+            logger.critical(f"Error at api.request - {method} @ {api_url}")
+            raise e
 
         if response is None:
-            raise requests.exceptions.HTTPError(f"Null response - {method} '{api_url}'")
+            logger.error(f"Null response - {method} '{api_url}'")
+            return None
 
         logger.info(f"Request: {method} {api_url} - {response.status_code}")
 
