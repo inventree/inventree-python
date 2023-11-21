@@ -7,7 +7,7 @@ logger = logging.getLogger('inventree')
 
 
 class CurrencyManager(object):
-    """Class for managing InvenTree currency suppport"""
+    """Class for managing InvenTree currency support"""
 
     # Currency API endpoint
     CURRENCY_ENDPOINT = 'currency/exchange/'

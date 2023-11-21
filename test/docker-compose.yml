@@ -10,7 +10,7 @@ services:
 
   inventree-py-test-server:
     container_name: inventree-py-test-server
-    image: inventree/inventree:latest
+    image: inventree/inventree:0.12.8
     ports:
       # Expose internal port 8000 on external port 12345
       - 12345:8000

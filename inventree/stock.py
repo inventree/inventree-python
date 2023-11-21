@@ -387,7 +387,7 @@ class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.Metadat
             'value': value,
         }
 
-        # Send the data to the serever
+        # Send the data to the server
         if api.post(cls.URL, data, files=files):
             logging.info(f"Uploaded test result: '{test}'")
             ret = True
