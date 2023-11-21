@@ -137,6 +137,8 @@ class InvenTreeTestCase(unittest.TestCase):
             SERVER,
             username=USERNAME, password=PASSWORD,
             timeout=30,
+            token_name='python-test',
+            use_token_auth=True
         )
 
 

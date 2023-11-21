@@ -154,6 +154,10 @@ def test(c, source=None, update=False, reset=False, debug=False):
 
     # If a source file is provided, check that it actually exists
     if source:
+
+        if not source.endswith('.py'):
+            source += '.py'
+
         if not os.path.exists(source):
             source = os.path.join('test', source)
         
