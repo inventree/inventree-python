@@ -46,7 +46,7 @@ class ReportClassesTest(InvenTreeTestCase):
 
         testscount = 0
 
-        for RepClass, ItemModel in zip(
+        for ItemModel, RepClass  in zip(
                 (BomItem, Build, PurchaseOrder, SalesOrder, ReturnOrder, StockLocation, StockItemTestResult),
                 (ReportBoM, ReportBuild, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest)
         ):
