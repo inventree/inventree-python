@@ -348,10 +348,19 @@ class StockItemTracking(inventree.base.InventreeObject):
     URL = 'stock/track'
 
 
-class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class StockItemTestResult(
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject
+):
     """Class representing a StockItemTestResult object"""
 
     URL = 'stock/test'
+
+    # Setup for Report mixin
+    REPORTNAME = 'test'
+    REPORTITEM = 'item'
 
     def getTestKey(self):
         return inventree.part.PartTestTemplate.generateTestKey(self.test)
