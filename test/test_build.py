@@ -9,9 +9,9 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.build import Build, BuildAttachment  # noqa: E402
-
 from test_api import InvenTreeTestCase  # noqa: E402
+
+from inventree.build import Build, BuildAttachment  # noqa: E402
 
 
 class BuildOrderTest(InvenTreeTestCase):
@@ -42,19 +42,19 @@ class BuildOrderTest(InvenTreeTestCase):
             )
         else:
             build = builds[-1]
-        
+
         return build
 
     def test_list_builds(self):
-        
+
         build = self.get_build()
-        
+
         self.assertIsNotNone(build)
 
         builds = Build.list(self.api)
 
         self.assertGreater(len(builds), 0)
-    
+
     def test_build_attachment(self):
         """
         Test that we can upload an attachment against a Build

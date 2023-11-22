@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
-import logging
 import json
+import logging
+import os
 
 from . import api as inventree_api
-
 
 INVENTREE_PYTHON_VERSION = "0.13.0"
 
@@ -18,7 +17,7 @@ class InventreeObject(object):
 
     # API URL (required) for the particular model type
     URL = ""
-    
+
     # Minimum server version for the particular model type
     REQUIRED_API_VERSION = None
 
@@ -45,13 +44,13 @@ class InventreeObject(object):
         # extract it from the provided dataset
         if pk is None and data:
             pk = data.get('pk', None)
-        
+
         # Convert to integer
         try:
             pk = int(pk)
         except Exception:
             raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
-        
+
         if pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
@@ -70,7 +69,7 @@ class InventreeObject(object):
     @classmethod
     def checkApiVersion(cls, api):
         """Check if the API version supports this particular model.
-        
+
         Raises:
             NotSupportedError if the server API version is too 'old'
         """
@@ -150,7 +149,7 @@ class InventreeObject(object):
             val = int(val)
         except ValueError:
             pass
-    
+
         return val
 
     @classmethod
@@ -164,7 +163,7 @@ class InventreeObject(object):
             data.pop('pk')
 
         response = api.post(cls.URL, data, **kwargs)
-        
+
         if response is None:
             logger.error("Error creating new object")
             return None
@@ -230,13 +229,13 @@ class InventreeObject(object):
         """
 
         self.checkApiVersion(self._api)
-        
+
         # If 'data' is not specified, then use *all* the data
         if data is None:
             data = self._data
-        
+
         if self._api:
-            
+
             # Default method used is PATCH (partial update)
             if method.lower() == 'patch':
                 response = self._api.patch(self._url, data, files=files)
@@ -253,7 +252,7 @@ class InventreeObject(object):
             self.reload()
 
         return response
-    
+
     def is_valid(self):
         """
         Test if this object is 'valid' - it has received data from the server.
@@ -271,10 +270,10 @@ class InventreeObject(object):
 
         if data is None:
             return False
-        
+
         if len(data) == 0:
             return False
-        
+
         return True
 
     def reload(self):
@@ -342,7 +341,7 @@ class BulkDeleteMixin:
 
         Returns:
             API response object
-        
+
         Throws:
             NotImplementError: The server API version is too old (requires v58)
             ValueError: Neither items or filters are supplied
@@ -354,12 +353,12 @@ class BulkDeleteMixin:
 
         if not items and not filters:
             raise ValueError("Must supply either 'items' or 'filters' argument")
-        
+
         data = {}
 
         if items:
             data['items'] = items
-        
+
         if filters:
             data['filters'] = filters
 
@@ -372,7 +371,7 @@ class BulkDeleteMixin:
 class Attachment(BulkDeleteMixin, InventreeObject):
     """
     Class representing a file attachment object
-    
+
     Multiple sub-classes exist, representing various types of attachment models in the database.
     """
 
@@ -414,7 +413,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
                         'attachment': (os.path.basename(attachment), fo),
                     }
                 )
-        
+
         else:
             # Assumes a StringIO or BytesIO like object
             name = getattr(attachment, 'name', 'filename')
@@ -430,7 +429,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             logger.info(f"File uploaded to {cls.URL}")
         else:
             logger.error(f"File upload failed at {cls.URL}")
-        
+
         return response
 
     def download(self, destination, **kwargs):
@@ -473,7 +472,7 @@ class MetadataMixin:
 
     def setMetadata(self, data, overwrite=False):
         """Write metadata to this particular model.
-        
+
         Arguments:
             data: The data to be written. Must be a dict object
             overwrite: If true, provided data replaces existing data. If false (default) data is merged with any existing data.
@@ -558,7 +557,7 @@ class StatusMixin:
     - complete
     - cancel
     on supported items.
-    
+
     Other functions, such as
     - ship
     - finish
@@ -597,11 +596,11 @@ class StatusMixin:
         return response
 
     def complete(self, **kwargs):
-        
+
         return self._statusupdate(status='complete', **kwargs)
 
     def cancel(self, **kwargs):
-        
+
         return self._statusupdate(status='cancel', **kwargs)
 
 
@@ -614,14 +613,14 @@ class BarcodeMixin:
     @classmethod
     def barcodeModelType(cls):
         """Return the model type name required for barcode assignment.
-        
+
         Default value is the lower-case class name ()
         """
         return cls.__name__.lower()
 
     def assignBarcode(self, barcode_data: str, reload=True):
         """Assign an arbitrary barcode to this object (in the database).
-        
+
         Arguments:
             barcode_data: A string containing arbitrary barcode data
         """

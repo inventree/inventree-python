@@ -12,14 +12,15 @@ except ImportError:
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
+from test_api import InvenTreeTestCase  # noqa: E402
+
 from inventree import company  # noqa: E402
 from inventree.part import Part  # noqa: E402
-from test_api import InvenTreeTestCase  # noqa: E402
 
 
 class ContactTest(InvenTreeTestCase):
     """Tests for the 'Contact' model"""
-    
+
     def test_contact_create(self):
         """Test that we can create a new contact"""
 
@@ -259,7 +260,7 @@ class CompanyTest(InvenTreeTestCase):
 
         with self.assertRaises(FileNotFoundError):
             c.uploadImage('ddddummy_image.png')
-        
+
         with self.assertRaises(TypeError):
             c.uploadImage(1)
 

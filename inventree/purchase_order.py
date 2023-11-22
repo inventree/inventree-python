@@ -3,8 +3,8 @@ PurchaseOrder models
 """
 
 import inventree.base
-import inventree.part
 import inventree.company
+import inventree.part
 
 
 class PurchaseOrder(
@@ -55,7 +55,7 @@ class PurchaseOrder(
 
     def getAttachments(self):
         return PurchaseOrderAttachment.list(self._api, order=self.pk)
-    
+
     def uploadAttachment(self, attachment, comment=''):
         return PurchaseOrderAttachment.upload(
             self._api,

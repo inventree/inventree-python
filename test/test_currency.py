@@ -22,7 +22,7 @@ class CurrencyTest(InvenTreeTestCase):
 
         self.assertIsNotNone(mgr.base_currency)
         self.assertIsNotNone(mgr.exchange_rates)
-    
+
     def test_base_currency(self):
         """Test call to 'getBaseCurrency'"""
 
@@ -31,7 +31,7 @@ class CurrencyTest(InvenTreeTestCase):
 
         self.assertEqual(base, 'USD')
         self.assertIsNotNone(mgr.exchange_rates)
-    
+
     def test_exchange_rates(self):
         """Test call to 'getExchangeRates'"""
 

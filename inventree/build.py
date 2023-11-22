@@ -14,7 +14,7 @@ class Build(
 
     def getAttachments(self):
         return BuildAttachment.list(self._api, build=self.pk)
-    
+
     def uploadAttachment(self, attachment, comment=''):
         return BuildAttachment.upload(
             self._api,
