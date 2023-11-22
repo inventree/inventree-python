@@ -3,8 +3,8 @@ Sales Order models
 """
 
 import inventree.base
-import inventree.part
 import inventree.company
+import inventree.part
 
 
 class SalesOrder(
@@ -55,7 +55,7 @@ class SalesOrder(
 
     def getAttachments(self):
         return SalesOrderAttachment.list(self._api, order=self.pk)
-    
+
     def uploadAttachment(self, attachment, comment=''):
         return SalesOrderAttachment.upload(
             self._api,
@@ -63,10 +63,10 @@ class SalesOrder(
             comment=comment,
             order=self.pk,
         )
-    
+
     def getShipments(self, **kwargs):
         """ Return the shipments associated with this order """
-        
+
         return SalesOrderShipment.list(self._api, order=self.pk, **kwargs)
 
     def addShipment(self, reference, **kwargs):
@@ -102,14 +102,14 @@ class SalesOrderLineItem(
     def allocateToShipment(self, shipment, stockitems=None, quantity=None):
         """
         Assign the items of this line to the given shipment.
-        
+
         By default, assign the total quantity using the first stock
         item(s) found. As many items as possible, up to the quantity in
         sales order, are assigned.
-        
+
         To limit which stock items can be used, supply a list of stockitems
         to use in the argument stockitems.
-        
+
         To limit how many items are assigned, supply a quantity to the
         argument quantity. This can also be used to over-assign the items,
         as no check for the amounts in the sales order is performed.
@@ -144,11 +144,11 @@ class SalesOrderLineItem(
         items = list()
 
         for SI in stockitems:
-            
+
             # Check if we are done
             if required_amount <= 0:
                 continue
-            
+
             # Check that this item has available stock
             if SI.quantity - SI.allocated > 0:
                 thisitem = {
@@ -211,7 +211,7 @@ class SalesOrderShipment(
     def allocateItems(self, items=[]):
         """
         Function to allocate items to the current shipment
-        
+
         items is expected to be a list containing dicts, one for each item
         to be assigned. Each dict should contain three parameters, as
         follows:

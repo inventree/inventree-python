@@ -4,11 +4,10 @@ import logging
 import re
 
 import inventree.base
-import inventree.stock
-import inventree.company
 import inventree.build
+import inventree.company
 import inventree.label
-
+import inventree.stock
 
 logger = logging.getLogger('inventree')
 
@@ -21,7 +20,7 @@ class PartCategoryParameterTemplate(inventree.base.InventreeObject):
     def getCategory(self):
         """Return the referenced PartCategory instance"""
         return PartCategory(self._api, self.category)
-    
+
     def getTemplate(self):
         """Return the referenced ParameterTemplate instance"""
         return ParameterTemplate(self._api, self.parameter_template)
@@ -116,7 +115,7 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
         """
 
         return InternalPrice.list(self._api, part=self.pk)
-    
+
     def setInternalPrice(self, quantity: int, price: float):
         """
         Set the internal price for this part
@@ -182,7 +181,7 @@ class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObj
 
     def getTestKey(self):
         return PartTestTemplate.generateTestKey(self.test_name)
-    
+
 
 class BomItem(inventree.base.InventreeObject, inventree.base.MetadataMixin):
     """ Class representing the BomItem database model """
@@ -209,8 +208,8 @@ class InternalPrice(inventree.base.InventreeObject):
 
         # Send the data to the server
         return api.post(cls.URL, data)
-    
-    
+
+
 class PartRelated(inventree.base.InventreeObject):
     """ Class representing a relationship between parts"""
 

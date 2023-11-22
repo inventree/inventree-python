@@ -5,10 +5,10 @@ Before, pypi release, ensure that the release tag matches the inventree version 
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import sys
-import re
-import os
 import argparse
+import os
+import re
+import sys
 
 if __name__ == '__main__':
 

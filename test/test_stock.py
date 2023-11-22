@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
 import sys
 
+import requests
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.stock import StockItem, StockLocation  # noqa: E402
-from inventree import part  # noqa: E402
-from inventree import company  # noqa: E402
-
 from test_api import InvenTreeTestCase  # noqa: E402
+
+from inventree import company  # noqa: E402
+from inventree import part  # noqa: E402
+from inventree.stock import StockItem, StockLocation  # noqa: E402
 
 
 class StockLocationTest(InvenTreeTestCase):
@@ -19,7 +19,7 @@ class StockLocationTest(InvenTreeTestCase):
     Tests for the StockLocation model
 
     Fixture data can be found in the InvenTree source:
-    
+
     - InvenTree/stock/fixtures/location.yaml
 
     """
@@ -28,7 +28,7 @@ class StockLocationTest(InvenTreeTestCase):
         """
         Test the LIST API endpoint for the StockLocation model
         """
-        
+
         locs = StockLocation.list(self.api)
         self.assertGreaterEqual(len(locs), 4)
 
@@ -103,7 +103,7 @@ class StockLocationTest(InvenTreeTestCase):
                     "location": location.pk,
                 }
             )
-        
+
             items = location.getStockItems(part=1)
             self.assertEqual(len(items), n + i + 1)
 
@@ -151,7 +151,7 @@ class StockTest(InvenTreeTestCase):
     Test alternative ways of getting StockItem objects.
 
     Fixture data can be found in the InvenTree source:
-    
+
     - InvenTree/stock/fixtures/stock.yaml
     """
 
@@ -169,11 +169,11 @@ class StockTest(InvenTreeTestCase):
         # Request via the Part instance (results should be the same!)
         items = part.Part(self.api, 1).getStockItems()
         self.assertEqual(len(items), n)
-        
+
     def test_get_stock_item(self):
         """
         StockItem API tests.
-        
+
         Refer to fixture data in InvenTree/stock/fixtures/stock.yaml
         """
 
@@ -188,7 +188,7 @@ class StockTest(InvenTreeTestCase):
         # Move the item to a known location
         item.transferStock(3)
         item.reload()
-        
+
         location = item.getLocation()
 
         self.assertEqual(type(location), StockLocation)
@@ -285,7 +285,7 @@ class StockAdjustTest(InvenTreeTestCase):
         # Check error conditions
         with self.assertRaises(requests.exceptions.HTTPError):
             item.countStock('not a number')
-    
+
         with self.assertRaises(requests.exceptions.HTTPError):
             item.countStock(-1)
 
@@ -345,7 +345,7 @@ class StockAdjustTest(InvenTreeTestCase):
         for loc in [-1, 'qqq', 99999, None]:
             with self.assertRaises(requests.exceptions.HTTPError):
                 item.transferStock(loc)
-        
+
         # Attempt to transfer with an invalid quantity
         for q in [-1, None, 'hhhh']:
             with self.assertRaises(requests.exceptions.HTTPError):

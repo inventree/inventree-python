@@ -6,11 +6,11 @@ except ImportError:
     from invoke import task
 
 import os
+import sys
 import time
 
 import requests
 from requests.auth import HTTPBasicAuth
-import sys
 
 
 @task
@@ -46,7 +46,7 @@ def update_image(c, debug=True, reset=True):
     """
 
     print("Pulling latest InvenTree image from docker hub (maybe grab a coffee!)")
-    
+
     hide = None if debug else 'both'
 
     c.run("docker-compose -f test/docker-compose.yml pull", hide=hide)
@@ -76,7 +76,7 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
         except Exception as e:
             if debug:
                 print("Error:", str(e))
-        
+
         if response is None:
 
             if timeout > 0:
@@ -84,7 +84,7 @@ def check_server(c, host="http://localhost:12345", username="testuser", password
                     print(f"No response from server. {timeout} seconds remaining")
                 timeout -= 1
                 time.sleep(1)
-        
+
             else:
                 return False
 
@@ -123,7 +123,7 @@ def start_server(c, debug=False):
     while not check_server(c, debug=False) and count > 0:
         count -= 1
         time.sleep(1)
-    
+
     if count == 0:
         print("No response from InvenTree server")
         sys.exit(1)
@@ -160,7 +160,7 @@ def test(c, source=None, update=False, reset=False, debug=False):
 
         if not os.path.exists(source):
             source = os.path.join('test', source)
-        
+
         if not os.path.exists(source):
             print(f"Error: Source file '{source}' does not exist")
             sys.exit(1)
@@ -172,7 +172,7 @@ def test(c, source=None, update=False, reset=False, debug=False):
     if reset:
         stop_server(c, debug=debug)
         reset_data(c, debug=debug)
-    
+
     # Launch the InvenTree server (in a docker container)
     start_server(c)
 

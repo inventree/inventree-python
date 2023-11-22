@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
 import sys
 import unittest
 
+import requests
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree import base  # noqa: E402
 from inventree import api  # noqa: E402
+from inventree import base  # noqa: E402
 from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
-
 
 SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:12345')
 USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'testuser')
@@ -100,7 +100,7 @@ class Unauthenticated(unittest.TestCase):
 
     def test_file_download(self):
         """
-        Attemtping to download a file while unauthenticated should raise an error
+        Attempting to download a file while unauthenticated should raise an error
         """
 
         # Downloading without auth = unauthorized error (401)
@@ -155,7 +155,7 @@ class InvenTreeAPITest(InvenTreeTestCase):
         self.assertIn('instance', details)
 
         self.assertIn('apiVersion', details)
-        
+
         api_version = int(details['apiVersion'])
 
         self.assertTrue(api_version >= self.api.getMinApiVersion())
@@ -230,7 +230,7 @@ class TemplateTest(InvenTreeTestCase):
 
         test_templates = widget.getTestTemplates()
         self.assertGreaterEqual(len(test_templates), 5)
-        
+
         keys = [test.key for test in test_templates]
 
         self.assertIn('teststrengthofchair', keys)
@@ -256,7 +256,7 @@ class TemplateTest(InvenTreeTestCase):
         self.assertEqual(len(widget.getTestTemplates()), n + 1)
 
     def test_add_result(self):
-        
+
         # Look for a particular serial number
         items = stock.StockItem.list(self.api, serial=1000)
         self.assertEqual(len(items), 1)

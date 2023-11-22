@@ -2,10 +2,12 @@
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.project_code import ProjectCode  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
+
+from inventree.project_code import ProjectCode  # noqa: E402
 
 
 class ProjectCodeTest(InvenTreeTestCase):
@@ -13,7 +15,7 @@ class ProjectCodeTest(InvenTreeTestCase):
 
     def test_project_code_create(self):
         """Test we can create a new project code"""
-            
+
         n = ProjectCode.count(self.api)
 
         ProjectCode.create(self.api, {
@@ -38,7 +40,7 @@ class ProjectCodeTest(InvenTreeTestCase):
                 'code': f'CODE-{idx + n}',
                 'description': f'Description {idx + n}',
             })
-        
+
         # List all codes
         codes = ProjectCode.list(self.api)
 

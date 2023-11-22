@@ -5,13 +5,14 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree.part import Part, InternalPrice  # noqa: E402
 from test_api import InvenTreeTestCase  # noqa: E402
+
+from inventree.part import InternalPrice, Part  # noqa: E402
 
 
 class InternalPriceTest(InvenTreeTestCase):
     """ Test that the InternalPrice related objects can be managed via the API """
-    
+
     def test_fields(self):
         """
         Test field names via OPTIONS request
