@@ -3,8 +3,8 @@ ReturnOrder models
 """
 
 import inventree.base
-import inventree.part
 import inventree.company
+import inventree.part
 import inventree.stock
 import inventree.report
 
