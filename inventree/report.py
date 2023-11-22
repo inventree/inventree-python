@@ -11,8 +11,12 @@ class ReportPrintingMixin:
     REPORTNAME: The name of the report type, as given in the API (e.g. 'bom', 'build', 'po')
     See https://demo.inventree.org/api-doc/#tag/report
     REPORTITEM: The name of items send to the report print endpoint.
-    This is the name of the array of items expected, eg 'build' in:
-    https://demo.inventree.org/api/report/build/?build[]=18
+    This is the name of the array of items expected.
+
+    Example:
+    https://demo.inventree.org/api/report/test/?item[]=205
+        -> REPORTNAME = test
+        -> REPORTITEM = item
     """
 
     REPORTNAME = ''
