@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
 
 import inventree.base
+import inventree.report
 
 
 class Build(
     inventree.base.InventreeObject,
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,
+    inventree.report.ReportPrintingMixin,
 ):
     """ Class representing the Build database model """
 
     URL = 'build'
+
+    # Setup for Report mixin
+    REPORTNAME = 'build'
+    REPORTITEM = 'build'
 
     def getAttachments(self):
         return BuildAttachment.list(self._api, build=self.pk)

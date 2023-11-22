@@ -8,6 +8,7 @@ import inventree.stock
 import inventree.company
 import inventree.build
 import inventree.label
+import inventree.report
 
 
 logger = logging.getLogger('inventree')
@@ -184,10 +185,18 @@ class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObj
         return PartTestTemplate.generateTestKey(self.test_name)
     
 
-class BomItem(inventree.base.InventreeObject, inventree.base.MetadataMixin):
+class BomItem(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+    inventree.report.ReportPrintingMixin,
+):
     """ Class representing the BomItem database model """
 
     URL = 'bom'
+
+    # Setup for Report mixin
+    REPORTNAME = 'bom'
+    REPORTITEM = 'part'
 
 
 class InternalPrice(inventree.base.InventreeObject):

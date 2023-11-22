@@ -8,9 +8,16 @@ import inventree.base
 import inventree.part
 import inventree.label
 import inventree.company
+import inventree.report
 
 
-class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
+class StockLocation(
+    inventree.base.BarcodeMixin,
+    inventree.base.MetadataMixin,
+    inventree.label.LabelPrintingMixin,
+    inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject
+):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -18,6 +25,10 @@ class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, i
     # Setup for Label printing
     LABELNAME = 'location'
     LABELITEM = 'locations'
+
+    # Setup for Report mixin
+    REPORTNAME = 'slr'
+    REPORTITEM = 'location'
 
     def getStockItems(self, **kwargs):
         return StockItem.list(self._api, location=self.pk, **kwargs)
