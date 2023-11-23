@@ -8,9 +8,16 @@ import inventree.base
 import inventree.company
 import inventree.label
 import inventree.part
+import inventree.report
 
 
-class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
+class StockLocation(
+    inventree.base.BarcodeMixin,
+    inventree.base.MetadataMixin,
+    inventree.label.LabelPrintingMixin,
+    inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject
+):
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
@@ -18,6 +25,10 @@ class StockLocation(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, i
     # Setup for Label printing
     LABELNAME = 'location'
     LABELITEM = 'locations'
+
+    # Setup for Report mixin
+    REPORTNAME = 'slr'
+    REPORTITEM = 'location'
 
     def getStockItems(self, **kwargs):
         return StockItem.list(self._api, location=self.pk, **kwargs)
@@ -337,10 +348,19 @@ class StockItemTracking(inventree.base.InventreeObject):
     URL = 'stock/track'
 
 
-class StockItemTestResult(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class StockItemTestResult(
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject
+):
     """Class representing a StockItemTestResult object"""
 
     URL = 'stock/test'
+
+    # Setup for Report mixin
+    REPORTNAME = 'test'
+    REPORTITEM = 'item'
 
     def getTestKey(self):
         return inventree.part.PartTestTemplate.generateTestKey(self.test)

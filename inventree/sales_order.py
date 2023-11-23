@@ -5,16 +5,22 @@ Sales Order models
 import inventree.base
 import inventree.company
 import inventree.part
+import inventree.report
 
 
 class SalesOrder(
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
-    inventree.base.StatusMixin
+    inventree.base.StatusMixin,
+    inventree.report.ReportPrintingMixin,
 ):
     """ Class representing the SalesOrder database model """
 
     URL = 'order/so'
+
+    # Setup for Report mixin
+    REPORTNAME = 'so'
+    REPORTITEM = 'order'
 
     def getCustomer(self):
         """Return the customer associated with this order"""

@@ -5,18 +5,24 @@ ReturnOrder models
 import inventree.base
 import inventree.company
 import inventree.part
+import inventree.report
 import inventree.stock
 
 
 class ReturnOrder(
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
-    inventree.base.StatusMixin
+    inventree.base.StatusMixin,
+    inventree.report.ReportPrintingMixin,
 ):
     """Class representing the ReturnOrder database model"""
 
     URL = 'order/ro'
     REQUIRED_API_VERSION = 104
+
+    # Setup for Report mixin
+    REPORTNAME = 'ro'
+    REPORTITEM = 'order'
 
     def getCustomer(self):
         """Return the customer associated with this order"""

@@ -5,16 +5,22 @@ PurchaseOrder models
 import inventree.base
 import inventree.company
 import inventree.part
+import inventree.report
 
 
 class PurchaseOrder(
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
-    inventree.base.StatusMixin
+    inventree.base.StatusMixin,
+    inventree.report.ReportPrintingMixin,
 ):
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
+
+    # Setup for Report mixin
+    REPORTNAME = 'po'
+    REPORTITEM = 'order'
 
     def getSupplier(self):
         """Return the supplier (Company) associated with this order"""
