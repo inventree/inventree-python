@@ -5,8 +5,8 @@ ReturnOrder models
 import inventree.base
 import inventree.company
 import inventree.part
-import inventree.stock
 import inventree.report
+import inventree.stock
 
 
 class ReturnOrder(
@@ -38,7 +38,7 @@ class ReturnOrder(
     def getLineItems(self, **kwargs):
         """Return line items associated with this order"""
         return ReturnOrderLineItem.list(self._api, order=self.pk, **kwargs)
-    
+
     def addLineItem(self, **kwargs):
         """Create (and return) a new ReturnOrderLineItem against this order"""
         kwargs['order'] = self.pk

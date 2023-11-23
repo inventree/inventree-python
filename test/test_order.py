@@ -9,9 +9,9 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree import part  # noqa: E402
-from inventree import order  # noqa: E402
 from inventree import company  # noqa: E402
+from inventree import order  # noqa: E402
+from inventree import part  # noqa: E402
 from inventree import stock  # noqa: E402
 
 
@@ -101,7 +101,7 @@ class POTest(InvenTreeTestCase):
             if _order.pk == po.pk:
                 found = True
                 break
-        
+
         self.assertTrue(found)
 
         # Should not be any line-items yet!
@@ -123,7 +123,7 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.getOrder().pk, po.pk)
 
             self.assertIsNotNone(line)
-        
+
             # Assert that a new line item has been created
             self.assertEqual(len(po.getLineItems()), idx)
 
@@ -137,33 +137,33 @@ class POTest(InvenTreeTestCase):
             self.assertEqual(line.quantity, idx + 1)
             self.assertEqual(line.received, 0)
             line.delete()
-        
+
         # Assert length is now one less than before
         self.assertEqual(len(po.getLineItems()), 0)
-        
+
         # Should not be any extra-line-items yet!
         extraitems = po.getExtraLineItems()
         self.assertEqual(len(extraitems), 0)
-        
+
         # Let's add some!
         extraline = po.addExtraLineItem(quantity=1, reference="Transport costs", notes="Extra line item added from Python interface", price=10, price_currency="EUR")
-        
+
         self.assertEqual(extraline.getOrder().pk, po.pk)
 
         self.assertIsNotNone(extraline)
-        
+
         # Assert that a new line item has been created
         self.assertEqual(len(po.getExtraLineItems()), 1)
-        
+
         # Assert that we can delete the item again
         extraline.delete()
-        
+
         # Now there should be 0 lines left
         self.assertEqual(len(po.getExtraLineItems()), 0)
 
     def test_order_cancel(self):
         """Test that we can cancel a PurchaseOrder via the API"""
-        
+
         n = len(order.PurchaseOrder.list(self.api)) + 1
         ref = f"PO-{n}"
 
@@ -230,7 +230,7 @@ class POTest(InvenTreeTestCase):
         # Try to complete the order (should fail, as lines have not been received)
         with self.assertRaises(HTTPError):
             po.complete()
-    
+
         po.reload()
 
         # Check that order status has *not* changed
@@ -326,7 +326,7 @@ class POTest(InvenTreeTestCase):
         # Try to complete the order (should fail, as lines have not been received)
         with self.assertRaises(HTTPError):
             po.complete()
-    
+
         po.reload()
 
         # Check that order status has *not* changed
@@ -401,7 +401,7 @@ class SOTest(InvenTreeTestCase):
         """
         Check that the OPTIONS endpoint provides field names for this model
         """
-        
+
         names = [
             'customer',
             'description',
@@ -522,7 +522,7 @@ class SOTest(InvenTreeTestCase):
         pk = response['pk']
 
         attachment = order.SalesOrderAttachment(self.api, pk=pk)
-        
+
         self.assertEqual(attachment.order, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 
@@ -540,7 +540,7 @@ class SOTest(InvenTreeTestCase):
 
         # Add some line items to the SalesOrder
         for p in part.Part.list(self.api, is_template=False, salable=True, limit=5):
-            
+
             # Create a line item matching the part
             order.SalesOrderLineItem.create(
                 self.api,
@@ -642,7 +642,7 @@ class SOTest(InvenTreeTestCase):
 
         # Remember for later test
         allocated_quantities = dict()
-        
+
         # Assign each line item to this shipment
         for si in so.getLineItems():
             # If there is no stock available, delete this line
@@ -688,7 +688,7 @@ class SOTest(InvenTreeTestCase):
 
     def test_order_cancel(self):
         """Test cancel sales order"""
-        
+
         so = order.SalesOrder.create(self.api, {
             'customer': 4,
             "description": "Selling some more stuff",
@@ -720,7 +720,7 @@ class ROTest(InvenTreeTestCase):
 
         for name in names:
             self.assertIn(name, field_names)
-        
+
     def test_ro_create(self):
         """Test that we can create a ReturnOrder"""
 
@@ -753,7 +753,7 @@ class ROTest(InvenTreeTestCase):
                 reference=f"ref {idx}",
                 notes="my notes",
             )
-        
+
         self.assertEqual(len(ro.getExtraLineItems()), 3)
 
         for line in ro.getExtraLineItems():
@@ -762,7 +762,7 @@ class ROTest(InvenTreeTestCase):
 
         self.assertEqual(ro.getCustomer().pk, 4)
         self.assertIsNone(ro.getContact())
-    
+
         # Test that we can "edit" the order
         self.assertEqual(ro.reference, ref)
 
@@ -779,10 +779,10 @@ class ROTest(InvenTreeTestCase):
         # Should throw an error, as it no longer exists
         with self.assertRaises(HTTPError):
             ro.reload()
-    
+
     def test_ro_cancel(self):
         """Test that an order can be cancelled"""
-        
+
         ro = order.ReturnOrder.create(self.api, data={
             'description': 'To be cancelled',
             'customer': 4,
@@ -793,10 +793,10 @@ class ROTest(InvenTreeTestCase):
         ro.reload()
         # Order should now be 'cancelled'
         self.assertEqual(ro.status, 40)
-    
+
     def test_ro_issue(self):
         """Test that an order can be issued"""
-    
+
         ro = order.ReturnOrder.create(self.api, data={
             'description': 'To be issued',
             'customer': 4,

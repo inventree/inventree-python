@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 
 import inventree.base
-import os
 
 logger = logging.getLogger('inventree')
 
 
 class LabelPrintingMixin:
     """Mixin class for label printing.
-    
+
     Classes which implement this mixin should define the following attributes:
 
     LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
@@ -19,19 +19,19 @@ class LabelPrintingMixin:
 
     LABELNAME = ''
     LABELITEM = ''
-    
+
     def printlabel(self, label, plugin=None, destination=None, *args, **kwargs):
         """Print the label belonging to the given item.
-        
+
         Set the label with 'label' argument, as the ID of the corresponding
         label. A corresponding label object can also be given.
-        
+
         If a plugin is given, the plugin will determine
         how the label is printed, and a message is returned.
-        
+
         Otherwise, if a destination is given, the file will be downloaded to 'destination'.
         Use overwrite=True to overwrite an existing file.
-        
+
         If neither plugin nor destination is given, nothing will be done
         """
 

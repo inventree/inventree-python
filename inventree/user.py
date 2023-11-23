@@ -4,7 +4,6 @@ import logging
 
 import inventree.base
 
-
 logger = logging.getLogger('inventree')
 
 

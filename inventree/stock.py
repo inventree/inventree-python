@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import os
 import logging
+import os
 
 import inventree.api
 import inventree.base
-import inventree.part
-import inventree.label
 import inventree.company
+import inventree.label
+import inventree.part
 import inventree.report
 
 
@@ -41,7 +41,7 @@ class StockLocation(
 
         if self.parent is None:
             return None
-        
+
         return StockLocation(self._api, pk=self.parent)
 
     def getChildLocations(self, **kwargs):
@@ -63,13 +63,13 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
     @classmethod
     def adjustStockItems(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
         """Perform a generic stock 'adjustment' action.
-        
+
         Arguments:
             api: InvenTreeAPI instance
             method: Adjument method, e.g. 'count' / 'add'
             items: List of items to include in the adjustment (see below)
             kwargs: Additional kwargs to send with the adjustment
-        
+
         Items:
             Each 'item' in the 'items' list must be a dict object, containing the following fields:
 
@@ -79,14 +79,14 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
 
         if method not in ['count', 'add', 'remove', 'transfer', 'assign']:
             raise ValueError(f"Stock adjustment method '{method}' not supported")
-        
+
         url = f"stock/{method}/"
 
         data = kwargs
         data['items'] = items
 
         return api.post(url, data=data)
-    
+
     @classmethod
     def countStockItems(cls, api: inventree.api.InvenTreeAPI, items: list, **kwargs):
         """Perform 'count' adjustment for multiple stock items"""
@@ -190,7 +190,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
 
     def transferStock(self, location, quantity=None, **kwargs):
         """Transfer this StockItem into the specified location.
-        
+
         Arguments:
             location: A StockLocation instance or integer ID value
             quantity: Optionally specify quantity to transfer. If None, entire quantity is transferred
@@ -199,7 +199,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
 
         if isinstance(location, StockLocation):
             location = location.pk
-        
+
         if quantity is None:
             quantity = self.quantity
 
@@ -241,7 +241,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
 
         Arguments:
             stockItem: A stockItem instance or integer ID value
-        
+
         kwargs:
             quantity: quantity of installed items
             notes: Optional transaction notes"""
@@ -251,7 +251,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
             item = item.pk
         else:
             quantity = kwargs.get('quantity', 1)
-        
+
         if self._api.api_version >= 148:
             kwargs['quantity'] = kwargs.get('quantity', quantity)
         else:
@@ -289,7 +289,7 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
     def getLocation(self):
         """
         Return the StockLocation associated with this StockItem
-        
+
         Returns None if there is no linked StockItem
         """
 

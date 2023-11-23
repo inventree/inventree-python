@@ -5,15 +5,14 @@ The inventree_api module handles low level requests and authentication
 with the InvenTree database server.
 """
 
-import requests
-import os
 import json
 import logging
-
-from requests.auth import HTTPBasicAuth
-from requests.exceptions import Timeout
+import os
 from urllib.parse import urljoin, urlparse
 
+import requests
+from requests.auth import HTTPBasicAuth
+from requests.exceptions import Timeout
 
 logger = logging.getLogger('inventree')
 
@@ -39,7 +38,7 @@ class InvenTreeAPI(object):
         Args:
             base_url - Base URL for the InvenTree server, including port (if required)
                        e.g. "http://inventree.server.com:8000"
-            
+
         kwargs:
             username - Login username
             password - Login password
@@ -77,7 +76,7 @@ class InvenTreeAPI(object):
 
     def setHostName(self, host):
         """Validate that the provided base URL is valid"""
-        
+
         if host is None:
             raise AttributeError("InvenTreeAPI initialized without providing host address")
 
@@ -86,7 +85,7 @@ class InvenTreeAPI(object):
 
         if not url.scheme:
             raise Exception(f"Host '{host}' supplied without valid scheme")
-        
+
         if not url.netloc or not url.hostname:
             raise Exception(f"Host '{host}' supplied without valid hostname")
 
@@ -308,7 +307,7 @@ class InvenTreeAPI(object):
             auth = None
         else:
             auth = self.auth
-        
+
         payload['headers'] = headers
         payload['auth'] = auth
         payload['proxies'] = proxies
@@ -359,13 +358,13 @@ class InvenTreeAPI(object):
 
             if headers:
                 detail['headers'] = headers
-            
+
             if params:
                 detail['params'] = params
-            
+
             if files:
                 detail['files'] = files
-            
+
             if data:
                 detail['data'] = data
 
@@ -591,7 +590,7 @@ class InvenTreeAPI(object):
 
                 if headers:
                     detail['headers'] = headers
-                
+
                 raise requests.exceptions.HTTPError(detail)
 
             headers = response.headers

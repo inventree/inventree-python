@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
 import sys
 
+import requests
 from requests.exceptions import HTTPError
 
 try:
@@ -16,9 +16,12 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from test_api import InvenTreeTestCase  # noqa: E402
 
 from inventree.company import SupplierPart  # noqa: E402
-from inventree.stock import StockItem  # noqa: E402
-from inventree.part import Part, PartAttachment, PartCategory, PartCategoryParameterTemplate, Parameter, ParameterTemplate, PartTestTemplate, PartRelated, BomItem  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
+from inventree.part import (BomItem, Parameter,  # noqa: E402
+                            ParameterTemplate, Part, PartAttachment,
+                            PartCategory, PartCategoryParameterTemplate,
+                            PartRelated, PartTestTemplate)
+from inventree.stock import StockItem  # noqa: E402
 
 
 class PartCategoryTest(InvenTreeTestCase):
@@ -55,11 +58,11 @@ class PartCategoryTest(InvenTreeTestCase):
 
         for child in children:
             self.assertEqual(child.parent, 1)
-        
+
         child = PartCategory(self.api, pk=3)
         self.assertEqual(child.name, 'Capacitors')
         self.assertEqual(child.getParentCategory().pk, electronics.pk)
-        
+
         # Grab all child categories
         children = PartCategory.list(self.api, parent=child.pk)
 
@@ -92,7 +95,7 @@ class PartCategoryTest(InvenTreeTestCase):
 
         # Number of children should have increased!
         self.assertEqual(len(child.getChildCategories()), n + 3)
-        
+
     def test_caps(self):
 
         cat = PartCategory(self.api, 6)
@@ -118,7 +121,7 @@ class PartCategoryTest(InvenTreeTestCase):
             self.assertIsNotNone(prt)
 
             self.assertEqual(prt.name, name)
-        
+
         parts = cat.getParts()
 
         self.assertEqual(len(parts), n_parts + 10)
@@ -157,11 +160,11 @@ class PartCategoryTest(InvenTreeTestCase):
         self.assertTrue(len(templates) >= 3)
 
         # Check child categories
-        childs = electronics.getChildCategories()
+        children = electronics.getChildCategories()
 
-        self.assertTrue(len(childs) > 0)
+        self.assertTrue(len(children) > 0)
 
-        for child in childs:
+        for child in children:
             child_templates = child.getCategoryParameterTemplates(fetch_parent=True)
             self.assertTrue(len(child_templates) >= 3)
 
@@ -204,7 +207,7 @@ class PartTest(InvenTreeTestCase):
 
         with self.assertRaises(TypeError):
             Part(self.api, 'hello')
-        
+
         with self.assertRaises(ValueError):
             Part(self.api, -1)
 
@@ -368,7 +371,7 @@ class PartTest(InvenTreeTestCase):
         """
         Test we can create and delete a Part instance via the API
         """
-        
+
         n = len(Part.list(self.api))
 
         # Create a new part
@@ -418,7 +421,7 @@ class PartTest(InvenTreeTestCase):
         # Attempt to upload an image
         with self.assertRaises(requests.exceptions.HTTPError):
             response = p.uploadImage("dummy_image.jpg")
-    
+
         # Now, let's actually upload a real image
         img = Image.new('RGB', (128, 128), color='red')
         img.save('dummy_image.png')
@@ -481,7 +484,7 @@ class PartTest(InvenTreeTestCase):
         )
 
         self.assertIsNotNone(response)
-        
+
         pk = response['pk']
 
         # Check that a new attachment has been created!
@@ -513,7 +516,7 @@ class PartTest(InvenTreeTestCase):
         # Grab all internal prices for the part
         ip = InternalPrice.list(self.api, part=p.pk)
 
-        # Delete any existsing prices
+        # Delete any existing prices
         for price in ip:
             self.assertEqual(type(price), InternalPrice)
             price.delete()
@@ -528,7 +531,7 @@ class PartTest(InvenTreeTestCase):
         # Ensure that the part has an internal price
         ip = InternalPrice.list(self.api, part=p.pk)
         self.assertEqual(len(ip), 1)
-        
+
         # Grab the internal price
         ip = ip[0]
 
@@ -541,37 +544,37 @@ class PartTest(InvenTreeTestCase):
         """
         Test setting and getting Part parameter templates, as well as parameter values
         """
-        
+
         # Count number of existing Parameter Templates
         existingTemplates = len(ParameterTemplate.list(self.api))
-        
+
         # Create new parameter template - this will fail, no name given
         with self.assertRaises(HTTPError):
             parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
-        
+
         # Now create a proper parameter template
         parametertemplate = ParameterTemplate.create(self.api, data={'name': f'Test parameter no {existingTemplates}', 'units': "kg A"})
-        
+
         # result should not be None
         self.assertIsNotNone(parametertemplate)
-        
+
         # Count should be one higher now
         self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates + 1)
-        
+
         # Grab the first part
         p = Part.list(self.api)[0]
-        
+
         # Count number of parameters
         existingParameters = len(p.getParameters())
-        
+
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
             Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
-            
+
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
             Parameter.create(self.api, data={'part': p.pk, 'data': 10})
-        
+
         # Define w. required values - integer
         param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
 
@@ -580,24 +583,24 @@ class PartTest(InvenTreeTestCase):
 
         # result should not be None
         self.assertIsNotNone(param)
-        
+
         # Same parameter for same part - should fail
         # Define w. required values - string
         with self.assertRaises(HTTPError):
             Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
-        
+
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters + 1)
-        
+
         # Delete the parameter
         param.delete()
-        
+
         # Check count
         self.assertEqual(len(p.getParameters()), existingParameters)
-        
+
         # Delete the parameter template
         parametertemplate.delete()
-        
+
         # Check count
         self.assertEqual(len(ParameterTemplate.list(self.api)), existingTemplates)
 
@@ -703,7 +706,7 @@ class PartBarcodeTest(InvenTreeTestCase):
 
         self.assertEqual(response['success'], 'Assigned barcode to part instance')
         self.assertEqual(response['barcode_data'], barcode)
-        
+
         # Attempt to assign the same barcode to a different part (should error)
         part_2 = Part(self.api, pk=2)
 
@@ -725,7 +728,7 @@ class PartBarcodeTest(InvenTreeTestCase):
         # Now assign to part_2
         response = part_2.assignBarcode(barcode)
         self.assertEqual(response['barcode_data'], barcode)
-    
+
         # Scan again
         response = self.api.scanBarcode(barcode)
         self.assertEqual(response['part']['pk'], 2)
@@ -740,7 +743,7 @@ class PartBarcodeTest(InvenTreeTestCase):
 
 class PartTestTemplateTest(InvenTreeTestCase):
     """Tests for PartTestTemplate functionality"""
-    
+
     def test_generateKey(self):
         """Tests for generating a key for a PartTestTemplate"""
 

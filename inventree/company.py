@@ -5,7 +5,6 @@ import logging
 import inventree.base
 import inventree.order
 
-
 logger = logging.getLogger('inventree')
 
 
