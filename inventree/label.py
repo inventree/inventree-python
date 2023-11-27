@@ -77,19 +77,83 @@ class LabelPrintingMixin:
             return response
 
 
-class LabelLocation(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+    """Base class for label functions"""
+
+    @classmethod
+    def create(cls, api, data, label, **kwargs):
+        """Create a new label by uploading a label template file. Convenience wrapper around base create() method.
+
+        Args:
+            data: Dict of data including at least name and description for the template
+            label: Either a string (filename) or a file object
+        """
+
+        # POST endpoints for creating new reports were added in API version 156
+        cls.REQUIRED_API_VERSION = 156
+
+        try:
+            # If label is already a readable object, don't convert it
+            if label.readable() is False:
+                raise ValueError("Label template file must be readable")
+        except AttributeError:
+            label = open(label)
+            if label.readable() is False:
+                raise ValueError("Label template file must be readable")
+
+        return super().create(api, data=data, files={'label': label}, **kwargs)
+
+    def save(self, data=None, label=None, **kwargs):
+        """Save label to database. Convenience wrapper around save() method.
+
+        Args:
+            data (optional): Dict of data to change for the template.
+            label (optional): Either a string (filename) or a file object, to upload a new label template
+        """
+
+        # PUT/PATCH endpoints for updating data were available before POST endpoints
+        self.REQUIRED_API_VERSION = None
+
+        if label is not None:
+            try:
+                # If template is already a readable object, don't convert it
+                if label.readable() is False:
+                    raise ValueError("Label template file must be readable")
+            except AttributeError:
+                label = open(label, 'r')
+                if label.readable() is False:
+                    raise ValueError("Label template file must be readable")
+
+            if 'files' in kwargs:
+                files = kwargs.pop('kwargs')
+                files['label'] = label
+            else:
+                files = {'label': label}
+        else:
+            files = None
+
+        return super().save(data=data, files=files)
+
+    def downloadTemplate(self, destination, overwrite=False):
+        """Download template file for the label to the given destination"""
+
+        # Use downloadFile method to get the file
+        return self._api.downloadFile(url=self._data['label'], destination=destination, overwrite=overwrite)
+
+
+class LabelLocation(LabelFunctions):
     """ Class representing the Label/Location database model """
 
     URL = 'label/location'
 
 
-class LabelPart(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class LabelPart(LabelFunctions):
     """ Class representing the Label/Part database model """
 
     URL = 'label/part'
 
 
-class LabelStock(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class LabelStock(LabelFunctions):
     """ Class representing the Label/stock database model """
 
     URL = 'label/stock'

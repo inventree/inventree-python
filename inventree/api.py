@@ -547,13 +547,13 @@ class InvenTreeAPI(object):
         if url.startswith('/'):
             url = url[1:]
 
-        url = urljoin(self.base_url, url)
+        fullurl = urljoin(self.base_url, url)
 
         if os.path.exists(destination) and os.path.isdir(destination):
 
             destination = os.path.join(
                 destination,
-                os.path.basename(url)
+                os.path.basename(fullurl)
             )
 
         destination = os.path.abspath(destination)
@@ -571,7 +571,7 @@ class InvenTreeAPI(object):
             auth = self.auth
 
         with requests.get(
-                url,
+                fullurl,
                 stream=True,
                 auth=auth,
                 headers=headers,
@@ -595,7 +595,7 @@ class InvenTreeAPI(object):
 
             headers = response.headers
 
-            if 'Content-Type' in headers and 'text/html' in headers['Content-Type']:
+            if url.startswith('media/report') is False and url.startswith('media/label') is False and 'Content-Type' in headers and 'text/html' in headers['Content-Type']:
                 logger.error(f"Error downloading file '{url}': Server return invalid response (text/html)")
                 return False
 
