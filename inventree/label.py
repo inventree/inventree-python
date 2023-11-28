@@ -132,7 +132,11 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         else:
             files = None
 
-        return super().save(data=data, files=files)
+        try:
+            response = super().save(data=data, files=files)
+        finally:
+            label.close()
+        return response
 
     def downloadTemplate(self, destination, overwrite=False):
         """Download template file for the label to the given destination"""

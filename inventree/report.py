@@ -105,7 +105,11 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
         else:
             files = None
 
-        return super().save(data=data, files=files)
+        try:
+            response = super().save(data=data, files=files)
+        finally:
+            template.close()
+        return response
 
     def downloadTemplate(self, destination, overwrite=False):
         """Download template file for the report to the given destination"""
