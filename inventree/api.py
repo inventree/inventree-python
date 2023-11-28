@@ -595,7 +595,7 @@ class InvenTreeAPI(object):
 
             headers = response.headers
 
-            if url.startswith('media/report') is False and url.startswith('media/label') is False and 'Content-Type' in headers and 'text/html' in headers['Content-Type']:
+            if not url.startswith('media/report') and not url.startswith('media/label') and 'Content-Type' in headers and 'text/html' in headers['Content-Type']:
                 logger.error(f"Error downloading file '{url}': Server return invalid response (text/html)")
                 return False
 
