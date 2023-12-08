@@ -379,6 +379,33 @@ class Attachment(BulkDeleteMixin, InventreeObject):
     REQUIRED_KWARGS = []
 
     @classmethod
+    def add_link(cls, api, link, comment="", **kwargs):
+        """
+        Add an external link attachment.
+
+        Args:
+            api: Authenticated InvenTree API instance
+            link: External link to attach
+            comment: Add comment to the attachment
+            kwargs: Additional kwargs to suppl
+        """
+
+        data = kwargs
+        data["comment"] = comment
+        data["link"] = link
+
+        for arg in cls.REQUIRED_KWARGS:
+            if arg not in kwargs:
+                raise ValueError(f"Required argument '{arg}' not supplied to upload method")
+
+        if response := api.post(cls.URL, data):
+            logger.info(f"Link attachment added to {cls.URL}")
+        else:
+            logger.error(f"Link attachment failed at {cls.URL}")
+
+        return response
+
+    @classmethod
     def upload(cls, api, attachment, comment='', **kwargs):
         """
         Upload a file attachment.

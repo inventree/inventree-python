@@ -502,6 +502,33 @@ class PartTest(InvenTreeTestCase):
             # Attempt to download the file again, but without overwrite option
             attachment.download(dst)
 
+    def test_part_link_attachment(self):
+        """
+        Check that we can add an external link attachment to the part
+        """
+
+        test_link = "https://inventree.org/"
+        test_comment = "inventree.org"
+
+        # Test that an external link attachment without the required 'part' parameter fails
+        with self.assertRaises(ValueError):
+            PartAttachment.add_link(self.api, link=test_link)
+
+        # Add valid external link attachment
+        response = PartAttachment.add_link(
+            self.api,
+            link=test_link,
+            comment=test_comment,
+            part=1
+        )
+        self.assertIsNotNone(response)
+
+        # Check that the attachment has been created
+        attachment = PartAttachment(self.api, pk=response["pk"])
+        self.assertTrue(attachment.is_valid())
+        self.assertEqual(attachment.link, test_link)
+        self.assertEqual(attachment.comment, test_comment)
+
     def test_set_price(self):
         """
         Tests that an internal price can be set for a part
