@@ -30,7 +30,7 @@ Before the first test, run the following:
 invoke update-image
 ```
 
-The `invoke-test` command performs the following sequence of actions:
+The `invoke test` command performs the following sequence of actions:
 
 - Ensures the test InvenTree server is running (in a docker container)
 - Resets the test database to a known state
