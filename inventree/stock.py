@@ -16,7 +16,7 @@ class StockLocation(
     inventree.base.MetadataMixin,
     inventree.label.LabelPrintingMixin,
     inventree.report.ReportPrintingMixin,
-    inventree.base.InventreeObject
+    inventree.base.InventreeObject,
 ):
     """ Class representing the StockLocation database model """
 
@@ -64,7 +64,7 @@ class StockItem(
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.label.LabelPrintingMixin,
-    inventree.base.InventreeObject
+    inventree.base.InventreeObject,
 ):
     """Class representing the StockItem database model."""
 
@@ -338,7 +338,7 @@ class StockItemTestResult(
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,
-    inventree.base.InventreeObject
+    inventree.base.InventreeObject,
 ):
     """Class representing a StockItemTestResult object"""
 

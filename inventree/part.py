@@ -71,7 +71,7 @@ class Part(
     inventree.base.MetadataMixin,
     inventree.base.ImageMixin,
     inventree.label.LabelPrintingMixin,
-    inventree.base.InventreeObject
+    inventree.base.InventreeObject,
 ):
     """ Class representing the Part database model """
 
