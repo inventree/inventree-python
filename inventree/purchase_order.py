@@ -8,11 +8,19 @@ import inventree.part
 import inventree.report
 
 
+class PurchaseOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a PurchaseOrder"""
+
+    URL = 'order/po/attachment'
+    ATTACH_TO = 'order'
+
+
 class PurchaseOrder(
+    inventree.base.AttachmentMixin(PurchaseOrderAttachment),
     inventree.base.MetadataMixin,
-    inventree.base.InventreeObject,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject,
 ):
     """ Class representing the PurchaseOrder database model """
 
@@ -58,17 +66,6 @@ class PurchaseOrder(
         kwargs['order'] = self.pk
 
         return PurchaseOrderExtraLineItem.create(self._api, data=kwargs)
-
-    def getAttachments(self):
-        return PurchaseOrderAttachment.list(self._api, order=self.pk)
-
-    def uploadAttachment(self, attachment, comment=''):
-        return PurchaseOrderAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            order=self.pk,
-        )
 
     def issue(self, **kwargs):
         """
@@ -248,10 +245,3 @@ class PurchaseOrderExtraLineItem(
         Return the PurchaseOrder to which this PurchaseOrderLineItem belongs
         """
         return PurchaseOrder(self._api, self.order)
-
-
-class PurchaseOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a PurchaseOrder"""
-
-    URL = 'order/po/attachment'
-    REQUIRED_KWARGS = ['order']

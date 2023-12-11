@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+from typing import Type
 
 from . import api as inventree_api
 
@@ -375,8 +376,8 @@ class Attachment(BulkDeleteMixin, InventreeObject):
     Multiple sub-classes exist, representing various types of attachment models in the database.
     """
 
-    # List of required kwargs required for the particular subclass
-    REQUIRED_KWARGS = []
+    # Name of the primary key field of the InventreeObject the attachment will be attached to
+    ATTACH_TO = None
 
     @classmethod
     def add_link(cls, api, link, comment="", **kwargs):
@@ -394,9 +395,8 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         data["comment"] = comment
         data["link"] = link
 
-        for arg in cls.REQUIRED_KWARGS:
-            if arg not in kwargs:
-                raise ValueError(f"Required argument '{arg}' not supplied to upload method")
+        if cls.ATTACH_TO not in kwargs:
+            raise ValueError(f"Required argument '{cls.ATTACH_TO}' not supplied to add_link method")
 
         if response := api.post(cls.URL, data):
             logger.info(f"Link attachment added to {cls.URL}")
@@ -421,10 +421,8 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         data = kwargs
         data['comment'] = comment
 
-        # Check that the extra kwargs are provided
-        for arg in cls.REQUIRED_KWARGS:
-            if arg not in kwargs:
-                raise ValueError(f"Required argument '{arg}' not supplied to upload method")
+        if cls.ATTACH_TO not in kwargs:
+            raise ValueError(f"Required argument '{cls.ATTACH_TO}' not supplied to upload method")
 
         if type(attachment) is str:
             if not os.path.exists(attachment):
@@ -465,6 +463,49 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         """
 
         return self._api.downloadFile(self.attachment, destination, **kwargs)
+
+
+def AttachmentMixin(AttachmentSubClass: Type[Attachment]):
+    class Mixin(Attachment):
+        def getAttachments(self):
+            return AttachmentSubClass.list(
+                self._api,
+                **{AttachmentSubClass.ATTACH_TO: self.pk},
+            )
+
+        def uploadAttachment(self, attachment, comment=""):
+            """
+            Upload an attachment (file) against this Object.
+
+            Args:
+                attachment: Either a string (filename) or a file object
+                comment: Attachment comment
+            """
+
+            return AttachmentSubClass.upload(
+                self._api,
+                attachment,
+                comment=comment,
+                **{AttachmentSubClass.ATTACH_TO: self.pk},
+            )
+        
+        def addLinkAttachment(self, link, comment=""):
+            """
+            Add an external link attachment against this Object.
+
+            Args:
+                link: The link to attach
+                comment: Attachment comment
+            """
+
+            return AttachmentSubClass.add_link(
+                self._api,
+                link,
+                comment=comment,
+                **{AttachmentSubClass.ATTACH_TO: self.pk},
+            )
+
+    return Mixin
 
 
 class MetadataMixin:

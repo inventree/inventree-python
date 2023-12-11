@@ -51,7 +51,21 @@ class StockLocation(
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
+class StockItemAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a StockItem"""
+
+    URL = 'stock/attachment'
+    ATTACH_TO = 'stock_item'
+
+
+class StockItem(
+    inventree.base.AttachmentMixin(StockItemAttachment),
+    inventree.base.BarcodeMixin,
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.label.LabelPrintingMixin,
+    inventree.base.InventreeObject
+):
     """Class representing the StockItem database model."""
 
     URL = 'stock'
@@ -312,34 +326,6 @@ class StockItem(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inv
         """ Upload a test result against this StockItem """
 
         return StockItemTestResult.upload_result(self._api, self.pk, test_name, test_result, **kwargs)
-
-    def getAttachments(self):
-        """ Return all file attachments for this StockItem """
-
-        return StockItemAttachment.list(
-            self._api,
-            stock_item=self.pk
-        )
-
-    def uploadAttachment(self, attachment, comment=''):
-        """
-        Upload an attachment against this StockItem
-        """
-
-        return StockItemAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            stock_item=self.pk
-        )
-
-
-class StockItemAttachment(inventree.base.Attachment):
-    """ Class representing a file attachment for a StockItem """
-
-    URL = 'stock/attachment'
-
-    REQUIRED_KWARGS = ['stock_item']
 
 
 class StockItemTracking(inventree.base.InventreeObject):

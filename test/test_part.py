@@ -515,12 +515,8 @@ class PartTest(InvenTreeTestCase):
             PartAttachment.add_link(self.api, link=test_link)
 
         # Add valid external link attachment
-        response = PartAttachment.add_link(
-            self.api,
-            link=test_link,
-            comment=test_comment,
-            part=1
-        )
+        part = Part(self.api, pk=1)
+        response = part.addLinkAttachment(test_link, comment=test_comment)
         self.assertIsNotNone(response)
 
         # Check that the attachment has been created
