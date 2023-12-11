@@ -98,7 +98,19 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-class ManufacturerPart(inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class ManufacturerPartAttachment(inventree.base.Attachment):
+    """Class representing an attachment against a ManufacturerPart object"""
+
+    URL = 'company/part/manufacturer/attachment'
+    ATTACH_TO = 'manufacturer_part'
+
+
+class ManufacturerPart(
+    inventree.base.AttachmentMixin(ManufacturerPartAttachment),
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject,
+):
     """Class representing the ManufacturerPart database model
 
     - Implements the BulkDeleteMixin
@@ -113,19 +125,6 @@ class ManufacturerPart(inventree.base.BulkDeleteMixin, inventree.base.MetadataMi
 
         return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
 
-    def getAttachments(self, **kwargs):
-
-        return ManufacturerPartAttachment.list(self._api, manufacturer_part=self.pk, **kwargs)
-
-    def uploadAttachment(self, attachment, comment=''):
-
-        return ManufacturerPartAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            manufacturer_part=self.pk,
-        )
-
 
 class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
     """Class representing the ManufacturerPartParameter database model.
@@ -134,14 +133,6 @@ class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.I
     """
 
     URL = 'company/part/manufacturer/parameter'
-
-
-class ManufacturerPartAttachment(inventree.base.Attachment):
-    """
-    Class representing the ManufacturerPartAttachment model
-    """
-
-    URL = 'company/part/manufacturer/attachment'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
