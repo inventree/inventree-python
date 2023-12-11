@@ -4,11 +4,19 @@ import inventree.base
 import inventree.report
 
 
+class BuildAttachment(inventree.base.Attachment):
+    """Class representing an attachment against a Build object"""
+
+    URL = 'build/attachment'
+    ATTACH_TO = 'build'
+
+
 class Build(
-    inventree.base.InventreeObject,
+    inventree.base.AttachmentMixin(BuildAttachment),
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject,
 ):
     """ Class representing the Build database model """
 
@@ -17,17 +25,6 @@ class Build(
     # Setup for Report mixin
     REPORTNAME = 'build'
     REPORTITEM = 'build'
-
-    def getAttachments(self):
-        return BuildAttachment.list(self._api, build=self.pk)
-
-    def uploadAttachment(self, attachment, comment=''):
-        return BuildAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            build=self.pk
-        )
 
     def complete(
         self,
@@ -52,10 +49,3 @@ class Build(
     def finish(self, *args, **kwargs):
         """Alias for complete"""
         return self.complete(*args, **kwargs)
-
-
-class BuildAttachment(inventree.base.Attachment):
-    """Class representing an attachment against a Build object"""
-
-    URL = 'build/attachment'
-    REQUIRED_KWARGS = ['build']

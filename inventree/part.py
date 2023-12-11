@@ -58,7 +58,21 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
         )
 
 
-class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.base.ImageMixin, inventree.label.LabelPrintingMixin, inventree.base.InventreeObject):
+class PartAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a Part"""
+
+    URL = 'part/attachment'
+    ATTACH_TO = 'part'
+
+
+class Part(
+    inventree.base.AttachmentMixin(PartAttachment),
+    inventree.base.BarcodeMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.ImageMixin,
+    inventree.label.LabelPrintingMixin,
+    inventree.base.InventreeObject,
+):
     """ Class representing the Part database model """
 
     URL = 'part'
@@ -124,25 +138,6 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
 
-    def getAttachments(self):
-        return PartAttachment.list(self._api, part=self.pk)
-
-    def uploadAttachment(self, attachment, comment=''):
-        """
-        Upload an attachment (file) against this Part.
-
-        Args:
-            attachment: Either a string (filename) or a file object
-            comment: Attachment comment
-        """
-
-        return PartAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            part=self.pk
-        )
-
     def getRequirements(self):
         """
         Get required amounts from requirements API endpoint for this part
@@ -153,14 +148,6 @@ class Part(inventree.base.BarcodeMixin, inventree.base.MetadataMixin, inventree.
 
         # Get data
         return self._api.get(URL)
-
-
-class PartAttachment(inventree.base.Attachment):
-    """ Class representing a file attachment for a Part """
-
-    URL = 'part/attachment'
-
-    REQUIRED_KWARGS = ['part']
 
 
 class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObject):

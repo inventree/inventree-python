@@ -9,11 +9,20 @@ import inventree.report
 import inventree.stock
 
 
+class ReturnOrderAttachment(inventree.base.InventreeObject):
+    """Class representing the ReturnOrderAttachment model"""
+
+    URL = 'order/ro/attachment'
+    ATTACH_TO = 'order'
+    REQUIRED_API_VERSION = 104
+
+
 class ReturnOrder(
+    inventree.base.AttachmentMixin(ReturnOrderAttachment),
     inventree.base.MetadataMixin,
-    inventree.base.InventreeObject,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject,
 ):
     """Class representing the ReturnOrder database model"""
 
@@ -53,19 +62,6 @@ class ReturnOrder(
         kwargs['order'] = self.pk
         return ReturnOrderExtraLineItem.create(self._api, data=kwargs)
 
-    def getAttachments(self):
-        """Return a list of attachments associated with this order"""
-        return ReturnOrderAttachment.list(self._api, order=self.pk)
-
-    def uploadAttachment(self, attachment, comment=''):
-        """Upload a file attachment against this order"""
-        return ReturnOrderAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            order=self.pk
-        )
-
     def issue(self, **kwargs):
         """Issue (send) this order"""
         return self._statusupdate(status='issue', **kwargs)
@@ -103,11 +99,3 @@ class ReturnOrderExtraLineItem(inventree.base.InventreeObject):
     def getOrder(self):
         """Return the ReturnOrder to which this line item belongs"""
         return ReturnOrder(self._api, self.order)
-
-
-class ReturnOrderAttachment(inventree.base.InventreeObject):
-    """Class representing the ReturnOrderAttachment model"""
-
-    URL = 'order/ro/attachment'
-    REQUIRED_KWARGS = ['order']
-    REQUIRED_API_VERSION = 104

@@ -8,11 +8,19 @@ import inventree.part
 import inventree.report
 
 
+class SalesOrderAttachment(inventree.base.Attachment):
+    """Class representing a file attachment for a SalesOrder"""
+
+    URL = 'order/so/attachment'
+    ATTACH_TO = 'order'
+
+
 class SalesOrder(
+    inventree.base.AttachmentMixin(SalesOrderAttachment),
     inventree.base.MetadataMixin,
-    inventree.base.InventreeObject,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
+    inventree.base.InventreeObject,
 ):
     """ Class representing the SalesOrder database model """
 
@@ -58,17 +66,6 @@ class SalesOrder(
         kwargs['order'] = self.pk
 
         return SalesOrderExtraLineItem.create(self._api, data=kwargs)
-
-    def getAttachments(self):
-        return SalesOrderAttachment.list(self._api, order=self.pk)
-
-    def uploadAttachment(self, attachment, comment=''):
-        return SalesOrderAttachment.upload(
-            self._api,
-            attachment,
-            comment=comment,
-            order=self.pk,
-        )
 
     def getShipments(self, **kwargs):
         """ Return the shipments associated with this order """
@@ -189,14 +186,6 @@ class SalesOrderExtraLineItem(
         Return the SalesOrder to which this SalesOrderLineItem belongs
         """
         return SalesOrder(self._api, self.order)
-
-
-class SalesOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a SalesOrder"""
-
-    URL = 'order/so/attachment'
-
-    REQUIRED_KWARGS = ['order']
 
 
 class SalesOrderShipment(
