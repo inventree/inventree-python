@@ -6,13 +6,17 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
-from inventree.part import BomItem  # noqa: E402
+
 from inventree.build import Build  # noqa: E402
+from inventree.part import BomItem  # noqa: E402
 from inventree.purchase_order import PurchaseOrder  # noqa: E402
-from inventree.sales_order import SalesOrder  # noqa: E402
+from inventree.report import (ReportBoM, ReportBuild,  # noqa: E402
+                              ReportPurchaseOrder, ReportReturnOrder,
+                              ReportSalesOrder, ReportStockLocation,
+                              ReportTest)
 from inventree.return_order import ReturnOrder  # noqa: E402
-from inventree.stock import StockLocation, StockItemTestResult  # noqa: E402
-from inventree.report import (ReportBoM, ReportBuild, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest)  # noqa: E402
+from inventree.sales_order import SalesOrder  # noqa: E402
+from inventree.stock import StockItemTestResult, StockLocation  # noqa: E402
 
 
 class ReportClassesTest(InvenTreeTestCase):
@@ -34,6 +38,33 @@ class ReportClassesTest(InvenTreeTestCase):
 
             self.assertGreater(len(report_list_filtered), 0)
             self.assertEqual(report_list, report_list_filtered)
+
+    def test_report_create_download(self):
+        """
+        Tests creating a new report from API, by uploading the dummy template file
+        """
+
+        for RepClass in (ReportBoM, ReportBuild, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest):
+            # Test for all Label classes sequentially
+
+            # Create a new label based on the dummy template
+            newlabel = RepClass.create(
+                self.api,
+                {'name': 'Dummy report', 'description': 'Report created as test'},
+                'dummytemplate.html'
+            )
+
+            # The return value should be a LabelPart object
+            self.assertTrue(isinstance(RepClass, newlabel))
+
+            # Try to download the template file
+            newlabel.downloadTemplate(destination="dummytemplate_download.html")
+
+            # Compare file contents, make sure they're the same
+            self.assertListEqual(
+                list("dummytemplate_download.html"),
+                list("dummytemplate.html")
+            )
 
     def test_report_printing(self):
         """

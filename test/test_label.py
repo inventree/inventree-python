@@ -56,6 +56,33 @@ class LabelTest(InvenTreeTestCase):
         self.assertGreater(len(lbl_location_list_filtered), 0)
         self.assertEqual(lbl_location_list, lbl_location_list_filtered)
 
+    def test_label_create_download(self):
+        """
+        Tests creating a new label from API, by uploading the dummy template file
+        """
+
+        for RepClass in (LabelPart, LabelStock, LabelLocation):
+            # Test for all Label classes sequentially
+
+            # Create a new label based on the dummy template
+            newlabel = RepClass.create(
+                self.api,
+                {'name': 'Dummy label', 'description': 'Label created as test'},
+                'dummytemplate.html'
+            )
+
+            # The return value should be a LabelPart object
+            self.assertTrue(isinstance(RepClass, newlabel))
+
+            # Try to download the template file
+            newlabel.downloadTemplate(destination="dummytemplate_download.html")
+
+            # Compare file contents, make sure they're the same
+            self.assertListEqual(
+                list("dummytemplate_download.html"),
+                list("dummytemplate.html")
+            )
+
     def test_label_printing(self):
         """
         Tests for using label printing function to download PDF files
