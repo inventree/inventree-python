@@ -68,17 +68,17 @@ class ReportClassesTest(InvenTreeTestCase):
             #
 
             # Create a new label based on the dummy template
-            newlabel = RepClass.create(
+            newreport = RepClass.create(
                 self.api,
                 {'name': 'Dummy report', 'description': 'Report created as test'},
                 dummytemplate
             )
 
             # The return value should be a LabelPart object
-            self.assertTrue(isinstance(newlabel, RepClass))
+            self.assertTrue(isinstance(newreport, RepClass))
 
             # Try to download the template file
-            newlabel.downloadTemplate(destination="dummytemplate_download.html")
+            newreport.downloadTemplate(destination="dummytemplate_download.html")
 
             # Compare file contents, make sure they're the same
             self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
@@ -92,17 +92,17 @@ class ReportClassesTest(InvenTreeTestCase):
 
             # Create a new label based on the dummy template
             with open(dummytemplate) as template_upload:
-                newlabel2 = RepClass.create(
+                newreport2 = RepClass.create(
                     self.api,
                     {'name': 'Dummy report', 'description': 'Report created as test'},
                     template_upload
                 )
 
             # The return value should be a LabelPart object
-            self.assertTrue(isinstance(newlabel2, RepClass))
+            self.assertTrue(isinstance(newreport2, RepClass))
 
             # Try to download the template file
-            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+            newreport2.downloadTemplate(destination="dummytemplate_download.html")
 
             # Compare file contents, make sure they're the same
             # Compare file contents, make sure they're the same
@@ -116,10 +116,10 @@ class ReportClassesTest(InvenTreeTestCase):
             # Use file name
             #
 
-            newlabel2.save(data=None, template=dummytemplate2)
+            newreport2.save(data=None, template=dummytemplate2)
 
             # Try to download the template file
-            newlabel2.downloadTemplate(destination="dummytemplate2_download.html")
+            newreport2.downloadTemplate(destination="dummytemplate2_download.html")
 
             # Compare file contents, make sure they're the same
             self.assertTrue(comparefiles("dummytemplate2_download.html", dummytemplate2))
@@ -133,10 +133,10 @@ class ReportClassesTest(InvenTreeTestCase):
             #
 
             with open(dummytemplate) as template_upload:
-                newlabel2.save(data=None, template=template_upload)
+                newreport2.save(data=None, template=template_upload)
 
             # Try to download the template file
-            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+            newreport2.downloadTemplate(destination="dummytemplate_download.html")
 
             # Compare file contents, make sure they're the same
             self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
