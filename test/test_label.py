@@ -61,6 +61,19 @@ class LabelTest(InvenTreeTestCase):
         Tests creating a new label from API, by uploading the dummy template file
         """
 
+        def comparefiles(file1, file2):
+            """Compare content of two files, return True if equal, else False"""
+
+            F1 = open(file1, 'r')
+            contents_1 = F1.read()
+            F1.close()
+
+            F2 = open(file2, 'r')
+            contents_2 = F2.read()
+            F2.close()
+
+            return contents_1 == contents_2
+
         dummytemplate = os.path.join(os.path.dirname(__file__), 'dummytemplate.html')
         dummytemplate2 = os.path.join(os.path.dirname(__file__), 'dummytemplate2.html')
 
@@ -84,13 +97,7 @@ class LabelTest(InvenTreeTestCase):
             # Try to download the template file
             newlabel.downloadTemplate(destination="dummytemplate_download.html")
 
-            # Compare file contents, make sure they're the same
-            with open("dummytemplate_download.html") as downloadedfile:
-                with open(dummytemplate) as originalfile:
-                    self.assertListEqual(
-                        list(downloadedfile),
-                        list(originalfile)
-                    )
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
 
             # Remove the test file
             os.remove("dummytemplate_download.html")
@@ -113,13 +120,7 @@ class LabelTest(InvenTreeTestCase):
             # Try to download the template file
             newlabel2.downloadTemplate(destination="dummytemplate_download.html")
 
-            # Compare file contents, make sure they're the same
-            with open("dummytemplate_download.html") as downloadedfile:
-                with open(dummytemplate) as originalfile:
-                    self.assertListEqual(
-                        list(downloadedfile),
-                        list(originalfile)
-                    )
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
 
             # Remove the test file
             os.remove("dummytemplate_download.html")
@@ -134,14 +135,7 @@ class LabelTest(InvenTreeTestCase):
             # Try to download the template file
             newlabel2.downloadTemplate(destination="dummytemplate2_download.html")
 
-            # Compare file contents, make sure they're the same
-            with open("dummytemplate_download.html") as downloadedfile:
-                with open(dummytemplate2) as originalfile:
-                    self.assertListEqual(
-                        list(downloadedfile),
-                        list(originalfile)
-                    )
-
+            self.assertTrue(comparefiles("dummytemplate2_download.html", dummytemplate2))
             # Remove the test file
             os.remove("dummytemplate2_download.html")
 
@@ -156,13 +150,7 @@ class LabelTest(InvenTreeTestCase):
             # Try to download the template file
             newlabel2.downloadTemplate(destination="dummytemplate_download.html")
 
-            # Compare file contents, make sure they're the same
-            with open("dummytemplate_download.html") as downloadedfile:
-                with open(dummytemplate) as originalfile:
-                    self.assertListEqual(
-                        list(downloadedfile),
-                        list(originalfile)
-                    )
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
 
             # Remove the test file
             os.remove("dummytemplate_download.html")
