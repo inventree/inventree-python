@@ -86,8 +86,8 @@ class LabelTest(InvenTreeTestCase):
 
             # Compare file contents, make sure they're the same
             self.assertListEqual(
-                list("dummytemplate_download.html"),
-                list(dummytemplate)
+                list(open("dummytemplate_download.html")),
+                list(open(dummytemplate))
             )
 
             # Remove the test file
@@ -112,8 +112,8 @@ class LabelTest(InvenTreeTestCase):
 
             # Compare file contents, make sure they're the same
             self.assertListEqual(
-                list("dummytemplate_download.html"),
-                list(dummytemplate)
+                list(open("dummytemplate_download.html")),
+                list(open(dummytemplate))
             )
 
             # Remove the test file
@@ -131,8 +131,8 @@ class LabelTest(InvenTreeTestCase):
 
             # Compare file contents, make sure they're the same
             self.assertListEqual(
-                list("dummytemplate2_download.html"),
-                list(dummytemplate2)
+                list(open("dummytemplate2_download.html")),
+                list(open(dummytemplate2))
             )
 
             # Remove the test file
@@ -150,8 +150,8 @@ class LabelTest(InvenTreeTestCase):
 
             # Compare file contents, make sure they're the same
             self.assertListEqual(
-                list("dummytemplate_download.html"),
-                list(dummytemplate)
+                list(open("dummytemplate_download.html")),
+                list(open(dummytemplate))
             )
 
             # Remove the test file
