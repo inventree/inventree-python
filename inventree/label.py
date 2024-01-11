@@ -101,7 +101,12 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
             if label.readable() is False:
                 raise ValueError("Label template file must be readable")
 
-        return super().create(api, data=data, files={'label': label}, **kwargs)
+        try:
+            response = super().create(api, data=data, files={'label': label}, **kwargs)
+        finally:
+            if label is not None:
+                label.close()
+        return response
 
     def save(self, data=None, label=None, **kwargs):
         """Save label to database. Convenience wrapper around save() method.
@@ -135,7 +140,8 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         try:
             response = super().save(data=data, files=files)
         finally:
-            label.close()
+            if label is not None:
+                label.close()
         return response
 
     def downloadTemplate(self, destination, overwrite=False):

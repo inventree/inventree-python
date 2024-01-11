@@ -74,7 +74,12 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
             if template.readable() is False:
                 raise ValueError("Template file must be readable")
 
-        return super().create(api, data=data, files={'template': template}, **kwargs)
+        try:
+            response = super().create(api, data=data, files={'template': template}, **kwargs)
+        finally:
+            if template is not None:
+                template.close()
+        return response
 
     def save(self, data=None, template=None, **kwargs):
         """Save report data to database. Convenience wrapper around save() method.
@@ -108,7 +113,8 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
         try:
             response = super().save(data=data, files=files)
         finally:
-            template.close()
+            if template is not None:
+                template.close()
         return response
 
     def downloadTemplate(self, destination, overwrite=False):
