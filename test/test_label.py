@@ -130,7 +130,7 @@ class LabelTest(InvenTreeTestCase):
             # Use file name
             #
 
-            newlabel2.save(data=None, template=dummytemplate2)
+            newlabel2.save(data=None, label=dummytemplate2)
 
             # Try to download the template file
             newlabel2.downloadTemplate(destination="dummytemplate2_download.html")
@@ -145,7 +145,7 @@ class LabelTest(InvenTreeTestCase):
             #
 
             with open(dummytemplate) as template_upload:
-                newlabel2.save(data=None, template=template_upload)
+                newlabel2.save(data=None, label=template_upload)
 
             # Try to download the template file
             newlabel2.downloadTemplate(destination="dummytemplate_download.html")
