@@ -61,14 +61,21 @@ class LabelTest(InvenTreeTestCase):
         Tests creating a new label from API, by uploading the dummy template file
         """
 
+        dummytemplate = os.path.join(os.path.dirname(__file__), 'dummytemplate.html')
+        dummytemplate2 = os.path.join(os.path.dirname(__file__), 'dummytemplate2.html')
+
         for RepClass in (LabelPart, LabelStock, LabelLocation):
             # Test for all Label classes sequentially
+
+            #
+            # Test with file name
+            #
 
             # Create a new label based on the dummy template
             newlabel = RepClass.create(
                 self.api,
                 {'name': 'Dummy label', 'description': 'Label created as test'},
-                'dummytemplate.html'
+                dummytemplate
             )
 
             # The return value should be a LabelPart object
@@ -80,8 +87,75 @@ class LabelTest(InvenTreeTestCase):
             # Compare file contents, make sure they're the same
             self.assertListEqual(
                 list("dummytemplate_download.html"),
-                list("dummytemplate.html")
+                list(dummytemplate)
             )
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
+
+            #
+            # Test with open(...)
+            #
+
+            # Create a new label based on the dummy template
+            newlabel2 = RepClass.create(
+                self.api,
+                {'name': 'Dummy label', 'description': 'Label created as test'},
+                open(dummytemplate)
+            )
+
+            # The return value should be a LabelPart object
+            self.assertTrue(isinstance(RepClass, newlabel2))
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+
+            # Compare file contents, make sure they're the same
+            self.assertListEqual(
+                list("dummytemplate_download.html"),
+                list(dummytemplate)
+            )
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
+
+            #
+            # Test overwriting the label file with save method
+            # Use file name
+            #
+
+            newlabel2.save(data=None, template=dummytemplate2)
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate2_download.html")
+
+            # Compare file contents, make sure they're the same
+            self.assertListEqual(
+                list("dummytemplate2_download.html"),
+                list(dummytemplate2)
+            )
+
+            # Remove the test file
+            os.remove("dummytemplate2_download.html")
+
+            #
+            # Test overwriting the template file with save method
+            # Use open(...)
+            #
+
+            newlabel2.save(data=None, template=open(dummytemplate))
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+
+            # Compare file contents, make sure they're the same
+            self.assertListEqual(
+                list("dummytemplate_download.html"),
+                list(dummytemplate)
+            )
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
 
     def test_label_printing(self):
         """
