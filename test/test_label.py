@@ -56,6 +56,105 @@ class LabelTest(InvenTreeTestCase):
         self.assertGreater(len(lbl_location_list_filtered), 0)
         self.assertEqual(lbl_location_list, lbl_location_list_filtered)
 
+    def test_label_create_download(self):
+        """
+        Tests creating a new label from API, by uploading the dummy template file
+        """
+
+        def comparefiles(file1, file2):
+            """Compare content of two files, return True if equal, else False"""
+
+            F1 = open(file1, 'r')
+            contents_1 = F1.read()
+            F1.close()
+
+            F2 = open(file2, 'r')
+            contents_2 = F2.read()
+            F2.close()
+
+            return contents_1 == contents_2
+
+        dummytemplate = os.path.join(os.path.dirname(__file__), 'dummytemplate.html')
+        dummytemplate2 = os.path.join(os.path.dirname(__file__), 'dummytemplate2.html')
+
+        for RepClass in (LabelPart, LabelStock, LabelLocation):
+            # Test for all Label classes sequentially
+
+            #
+            # Test with file name
+            #
+
+            # Create a new label based on the dummy template
+            newlabel = RepClass.create(
+                self.api,
+                {'name': 'Dummy label', 'description': 'Label created as test'},
+                dummytemplate
+            )
+
+            # The return value should be a LabelPart object
+            self.assertIsInstance(newlabel, RepClass)
+
+            # Try to download the template file
+            newlabel.downloadTemplate(destination="dummytemplate_download.html")
+
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
+
+            #
+            # Test with open(...)
+            #
+
+            # Create a new label based on the dummy template
+            with open(dummytemplate) as template_upload:
+                newlabel2 = RepClass.create(
+                    self.api,
+                    {'name': 'Dummy label', 'description': 'Label created as test'},
+                    template_upload
+                )
+
+            # The return value should be a LabelPart object
+            self.assertIsInstance(newlabel2, RepClass)
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
+
+            #
+            # Test overwriting the label file with save method
+            # Use file name
+            #
+
+            newlabel2.save(data=None, label=dummytemplate2)
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate2_download.html")
+
+            self.assertTrue(comparefiles("dummytemplate2_download.html", dummytemplate2))
+            # Remove the test file
+            os.remove("dummytemplate2_download.html")
+
+            #
+            # Test overwriting the template file with save method
+            # Use open(...)
+            #
+
+            with open(dummytemplate) as template_upload:
+                newlabel2.save(data=None, label=template_upload)
+
+            # Try to download the template file
+            newlabel2.downloadTemplate(destination="dummytemplate_download.html")
+
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
+
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
+
     def test_label_printing(self):
         """
         Tests for using label printing function to download PDF files
