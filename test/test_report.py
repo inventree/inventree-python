@@ -75,7 +75,7 @@ class ReportClassesTest(InvenTreeTestCase):
             )
 
             # The return value should be a LabelPart object
-            self.assertTrue(isinstance(newreport, RepClass))
+            self.assertIsInstance(newreport, RepClass)
 
             # Try to download the template file
             newreport.downloadTemplate(destination="dummytemplate_download.html")
@@ -99,7 +99,7 @@ class ReportClassesTest(InvenTreeTestCase):
                 )
 
             # The return value should be a LabelPart object
-            self.assertTrue(isinstance(newreport2, RepClass))
+            self.assertIsInstance(newreport2, RepClass)
 
             # Try to download the template file
             newreport2.downloadTemplate(destination="dummytemplate_download.html")
