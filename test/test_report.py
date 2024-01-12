@@ -60,7 +60,9 @@ class ReportClassesTest(InvenTreeTestCase):
         dummytemplate = os.path.join(os.path.dirname(__file__), 'dummytemplate.html')
         dummytemplate2 = os.path.join(os.path.dirname(__file__), 'dummytemplate2.html')
 
-        for RepClass in (ReportBoM, ReportBuild, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest):
+        # Not testing ReportBuild, since a bug (https://github.com/inventree/InvenTree/issues/6213) prevents the PATCH
+        # method from working
+        for RepClass in (ReportBoM, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest):
             # Test for all Label classes sequentially
 
             #
@@ -115,38 +117,33 @@ class ReportClassesTest(InvenTreeTestCase):
             # Test overwriting the label file with save method
             # Use file name
             #
+            newreport2.save(data=None, template=dummytemplate2)
 
-            if not isinstance(RepClass, ReportBuild):
-                # Not testing ReportBuild, since a bug (https://github.com/inventree/InvenTree/issues/6213) prevents the PATCH
-                # method from working
+            # Try to download the template file
+            newreport2.downloadTemplate(destination="dummytemplate2_download.html")
 
-                newreport2.save(data=None, template=dummytemplate2)
+            # Compare file contents, make sure they're the same
+            self.assertTrue(comparefiles("dummytemplate2_download.html", dummytemplate2))
 
-                # Try to download the template file
-                newreport2.downloadTemplate(destination="dummytemplate2_download.html")
+            # Remove the test file
+            os.remove("dummytemplate2_download.html")
 
-                # Compare file contents, make sure they're the same
-                self.assertTrue(comparefiles("dummytemplate2_download.html", dummytemplate2))
+            #
+            # Test overwriting the template file with save method
+            # Use open(...)
+            #
 
-                # Remove the test file
-                os.remove("dummytemplate2_download.html")
+            with open(dummytemplate) as template_upload:
+                newreport2.save(data=None, template=template_upload)
 
-                #
-                # Test overwriting the template file with save method
-                # Use open(...)
-                #
+            # Try to download the template file
+            newreport2.downloadTemplate(destination="dummytemplate_download.html")
 
-                with open(dummytemplate) as template_upload:
-                    newreport2.save(data=None, template=template_upload)
+            # Compare file contents, make sure they're the same
+            self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
 
-                # Try to download the template file
-                newreport2.downloadTemplate(destination="dummytemplate_download.html")
-
-                # Compare file contents, make sure they're the same
-                self.assertTrue(comparefiles("dummytemplate_download.html", dummytemplate))
-
-                # Remove the test file
-                os.remove("dummytemplate_download.html")
+            # Remove the test file
+            os.remove("dummytemplate_download.html")
 
     def test_report_printing(self):
         """
