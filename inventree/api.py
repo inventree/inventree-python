@@ -43,6 +43,7 @@ class InvenTreeAPI(object):
             username - Login username
             password - Login password
             token - Authentication token (if provided, username/password are ignored)
+            token-name - Name of the token to use (default = 'inventree-python-client')
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
             timeout - Set timeout to use (in seconds). Default: 10
@@ -62,6 +63,7 @@ class InvenTreeAPI(object):
         self.username = kwargs.get('username', os.environ.get('INVENTREE_API_USERNAME', None))
         self.password = kwargs.get('password', os.environ.get('INVENTREE_API_PASSWORD', None))
         self.token = kwargs.get('token', os.environ.get('INVENTREE_API_TOKEN', None))
+        self.token_name = kwargs.get('token_name', os.environ.get('INVENTREE_API_TOKEN_NAME', 'inventree-python-client'))
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
 
@@ -244,7 +246,12 @@ class InvenTreeAPI(object):
 
         # Request an auth token from the server
         try:
-            response = self.get('/user/token/')
+            response = self.get(
+                '/user/token/',
+                params={
+                    'name': self.token_name,
+                }
+            )
         except Exception as e:
             logger.error(f"Error requesting token: {str(type(e))}")
             return None
