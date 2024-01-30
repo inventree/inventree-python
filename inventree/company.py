@@ -15,6 +15,13 @@ class Contact(inventree.base.InventreeObject):
     REQUIRED_API_VERSION = 104
 
 
+class Address(inventree.base.InventreeObject):
+    """Class representing the Address model"""
+
+    URL = 'company/address/'
+    REQUIRED_API_VERSION = 126
+
+
 class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
@@ -24,6 +31,11 @@ class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree
         """Return contacts associated with this Company"""
         kwargs['company'] = self.pk
         return Contact.list(self._api, **kwargs)
+
+    def getAddresses(self, **kwargs):
+        """Return addresses associated with this Company"""
+        kwargs['company'] = self.pk
+        return Address.list(self._api, **kwargs)
 
     def getSuppliedParts(self, **kwargs):
         """
