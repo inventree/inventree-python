@@ -359,7 +359,7 @@ class StockItemTestResult(
         args:
             api: Authenticated InvenTree API object
             stock_item: pk of the StockItem object to upload the test result against
-            test: Name of the test (string)
+            test: Name of the test (string) or ID of the test template (integer)
             result: Test result (boolean)
 
         kwargs:
@@ -387,11 +387,19 @@ class StockItemTestResult(
 
         data = {
             'stock_item': stock_item,
-            'test': test,
             'result': result,
             'notes': notes,
             'value': value,
         }
+
+        # Determine the method by which the particular test is designated
+        # It is either the test "name", or the test "template" ID
+        if type(test) is int:
+            data['template'] = test
+        elif isinstance(test, inventree.part.PartTestTemplate):
+            data['template'] = test.pk
+        else:
+            data['test'] = str(test)
 
         # Send the data to the server
         if api.post(cls.URL, data, files=files):
