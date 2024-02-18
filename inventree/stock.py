@@ -329,7 +329,7 @@ class StockItem(
 
 
 class StockItemTracking(inventree.base.InventreeObject):
-    """ Class representing a StockItem tracking object """
+    """Class representing a StockItem tracking object."""
 
     URL = 'stock/track'
 
@@ -340,7 +340,14 @@ class StockItemTestResult(
     inventree.report.ReportPrintingMixin,
     inventree.base.InventreeObject,
 ):
-    """Class representing a StockItemTestResult object"""
+    """Class representing a StockItemTestResult object.
+    
+    Note: From API version 169 and onwards, the StockItemTestResult object
+    must reference a PartTestTemplate object, rather than a test name.
+
+    However, for backwards compatibility, test results can be uploaded using the test name,
+    and will be associated with the correct PartTestTemplate on the server.
+    """
 
     URL = 'stock/test'
 

@@ -168,6 +168,10 @@ class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObj
         return key
 
     def getTestKey(self):
+        """Return the 'key' for this test.
+        
+        Note that after API v169, the 'key' parameter is also directly accessible
+        """
         return PartTestTemplate.generateTestKey(self.test_name)
 
 
