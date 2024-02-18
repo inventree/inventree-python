@@ -329,7 +329,7 @@ class StockItem(
 
 
 class StockItemTracking(inventree.base.InventreeObject):
-    """ Class representing a StockItem tracking object """
+    """Class representing a StockItem tracking object."""
 
     URL = 'stock/track'
 
@@ -340,7 +340,14 @@ class StockItemTestResult(
     inventree.report.ReportPrintingMixin,
     inventree.base.InventreeObject,
 ):
-    """Class representing a StockItemTestResult object"""
+    """Class representing a StockItemTestResult object.
+    
+    Note: From API version 169 and onwards, the StockItemTestResult object
+    must reference a PartTestTemplate object, rather than a test name.
+
+    However, for backwards compatibility, test results can be uploaded using the test name,
+    and will be associated with the correct PartTestTemplate on the server.
+    """
 
     URL = 'stock/test'
 
@@ -359,7 +366,7 @@ class StockItemTestResult(
         args:
             api: Authenticated InvenTree API object
             stock_item: pk of the StockItem object to upload the test result against
-            test: Name of the test (string)
+            test: Name of the test (string) or ID of the test template (integer)
             result: Test result (boolean)
 
         kwargs:
@@ -387,11 +394,19 @@ class StockItemTestResult(
 
         data = {
             'stock_item': stock_item,
-            'test': test,
             'result': result,
             'notes': notes,
             'value': value,
         }
+
+        # Determine the method by which the particular test is designated
+        # It is either the test "name", or the test "template" ID
+        if type(test) is int:
+            data['template'] = test
+        elif isinstance(test, inventree.part.PartTestTemplate):
+            data['template'] = test.pk
+        else:
+            data['test'] = str(test)
 
         # Send the data to the server
         if api.post(cls.URL, data, files=files):
