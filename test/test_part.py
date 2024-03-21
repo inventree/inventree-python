@@ -138,7 +138,7 @@ class PartCategoryTest(InvenTreeTestCase):
             for name in ['wodth', 'lungth', 'herght']:
                 template = ParameterTemplate.create(self.api, data={
                     'name': name,
-                    'units': 'uu',
+                    'units': 'mm',
                 })
 
                 pcpt = PartCategoryParameterTemplate.create(
@@ -146,7 +146,7 @@ class PartCategoryTest(InvenTreeTestCase):
                     data={
                         'category': electronics.pk,
                         'parameter_template': template.pk,
-                        'default_value': name,
+                        'default_value': 123,
                     }
                 )
 
