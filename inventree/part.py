@@ -208,6 +208,28 @@ class InternalPrice(inventree.base.InventreeObject):
 
         # Send the data to the server
         return api.post(cls.URL, data)
+    
+class SalePrice(inventree.base.InventreeObject):
+    """ Class representing the SalePrice model """
+
+    URL = 'part/sale-price'
+
+    @classmethod
+    def setSalePrice(cls, api, part, quantity: int, price: float, price_currency: str):
+        """
+        Set the sale price for this part
+        """
+
+        data = {
+            'part': part,
+            'quantity': quantity,
+            'price': price,
+            'price_currency': price_currency,
+        }
+
+        # Send the data to the server
+        return api.post(cls.URL, data)
+
 
 
 class PartRelated(inventree.base.InventreeObject):
