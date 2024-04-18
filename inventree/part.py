@@ -137,6 +137,12 @@ class Part(
         """
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
+    
+    def getSalePrice(self):
+        """
+        Get sales prices for this part
+        """
+        return SalePrice.list(self._api, part=self.pk)[0].price
 
     def getRequirements(self):
         """
@@ -148,6 +154,7 @@ class Part(
 
         # Get data
         return self._api.get(URL)
+    
 
 
 class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObject):
