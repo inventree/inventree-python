@@ -341,7 +341,7 @@ class StockItemTestResult(
     inventree.base.InventreeObject,
 ):
     """Class representing a StockItemTestResult object.
-    
+
     Note: From API version 169 and onwards, the StockItemTestResult object
     must reference a PartTestTemplate object, rather than a test name.
 
@@ -355,8 +355,15 @@ class StockItemTestResult(
     REPORTNAME = 'test'
     REPORTITEM = 'item'
 
+    def getTestTemplate(self):
+        '''Return the PartTestTemplate item for this StockItemTestResult'''
+
+        return inventree.part.PartTestTemplate(self._api, self.template)
+
     def getTestKey(self):
-        return inventree.part.PartTestTemplate.generateTestKey(self.test)
+
+        # Get the test key from the PartTestTemplate
+        return self.getTestTemplate().getTestKey()
 
     @classmethod
     def upload_result(cls, api, stock_item, test, result, **kwargs):
