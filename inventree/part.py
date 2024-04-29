@@ -154,7 +154,6 @@ class Part(
 
         # Get data
         return self._api.get(URL)
-    
 
 
 class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObject):
@@ -215,7 +214,8 @@ class InternalPrice(inventree.base.InventreeObject):
 
         # Send the data to the server
         return api.post(cls.URL, data)
-    
+
+
 class SalePrice(inventree.base.InventreeObject):
     """ Class representing the SalePrice model """
 
@@ -236,7 +236,6 @@ class SalePrice(inventree.base.InventreeObject):
 
         # Send the data to the server
         return api.post(cls.URL, data)
-
 
 
 class PartRelated(inventree.base.InventreeObject):
