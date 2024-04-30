@@ -137,6 +137,12 @@ class Part(
         """
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
+    
+    def getSalePrice(self):
+        """
+        Get sales prices for this part
+        """
+        return SalePrice.list(self._api, part=self.pk)[0].price
 
     def getRequirements(self):
         """
@@ -209,6 +215,28 @@ class InternalPrice(inventree.base.InventreeObject):
             'part': part,
             'quantity': quantity,
             'price': price,
+        }
+
+        # Send the data to the server
+        return api.post(cls.URL, data)
+
+
+class SalePrice(inventree.base.InventreeObject):
+    """ Class representing the SalePrice model """
+
+    URL = 'part/sale-price'
+
+    @classmethod
+    def setSalePrice(cls, api, part, quantity: int, price: float, price_currency: str):
+        """
+        Set the sale price for this part
+        """
+
+        data = {
+            'part': part,
+            'quantity': quantity,
+            'price': price,
+            'price_currency': price_currency,
         }
 
         # Send the data to the server
