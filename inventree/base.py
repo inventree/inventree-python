@@ -7,7 +7,7 @@ from typing import Type
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.13.3"
+INVENTREE_PYTHON_VERSION = "0.13.4"
 
 
 logger = logging.getLogger('inventree')
