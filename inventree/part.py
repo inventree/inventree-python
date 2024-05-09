@@ -106,7 +106,7 @@ class Part(
 
     def isUsedIn(self):
         """ Return a list of all the parts this part is used in """
-        return BomItem.list(self._api, sub_part=self.pk)
+        return BomItem.list(self._api, uses=self.pk)
 
     def getBuilds(self, **kwargs):
         """ Return the builds associated with this part """
