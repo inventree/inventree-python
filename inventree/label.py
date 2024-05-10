@@ -268,3 +268,8 @@ class LabelTemplate(LabelFunctions):
 
     URL = 'label/template'
     MIN_API_VERSION = MODERN_LABEL_PRINTING_API
+
+    def __str__(self):
+        """String representation of the LabelTemplate instance."""
+
+        return f"LabelTemplate <{self.pk}>: '{self.name}' - ({self.model_type})"
