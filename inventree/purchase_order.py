@@ -25,6 +25,7 @@ class PurchaseOrder(
     """ Class representing the PurchaseOrder database model """
 
     URL = 'order/po'
+    MODEL_TYPE = 'purchaseorder'
 
     # Setup for Report mixin
     REPORTNAME = 'po'

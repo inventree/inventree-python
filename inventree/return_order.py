@@ -28,6 +28,7 @@ class ReturnOrder(
 
     URL = 'order/ro'
     MIN_API_VERSION = 104
+    MODEL_TYPE = 'returnorder'
 
     # Setup for Report mixin
     REPORTNAME = 'ro'

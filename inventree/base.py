@@ -23,6 +23,8 @@ class InventreeObject(object):
     MIN_API_VERSION = None
     MAX_API_VERSION = None
 
+    MODEL_TYPE = None
+
     def __str__(self):
         """
         Simple human-readable printing.
@@ -67,6 +69,11 @@ class InventreeObject(object):
         # If the data are not populated, fetch from server
         if len(self._data) == 0:
             self.reload()
+
+    @classmethod
+    def getModelType(cls):
+        """Return the model type for this label printing class."""
+        return cls.MODEL_TYPE
 
     @classmethod
     def checkApiVersion(cls, api):

@@ -28,14 +28,6 @@ class LabelPrintingMixin:
     LABELNAME = ''
     LABELITEM = ''
 
-    # Each class should specify the associated 'model_type' attribite - e.g. 'stockitem'
-    MODEL_TYPE = None
-
-    @classmethod
-    def getModelType(cls):
-        """Return the model type for this label printing class."""
-        return cls.MODEL_TYPE or cls.LABELNAME
-
     def getTemplateId(self, template):
         """Return the ID (pk) from the supplied template."""
 
@@ -45,7 +37,7 @@ class LabelPrintingMixin:
         if hasattr(template, 'pk'):
             return int(template.pk)
         
-        raise ValueError(f"Provided template is not a valid type: {type(template)}")
+        raise ValueError(f"Provided label template is not a valid type: {type(template)}")
 
     def saveOutput(self, output, filename):
         """Save the output from a label printing job to the specified file path."""
@@ -161,8 +153,6 @@ class LabelPrintingMixin:
         if self._api.api_version < MODERN_LABEL_PRINTING_API:
             logger.error("Legacy label printing API is not supported")
             return []
-
-        print("getting templates for:", self.getModelType())
 
         return LabelTemplate.list(
             self._api,
