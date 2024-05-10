@@ -7,6 +7,7 @@ import inventree.base
 # Ref: https://github.com/inventree/InvenTree/pull/7074
 MODERN_LABEL_PRINTING_API = 197
 
+
 class ReportPrintingMixin:
     """Mixin class for report printing.
 
@@ -49,7 +50,7 @@ class ReportPrintingMixin:
         if self._api.api_version < MODERN_LABEL_PRINTING_API:
             return self.printReportLegacy(report, destination, *args, **kwargs)
 
-        print_url = '/report/print/'        
+        print_url = '/report/print/'
         template_id = self.getTemplateId(report)
 
         response = self._api.post(
@@ -89,6 +90,7 @@ class ReportPrintingMixin:
         """Return a list of report templates which match this model class."""
 
         return ReportTemplate.list(self._api, model_type=self.MODEL_TYPE, **kwargs)
+
 
 class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Base class for report functions"""
@@ -164,7 +166,6 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
         return self._api.downloadFile(url=self._data['template'], destination=destination, overwrite=overwrite)
 
 
-
 class ReportTemplate(ReportFunctions):
     """Class representing the ReportTemplatel model."""
 
@@ -177,6 +178,7 @@ class ReportBoM(ReportFunctions):
 
     URL = 'report/bom'
     MAX_API_VERSION = MODERN_LABEL_PRINTING_API
+
 
 class ReportBuild(ReportFunctions):
     """Class representing ReportBuild"""

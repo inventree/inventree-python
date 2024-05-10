@@ -10,6 +10,7 @@ from test_api import InvenTreeTestCase  # noqa: E402
 from inventree.build import Build  # noqa: E402
 from inventree.report import ReportTemplate  # noqa: E402
 
+
 class ReportClassesTest(InvenTreeTestCase):
     """Tests for Report functions models"""
 
@@ -32,7 +33,7 @@ class ReportClassesTest(InvenTreeTestCase):
 
         # enable a template
         templates[0].save(data={'enabled': True})
-        
+
         templates = ReportTemplate.list(self.api, enabled=True)
         self.assertGreater(len(templates), 0)
     
