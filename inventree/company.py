@@ -12,14 +12,14 @@ class Contact(inventree.base.InventreeObject):
     """Class representing the Contact model"""
 
     URL = 'company/contact/'
-    REQUIRED_API_VERSION = 104
+    MIN_API_VERSION = 104
 
 
 class Address(inventree.base.InventreeObject):
     """Class representing the Address model"""
 
     URL = 'company/address/'
-    REQUIRED_API_VERSION = 126
+    MIN_API_VERSION = 126
 
 
 class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):

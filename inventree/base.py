@@ -20,7 +20,8 @@ class InventreeObject(object):
     URL = ""
 
     # Minimum server version for the particular model type
-    REQUIRED_API_VERSION = None
+    MIN_API_VERSION = None
+    MAX_API_VERSION = None
 
     def __str__(self):
         """
@@ -75,9 +76,12 @@ class InventreeObject(object):
             NotSupportedError if the server API version is too 'old'
         """
 
-        if cls.REQUIRED_API_VERSION is not None:
-            if cls.REQUIRED_API_VERSION > api.api_version:
-                raise NotImplementedError(f"Server API Version ({api.api_version}) is too old for the '{cls.__name__}' class, which requires API version {cls.REQUIRED_API_VERSION}")
+        if cls.MIN_API_VERSION and cls.MIN_API_VERSION > api.api_version:
+            raise NotImplementedError(f"Server API Version ({api.api_version}) is too old for the '{cls.__name__}' class, which requires API version >= {cls.MIN_API_VERSION}")
+
+        if cls.MAX_API_VERSION and cls.MAX_API_VERSION < api.api_version:
+            raise NotImplementedError(f"Server API Version ({api.api_version}) is too new for the '{cls.__name__}' class, which requires API version <= {cls.MAX_API_VERSION}")
+
 
     @classmethod
     def options(cls, api):
