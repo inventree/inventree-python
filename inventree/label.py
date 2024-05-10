@@ -234,21 +234,30 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
 
 
 class LabelLocation(LabelFunctions):
-    """ Class representing the Label/Location database model """
+    """Class representing the Label/Location database model.
+    
+    Note: This class will be deprecated at some point in the future.
+    """
 
     URL = 'label/location'
     MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
 
 
 class LabelPart(LabelFunctions):
-    """ Class representing the Label/Part database model """
+    """Class representing the Label/Part database model.
+    
+    Note: This class will be deprecated at some point in the future.
+    """
 
     URL = 'label/part'
     MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
 
 
 class LabelStock(LabelFunctions):
-    """ Class representing the Label/stock database model """
+    """Class representing the Label/stock database model.
+    
+    Note: This class will be deprecated at some point in the future.
+    """
 
     URL = 'label/stock'
     MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
