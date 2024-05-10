@@ -17,13 +17,18 @@ class LabelPrintingMixin:
 
     Classes which implement this mixin should define the following attributes:
 
-    LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
-    LABELITEM: The name of the label item (e.g. 'parts', 'items', 'locations')
+    Legacy API: < 197
+        - LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
+        - LABELITEM: The name of the label item (e.g. 'parts', 'items', 'locations')
+    
+    Modern API: >= 197
+        - MODEL_TYPE: The model type for the label printing class (e.g. 'part', 'stockitem', 'location')
     """
 
     LABELNAME = ''
     LABELITEM = ''
 
+    # Each class should specify the associated 'model_type' attribite - e.g. 'stockitem'
     MODEL_TYPE = None
 
     @classmethod
