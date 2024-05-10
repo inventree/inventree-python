@@ -7,7 +7,8 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.plugin import InvenTreePlugin
+from inventree.plugin import InvenTreePlugin  # noqa: E402
+
 
 class PluginTest(InvenTreeTestCase):
     """Unit tests for plugin functionality."""
@@ -33,7 +34,6 @@ class PluginTest(InvenTreeTestCase):
         for plugin in plugins:
             for key in expected_attributes:
                 self.assertIn(key, plugin)
-
 
     def test_filter_by_active(self):
         """Filter by plugin active status."""
