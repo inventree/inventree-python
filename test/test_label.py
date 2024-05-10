@@ -9,7 +9,8 @@ from test_api import InvenTreeTestCase  # noqa: E402
 
 from inventree.label import LabelTemplate  # noqa: E402
 from inventree.part import Part  # noqa: E402
-from inventree.plugin import InvenTreePlugin
+from inventree.plugin import InvenTreePlugin  # noqa: E402
+
 
 class LabelTemplateTests(InvenTreeTestCase):
     """Unit tests for label templates and printing, using the modern API."""
@@ -32,7 +33,7 @@ class LabelTemplateTests(InvenTreeTestCase):
             enabled = idx > 0
 
             if template.enabled != enabled:
-                template.save(data = {'enabled': idx > 0})
+                template.save(data={'enabled': idx > 0})
 
         # Filter by 'enabled' status
         templates = LabelTemplate.list(self.api, enabled=True)

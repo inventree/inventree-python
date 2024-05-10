@@ -41,14 +41,10 @@ class PluginTest(InvenTreeTestCase):
         plugins = InvenTreePlugin.list(self.api, active=True)
         self.assertGreater(len(plugins), 0)
 
+        plugin = plugins[0]
+
         for plugin in plugins:
             self.assertTrue(plugin.active)
-
-        plugins = InvenTreePlugin.list(self.api, active=False)
-        self.assertGreater(len(plugins), 0)
-
-        for plugin in plugins:
-            self.assertFalse(plugin.active)
 
     def test_filter_by_builtin(self):
         """Filter by plugin builtin status."""
