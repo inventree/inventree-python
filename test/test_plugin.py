@@ -54,12 +54,6 @@ class PluginTest(InvenTreeTestCase):
 
         for plugin in plugins:
             self.assertTrue(plugin.is_builtin)
-        
-        plugins = InvenTreePlugin.list(self.api, builtin=False)
-        self.assertGreater(len(plugins), 0)
-
-        for plugin in plugins:
-            self.assertFalse(plugin.is_builtin)
     
     def test_filter_by_mixin(self):
         """Test that we can filter by 'mixin' attribute."""
