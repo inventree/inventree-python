@@ -22,6 +22,8 @@ class StockLocation(
 
     URL = 'stock/location'
 
+    MODEL_TYPE = 'stocklocation'
+
     # Setup for Label printing
     LABELNAME = 'location'
     LABELITEM = 'locations'
@@ -69,6 +71,8 @@ class StockItem(
     """Class representing the StockItem database model."""
 
     URL = 'stock'
+
+    MODEL_TYPE = 'stockitem'
 
     # Setup for Label printing
     LABELNAME = 'stock'

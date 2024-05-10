@@ -63,7 +63,7 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
         """
 
         # POST endpoints for creating new reports were added in API version 156
-        cls.REQUIRED_API_VERSION = 156
+        cls.MIN_API_VERSION = 156
 
         try:
             # If template is already a readable object, don't convert it
@@ -90,7 +90,7 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
         """
 
         # PUT/PATCH endpoints for updating data were available before POST endpoints
-        self.REQUIRED_API_VERSION = None
+        self.MIN_API_VERSION = None
 
         if template is not None:
             try:
@@ -159,7 +159,7 @@ class ReportStockLocation(ReportFunctions):
 
     # The Stock location report was added when API version was 127, but the API version was not incremented at the same time
     # The closest API version which has the SLR report is 128
-    REQUIRED_API_VERSION = 128
+    MIN_API_VERSION = 128
     URL = 'report/slr'
 
 

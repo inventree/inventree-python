@@ -7,6 +7,10 @@ import inventree.base
 
 logger = logging.getLogger('inventree')
 
+# The InvenTree API endpoint changed considerably @ version 197
+# Ref: https://github.com/inventree/InvenTree/pull/7074
+MODERN_LABEL_PRINTING_API = 197
+
 
 class LabelPrintingMixin:
     """Mixin class for label printing.
@@ -20,7 +24,25 @@ class LabelPrintingMixin:
     LABELNAME = ''
     LABELITEM = ''
 
-    def printlabel(self, label, plugin=None, destination=None, *args, **kwargs):
+    MODEL_TYPE = None
+
+    @classmethod
+    def getModelType(cls):
+        """Return the model type for this label printing class."""
+        return cls.MODEL_TYPE or cls.LABELNAME
+
+    def printlabel(self, label=None, plugin=None, destination=None, *args, **kwargs):
+        """Print a label for the given item.
+
+        Check the connected API version to determine if the "modern" or "legacy" approach should be used.
+        """
+
+        if self._api.api_version < MODERN_LABEL_PRINTING_API:
+            return self.printLabelLegacy(label, plugin=plugin, destination=destination, *args, **kwargs)
+        else:
+            return self.printLabelModern(label, plugin=plugin, destination=destination, *args, **kwargs)
+
+    def printLabelLegacy(self, label, plugin=None, destination=None, *args, **kwargs):
         """Print the label belonging to the given item.
 
         Set the label with 'label' argument, as the ID of the corresponding
@@ -32,13 +54,18 @@ class LabelPrintingMixin:
         Otherwise, if a destination is given, the file will be downloaded to 'destination'.
         Use overwrite=True to overwrite an existing file.
 
-        If neither plugin nor destination is given, nothing will be done
-        """
+        If neither plugin nor destination is given, nothing will be done.
 
+        Note: This legacy API support will be deprecated at some point in the future.
+        """
+        
         if isinstance(label, (LabelPart, LabelStock, LabelLocation)):
             label_id = label.pk
         else:
-            label_id = label
+            try:
+                label_id = int(label)
+            except ValueError:
+                raise ValueError("Invalid label ID provided")
 
         # Set URL to use
         URL = f'/label/{self.LABELNAME}/{label_id}/print/'
@@ -76,9 +103,29 @@ class LabelPrintingMixin:
         else:
             return response
 
+    def printLabelModern(self, template, plugin=None, destination=None, *args, **kwargs):
+        """Print a label against the provided label template."""
+
+        print_url = '/api/label/print/'
+
+        # Extract template ID
+
+
+    def getLabelTemplates(self, **kwargs):
+        """Return a list of label templates for this model class."""
+
+        if self._api.api_version < MODERN_LABEL_PRINTING_API:
+            logger.error("Legacy label printing API is not supported")
+            return []
+
+        return LabelTemplate.list(
+            self._api,
+            model_type=self.getModelType(),
+            **kwargs
+        )
 
 class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
-    """Base class for label functions"""
+    """Base class for label functions."""
 
     @classmethod
     def create(cls, api, data, label, **kwargs):
@@ -90,7 +137,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         """
 
         # POST endpoints for creating new reports were added in API version 156
-        cls.REQUIRED_API_VERSION = 156
+        cls.MIN_API_VERSION = 156
 
         try:
             # If label is already a readable object, don't convert it
@@ -117,7 +164,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         """
 
         # PUT/PATCH endpoints for updating data were available before POST endpoints
-        self.REQUIRED_API_VERSION = None
+        self.MIN_API_VERSION = None
 
         if label is not None:
             try:
@@ -155,15 +202,25 @@ class LabelLocation(LabelFunctions):
     """ Class representing the Label/Location database model """
 
     URL = 'label/location'
+    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
 
 
 class LabelPart(LabelFunctions):
     """ Class representing the Label/Part database model """
 
     URL = 'label/part'
+    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
 
 
 class LabelStock(LabelFunctions):
     """ Class representing the Label/stock database model """
 
     URL = 'label/stock'
+    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
+
+
+class LabelTemplate(LabelFunctions):
+    """Class representing the LabelTemplate database model."""
+
+    URL = 'label/template'
+    MIN_API_VERSION = MODERN_LABEL_PRINTING_API

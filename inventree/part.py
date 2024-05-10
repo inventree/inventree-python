@@ -81,6 +81,8 @@ class Part(
     LABELNAME = 'part'
     LABELITEM = 'parts'
 
+    MODEL_TYPE = 'part'
+
     def getCategory(self):
         """ Return the part category associated with this part """
         return PartCategory(self._api, self.category)
