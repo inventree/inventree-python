@@ -134,8 +134,12 @@ class LabelPrintingMixin:
 
         if plugin is not None:
             # For the modern printing API, plugin is provided as a pk (integer) value
-            if type(plugin) is not int:
-                raise ValueError(f"Plugin ID must be an integer, not {type(plugin)}")
+            if type(plugin) is int:
+                plugin = int(plugin)
+            elif hasattr(plugin, 'pk'):
+                plugin = int(plugin.pk)
+            else:
+                raise ValueError(f"Invalid plugin provided: {type(plugin)}")
             
             data['plugin'] = plugin
         
@@ -158,6 +162,8 @@ class LabelPrintingMixin:
             logger.error("Legacy label printing API is not supported")
             return []
 
+        print("getting templates for:", self.getModelType())
+
         return LabelTemplate.list(
             self._api,
             model_type=self.getModelType(),
@@ -167,6 +173,15 @@ class LabelPrintingMixin:
 
 class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Base class for label functions."""
+
+    @property
+    def template_key(self):
+        """Return the attribute name for the template file."""
+
+        if self._api.api_version < MODERN_LABEL_PRINTING_API:
+            return 'label'
+        else:
+            return 'template'
 
     @classmethod
     def create(cls, api, data, label, **kwargs):
@@ -189,8 +204,10 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
             if label.readable() is False:
                 raise ValueError("Label template file must be readable")
 
+        template_key = 'template' if api.api_version >= MODERN_LABEL_PRINTING_API else 'label'
+
         try:
-            response = super().create(api, data=data, files={'label': label}, **kwargs)
+            response = super().create(api, data=data, files={template_key: label}, **kwargs)
         finally:
             if label is not None:
                 label.close()
@@ -219,9 +236,9 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
 
             if 'files' in kwargs:
                 files = kwargs.pop('kwargs')
-                files['label'] = label
+                files[self.template_key] = label
             else:
-                files = {'label': label}
+                files = {self.template_key: label}
         else:
             files = None
 
@@ -236,7 +253,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         """Download template file for the label to the given destination"""
 
         # Use downloadFile method to get the file
-        return self._api.downloadFile(url=self._data['label'], destination=destination, overwrite=overwrite)
+        return self._api.downloadFile(url=self._data[self.template_key], destination=destination, overwrite=overwrite)
 
 
 class LabelLocation(LabelFunctions):
