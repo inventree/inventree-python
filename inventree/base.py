@@ -82,7 +82,6 @@ class InventreeObject(object):
         if cls.MAX_API_VERSION and cls.MAX_API_VERSION < api.api_version:
             raise NotImplementedError(f"Server API Version ({api.api_version}) is too new for the '{cls.__name__}' class, which requires API version <= {cls.MAX_API_VERSION}")
 
-
     @classmethod
     def options(cls, api):
         """Perform an OPTIONS request for this model, to determine model information.

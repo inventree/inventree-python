@@ -48,7 +48,7 @@ class LabelPrintingMixin:
         if os.path.exists(filename) and os.path.isdir(filename):
             filename = os.path.join(
                 filename,
-                f'Label_{self.getModelType()}_{label}_{self.pk}.pdf'
+                f'Label_{self.getModelType()}_{self.pk}.pdf'
             )
         
         return self._api.downloadFile(url=output, destination=filename)
@@ -158,6 +158,7 @@ class LabelPrintingMixin:
             model_type=self.getModelType(),
             **kwargs
         )
+
 
 class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Base class for label functions."""
