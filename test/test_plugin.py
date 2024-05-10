@@ -17,6 +17,63 @@ class PluginTest(InvenTreeTestCase):
 
         plugins = InvenTreePlugin.list(self.api)
 
-        for plugin in plugins:
-            print(plugin._data)
+        expected_attributes = [
+            'pk',
+            'key',
+            'name',
+            'package_name',
+            'active',
+            'meta',
+            'mixins',
+            'is_builtin',
+            'is_sample',
+            'is_installed'
+        ]
 
+        for plugin in plugins:
+            for key in expected_attributes:
+                self.assertIn(key, plugin)
+
+
+    def test_filter_by_active(self):
+        """Filter by plugin active status."""
+
+        plugins = InvenTreePlugin.list(self.api, active=True)
+        self.assertGreater(len(plugins), 0)
+
+        for plugin in plugins:
+            self.assertTrue(plugin.active)
+
+        plugins = InvenTreePlugin.list(self.api, active=False)
+        self.assertGreater(len(plugins), 0)
+
+        for plugin in plugins:
+            self.assertFalse(plugin.active)
+
+    def test_filter_by_builtin(self):
+        """Filter by plugin builtin status."""
+
+        plugins = InvenTreePlugin.list(self.api, builtin=True)
+        self.assertGreater(len(plugins), 0)
+
+        for plugin in plugins:
+            self.assertTrue(plugin.is_builtin)
+        
+        plugins = InvenTreePlugin.list(self.api, builtin=False)
+        self.assertGreater(len(plugins), 0)
+
+        for plugin in plugins:
+            self.assertFalse(plugin.is_builtin)
+    
+    def test_filter_by_mixin(self):
+        """Test that we can filter by 'mixin' attribute."""
+
+        n = InvenTreePlugin.count(self.api)
+
+        plugins = InvenTreePlugin.list(self.api, mixin='labels')
+
+        self.assertLess(len(plugins), n)
+        self.assertGreater(len(plugins), 0)
+
+        for plugin in plugins:
+            self.assertIn('labels', plugin.mixins)
