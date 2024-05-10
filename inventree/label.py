@@ -31,7 +31,29 @@ class LabelPrintingMixin:
         """Return the model type for this label printing class."""
         return cls.MODEL_TYPE or cls.LABELNAME
 
-    def printlabel(self, label=None, plugin=None, destination=None, *args, **kwargs):
+    def getTemplateId(self, template):
+        """Return the ID (pk) from the supplied template."""
+
+        if type(template) in [str, int]:
+            return int(template)
+        
+        if hasattr(template, 'pk'):
+            return int(template.pk)
+        
+        raise ValueError(f"Provided template is not a valid type: {type(template)}")
+
+    def saveOutput(self, output, filename):
+        """Save the output from a label printing job to the specified file path."""
+
+        if os.path.exists(filename) and os.path.isdir(filename):
+            filename = os.path.join(
+                filename,
+                f'Label_{self.getModelType()}_{label}_{self.pk}.pdf'
+            )
+        
+        return self._api.downloadFile(url=output, destination=filename)
+
+    def printLabel(self, label=None, plugin=None, destination=None, *args, **kwargs):
         """Print a label for the given item.
 
         Check the connected API version to determine if the "modern" or "legacy" approach should be used.
@@ -58,15 +80,9 @@ class LabelPrintingMixin:
 
         Note: This legacy API support will be deprecated at some point in the future.
         """
-        
-        if isinstance(label, (LabelPart, LabelStock, LabelLocation)):
-            label_id = label.pk
-        else:
-            try:
-                label_id = int(label)
-            except ValueError:
-                raise ValueError("Invalid label ID provided")
 
+        label_id = self.getTemplateId(label)
+        
         # Set URL to use
         URL = f'/label/{self.LABELNAME}/{label_id}/print/'
 
@@ -75,6 +91,11 @@ class LabelPrintingMixin:
         }
 
         if plugin is not None:
+
+            # For the legacy printing API, plugin is provided as a 'slug' (string)
+            if type(plugin) is not str:
+                raise TypeError(f"Plugin must be a string, not {type(plugin)}")
+
             # Append profile
             params['plugin'] = plugin
 
@@ -88,28 +109,42 @@ class LabelPrintingMixin:
             download_url = response.get('file', None)
 
         # Label file is available for download
-        if download_url and destination is not None:
-            if os.path.exists(destination) and os.path.isdir(destination):
-                # No file name given, construct one
-                # Otherwise, filename will be something like '?parts[]=37'
-                destination = os.path.join(
-                    destination,
-                    f'Label_{self.LABELNAME}{label}_{self.pk}.pdf'
-                )
-
-            # Use downloadFile method to get the file
-            return self._api.downloadFile(url=download_url, destination=destination, params=params, *args, **kwargs)
-
+        if download_url and destination:
+            return self.saveOutput(download_url, destination)
+            
         else:
             return response
 
     def printLabelModern(self, template, plugin=None, destination=None, *args, **kwargs):
         """Print a label against the provided label template."""
 
-        print_url = '/api/label/print/'
+        print_url = '/label/print/'
 
-        # Extract template ID
+        template_id = self.getTemplateId(template)
 
+        data = {
+            'template': template_id,
+            'items': [self.pk]
+        }
+
+        if plugin is not None:
+            # For the modern printing API, plugin is provided as a pk (integer) value
+            if type(plugin) is not int:
+                raise ValueError(f"Plugin ID must be an integer, not {type(plugin)}")
+            
+            data['plugin'] = plugin
+        
+        response = self._api.post(
+            print_url,
+            data=data
+        )
+
+        output = response.get('output', None)
+
+        if output and destination:
+            return self.saveOutput(output, destination)
+        else:
+            return response
 
     def getLabelTemplates(self, **kwargs):
         """Return a list of label templates for this model class."""
