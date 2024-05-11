@@ -141,8 +141,17 @@ def stop_server(c, debug=False):
     c.run('docker-compose -f test/docker-compose.yml down', hide=None if debug else 'both')
 
 
-@task
-def test(c, source=None, update=False, reset=False, debug=False):
+@task(help={
+    'source': 'Specify the source file to test',
+    'update': 'If set, update the docker image before running tests',
+    'reset': 'If set, reset test data to a known state',
+    'host': 'Specify the InvenTree host address (default = http://localhost:12345)',
+    'username': 'Specify the InvenTree username (default = testuser)',
+    'password': 'Specify the InvenTree password (default = testpassword)',
+    'noserver': 'If set, do not spin up the docker container',
+}
+)
+def test(c, source=None, update=False, reset=False, debug=False, host=None, username=None, password=None, noserver=False):
     """
     Run the unit tests for the python bindings.
     Performs the following steps:
@@ -165,23 +174,22 @@ def test(c, source=None, update=False, reset=False, debug=False):
             print(f"Error: Source file '{source}' does not exist")
             sys.exit(1)
 
-    if update:
-        # Pull down the latest InvenTree docker image
-        update_image(c, debug=debug)
+    if not noserver:
+        if update:
+            # Pull down the latest InvenTree docker image
+            update_image(c, debug=debug)
 
-    if reset:
-        stop_server(c, debug=debug)
-        reset_data(c, debug=debug)
+        if reset:
+            stop_server(c, debug=debug)
+            reset_data(c, debug=debug)
 
-    # Launch the InvenTree server (in a docker container)
-    start_server(c)
-
-    # Wait until the docker server is running, and API is accessible
+        # Launch the InvenTree server (in a docker container)
+        start_server(c)
 
     # Set environment variables so test scripts can access them
-    os.environ['INVENTREE_PYTHON_TEST_SERVER'] = 'http://localhost:12345'
-    os.environ['INVENTREE_PYTHON_TEST_USERNAME'] = 'testuser'
-    os.environ['INVENTREE_PYTHON_TEST_PASSWORD'] = 'testpassword'
+    os.environ['INVENTREE_PYTHON_TEST_SERVER'] = host or 'http://localhost:12345'
+    os.environ['INVENTREE_PYTHON_TEST_USERNAME'] = username or 'testuser'
+    os.environ['INVENTREE_PYTHON_TEST_PASSWORD'] = password or 'testpassword'
 
     # Run unit tests
 

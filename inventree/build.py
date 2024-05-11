@@ -21,6 +21,7 @@ class Build(
     """ Class representing the Build database model """
 
     URL = 'build'
+    MODEL_TYPE = 'build'
 
     # Setup for Report mixin
     REPORTNAME = 'build'

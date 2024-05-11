@@ -25,6 +25,7 @@ class SalesOrder(
     """ Class representing the SalesOrder database model """
 
     URL = 'order/so'
+    MODEL_TYPE = 'salesorder'
 
     # Setup for Report mixin
     REPORTNAME = 'so'

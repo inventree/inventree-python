@@ -14,7 +14,7 @@ class ReturnOrderAttachment(inventree.base.InventreeObject):
 
     URL = 'order/ro/attachment'
     ATTACH_TO = 'order'
-    REQUIRED_API_VERSION = 104
+    MIN_API_VERSION = 104
 
 
 class ReturnOrder(
@@ -27,7 +27,8 @@ class ReturnOrder(
     """Class representing the ReturnOrder database model"""
 
     URL = 'order/ro'
-    REQUIRED_API_VERSION = 104
+    MIN_API_VERSION = 104
+    MODEL_TYPE = 'returnorder'
 
     # Setup for Report mixin
     REPORTNAME = 'ro'
@@ -79,7 +80,7 @@ class ReturnOrderLineItem(inventree.base.InventreeObject):
     """Class representing the ReturnOrderLineItem model"""
 
     URL = 'order/ro-line/'
-    REQUIRED_API_VERSION = 104
+    MIN_API_VERSION = 104
 
     def getOrder(self):
         """Return the ReturnOrder to which this ReturnOrderLineItem belongs"""
@@ -94,7 +95,7 @@ class ReturnOrderExtraLineItem(inventree.base.InventreeObject):
     """Class representing the ReturnOrderExtraLineItem model"""
 
     URL = 'order/ro-extra-line/'
-    REQUIRED_API_VERSION = 104
+    MIN_API_VERSION = 104
 
     def getOrder(self):
         """Return the ReturnOrder to which this line item belongs"""

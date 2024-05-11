@@ -10,4 +10,4 @@ class ProjectCode(inventree.base.InventreeObject):
     """Class representing the 'ProjectCode' database model"""
 
     URL = 'project-code/'
-    REQUIRED_API_VERSION = 109
+    MIN_API_VERSION = 109
