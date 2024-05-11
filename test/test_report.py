@@ -9,6 +9,7 @@ from test_api import InvenTreeTestCase  # noqa: E402
 
 from inventree.build import Build  # noqa: E402
 from inventree.report import ReportTemplate  # noqa: E402
+from inventree.report import MODERN_LABEL_PRINTING_API  # noqa: E402
 
 
 class ReportClassesTest(InvenTreeTestCase):
@@ -16,6 +17,10 @@ class ReportClassesTest(InvenTreeTestCase):
 
     def test_list_templates(self):
         """List the available report templates."""
+
+        # Test only for the modern API
+        if self.api.api_version < MODERN_LABEL_PRINTING_API:
+            return
 
         templates = ReportTemplate.list(self.api)
 
@@ -39,6 +44,10 @@ class ReportClassesTest(InvenTreeTestCase):
     
     def test_print_report(self):
         """Test report printing."""
+
+        # Test only for the modern API
+        if self.api.api_version < MODERN_LABEL_PRINTING_API:
+            return
 
         # Find a build to print
         build = Build.list(self.api, limit=1)[0]
