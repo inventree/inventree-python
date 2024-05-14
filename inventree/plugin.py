@@ -8,6 +8,11 @@ class InvenTreePlugin(inventree.base.MetadataMixin, inventree.base.InventreeObje
 
     URL = 'plugins'
 
+    @classmethod
+    def getPkField(cls):
+        """Return the primary key field for the PluginConfig object."""
+        return 'key'
+
     def setActive(self, active: bool):
         """Activate or deactivate this plugin."""
 
