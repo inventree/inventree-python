@@ -173,8 +173,8 @@ class InventreeObject(object):
         cls.checkApiVersion(api)
 
         # Ensure the pk value is None so an existing object is not updated
-        if self.getPkField() in data.keys():
-            data.pop(self.getPkField())
+        if cls.getPkField() in data.keys():
+            data.pop(cls.getPkField())
 
         response = api.post(cls.URL, data, **kwargs)
 
