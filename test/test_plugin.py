@@ -16,6 +16,9 @@ class PluginTest(InvenTreeTestCase):
     def test_plugin_list(self):
         """Test plugin list API."""
 
+        if api.api_version < 197:
+            return
+
         plugins = InvenTreePlugin.list(self.api)
 
         expected_attributes = [
@@ -38,6 +41,9 @@ class PluginTest(InvenTreeTestCase):
     def test_filter_by_active(self):
         """Filter by plugin active status."""
 
+        if api.api_version < 197:
+            return
+
         plugins = InvenTreePlugin.list(self.api, active=True)
         self.assertGreater(len(plugins), 0)
 
@@ -49,6 +55,9 @@ class PluginTest(InvenTreeTestCase):
     def test_filter_by_builtin(self):
         """Filter by plugin builtin status."""
 
+        if api.api_version < 197:
+            return
+
         plugins = InvenTreePlugin.list(self.api, builtin=True)
         self.assertGreater(len(plugins), 0)
 
@@ -57,6 +66,9 @@ class PluginTest(InvenTreeTestCase):
     
     def test_filter_by_mixin(self):
         """Test that we can filter by 'mixin' attribute."""
+
+        if api.api_version < 197:
+            return
 
         n = InvenTreePlugin.count(self.api)
 
