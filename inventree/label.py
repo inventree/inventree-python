@@ -9,7 +9,7 @@ logger = logging.getLogger('inventree')
 
 # The InvenTree API endpoint changed considerably @ version 197
 # Ref: https://github.com/inventree/InvenTree/pull/7074
-MODERN_LABEL_PRINTING_API = 197
+MODERN_LABEL_PRINTING_API = 198
 
 
 class LabelPrintingMixin:
