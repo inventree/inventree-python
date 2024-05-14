@@ -7,6 +7,7 @@ class InvenTreePlugin(inventree.base.MetadataMixin, inventree.base.InventreeObje
     """Represents a PluginConfig instance on the InvenTree server."""
 
     URL = 'plugins'
+    MIN_API_VERSION = 197
 
     @classmethod
     def getPkField(cls):
