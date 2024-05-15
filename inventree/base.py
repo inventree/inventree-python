@@ -44,7 +44,13 @@ class InventreeObject(object):
 
         Note that by default this is the 'pk' field, but can be overridden in subclasses.
         """
-        return self.getPkValue()
+        val = self.getPkValue()
+
+        # Coerce 'pk' values to integer
+        if self.getPkField() == 'pk':
+            val = int(val)
+        
+        return val
 
     def __str__(self):
         """
@@ -74,7 +80,7 @@ class InventreeObject(object):
             try:
                 pk = int(str(pk).strip())
             except Exception:
-                raise ValueError(f"Invalid primary key value '{pk}' for {self.__class__}")
+                raise TypeError(f"Invalid primary key value '{pk}' for {self.__class__}")
             
             if pk <= 0:
                 raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
