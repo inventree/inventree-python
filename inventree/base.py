@@ -70,9 +70,9 @@ class InventreeObject(object):
         if pk is None and data:
             pk = data.get(self.getPkField(), None)
 
-        if self.getPkField() == 'pk' and type(pk) is not int:
-            raise TypeError(f"Primary key value ({pk}) for {self.__class__} must be an integer.")
-
+        if self.getPkField() == 'pk' and pk is not None:
+            pk = int(str(pk).strip())
+   
         if type(pk) is int and pk <= 0:
             raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
