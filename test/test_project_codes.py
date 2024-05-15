@@ -11,10 +11,10 @@ from inventree.project_code import ProjectCode  # noqa: E402
 
 
 class ProjectCodeTest(InvenTreeTestCase):
-    """Tests for the ProjectCode model"""
+    """Tests for the ProjectCode model."""
 
     def test_project_code_create(self):
-        """Test we can create a new project code"""
+        """Test we can create a new project code."""
 
         n = ProjectCode.count(self.api)
 

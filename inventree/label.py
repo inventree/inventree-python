@@ -129,7 +129,7 @@ class LabelPrintingMixin:
             if type(plugin) is str:
                 pass
             elif hasattr(plugin, 'key'):
-                plugin = int(plugin.key)
+                plugin = plugin.key
             else:
                 raise ValueError(f"Invalid plugin provided: {type(plugin)}")
             
