@@ -9,7 +9,7 @@ logger = logging.getLogger('inventree')
 
 # The InvenTree API endpoint changed considerably @ version 197
 # Ref: https://github.com/inventree/InvenTree/pull/7074
-MODERN_LABEL_PRINTING_API = 197
+MODERN_LABEL_PRINTING_API = 198
 
 
 class LabelPrintingMixin:
@@ -17,11 +17,11 @@ class LabelPrintingMixin:
 
     Classes which implement this mixin should define the following attributes:
 
-    Legacy API: < 197
+    Legacy API: < 198
         - LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
         - LABELITEM: The name of the label item (e.g. 'parts', 'items', 'locations')
     
-    Modern API: >= 197
+    Modern API: >= 198
         - MODEL_TYPE: The model type for the label printing class (e.g. 'part', 'stockitem', 'location')
     """
 
@@ -125,11 +125,11 @@ class LabelPrintingMixin:
         }
 
         if plugin is not None:
-            # For the modern printing API, plugin is provided as a pk (integer) value
-            if type(plugin) is int:
-                plugin = int(plugin)
-            elif hasattr(plugin, 'pk'):
-                plugin = int(plugin.pk)
+            # For the modern printing API, plugin is provided as a key (string) value
+            if type(plugin) is str:
+                pass
+            elif hasattr(plugin, 'key'):
+                plugin = int(plugin.key)
             else:
                 raise ValueError(f"Invalid plugin provided: {type(plugin)}")
             

@@ -25,13 +25,40 @@ class InventreeObject(object):
 
     MODEL_TYPE = None
 
+    @classmethod
+    def getPkField(cls):
+        """Return the primary key field name for this model.
+
+        The default value (used for most models) is 'pk'.
+        """
+        return 'pk'
+
+    def getPkValue(self):
+        """Return the primary key value for this model."""
+
+        return self._data.get(self.getPkField(), None)
+
+    @property
+    def pk(self):
+        """Override the 'pk' property to return the primary key value for this object.
+
+        Note that by default this is the 'pk' field, but can be overridden in subclasses.
+        """
+        val = self.getPkValue()
+
+        # Coerce 'pk' values to integer
+        if self.getPkField() == 'pk':
+            val = int(val)
+        
+        return val
+
     def __str__(self):
         """
         Simple human-readable printing.
         Can override in subclass
         """
 
-        return f"{type(self)}<pk={self.pk}>"
+        return f"{type(self)}<{self.getPkField()}={self.pk}>"
 
     def __init__(self, api, pk=None, data=None):
         """ Instantiate this InvenTree object.
@@ -47,16 +74,16 @@ class InventreeObject(object):
         # If the pk is not explicitly provided,
         # extract it from the provided dataset
         if pk is None and data:
-            pk = data.get('pk', None)
+            pk = data.get(self.getPkField(), None)
 
-        # Convert to integer
-        try:
-            pk = int(pk)
-        except Exception:
-            raise TypeError(f"Supplied <pk> value ({pk}) for {self.__class__} is invalid.")
-
-        if pk <= 0:
-            raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
+        if self.getPkField() == 'pk' and pk is not None:
+            try:
+                pk = int(str(pk).strip())
+            except Exception:
+                raise TypeError(f"Invalid primary key value '{pk}' for {self.__class__}")
+            
+            if pk <= 0:
+                raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
         self._url = f"{self.URL}/{pk}/"
         self._api = api
@@ -151,18 +178,6 @@ class InventreeObject(object):
 
         return [k for k in cls.fields(api).keys()]
 
-    @property
-    def pk(self):
-        """ Convenience method for accessing primary-key field """
-        val = self._data.get('pk', None)
-
-        try:
-            val = int(val)
-        except ValueError:
-            pass
-
-        return val
-
     @classmethod
     def create(cls, api, data, **kwargs):
         """ Create a new database object in this class. """
@@ -170,8 +185,8 @@ class InventreeObject(object):
         cls.checkApiVersion(api)
 
         # Ensure the pk value is None so an existing object is not updated
-        if 'pk' in data.keys():
-            data.pop('pk')
+        if cls.getPkField() in data.keys():
+            data.pop(cls.getPkField())
 
         response = api.post(cls.URL, data, **kwargs)
 
@@ -221,7 +236,7 @@ class InventreeObject(object):
             response = response['results']
 
         for data in response:
-            if 'pk' in data:
+            if cls.getPkField() in data:
                 items.append(cls(data=data, api=api))
 
         return items

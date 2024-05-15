@@ -5,7 +5,7 @@ import inventree.base
 
 # The InvenTree API endpoint changed considerably @ version 197
 # Ref: https://github.com/inventree/InvenTree/pull/7074
-MODERN_LABEL_PRINTING_API = 197
+MODERN_LABEL_PRINTING_API = 198
 
 
 class ReportPrintingMixin:
@@ -17,7 +17,7 @@ class ReportPrintingMixin:
         - REPORTNAME: The name of the report type, as given in the API (e.g. 'bom', 'build', 'po')
         - REPORTITEM: The name of items send to the report print endpoint.
         
-    Modern API: >= 197
+    Modern API: >= 198
         - MODEL_TYPE: The model type of the report (e.g. 'purchaseorder', 'stocklocation')
     """
 
