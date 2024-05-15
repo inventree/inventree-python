@@ -71,10 +71,13 @@ class InventreeObject(object):
             pk = data.get(self.getPkField(), None)
 
         if self.getPkField() == 'pk' and pk is not None:
-            pk = int(str(pk).strip())
-   
-        if type(pk) is int and pk <= 0:
-            raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
+            try:
+                pk = int(str(pk).strip())
+            except Exception:
+                raise ValueError(f"Invalid primary key value '{pk}' for {self.__class__}")
+            
+            if pk <= 0:
+                raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
         self._url = f"{self.URL}/{pk}/"
         self._api = api
