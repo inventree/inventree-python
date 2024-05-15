@@ -13,10 +13,30 @@ from inventree.plugin import InvenTreePlugin  # noqa: E402
 class PluginTest(InvenTreeTestCase):
     """Unit tests for plugin functionality."""
 
+    def test_plugin_lookup(self):
+        """Test plugin lookup by key."""
+
+        if self.api.api_version < InvenTreePlugin.MIN_API_VERSION:
+            return
+
+        plugins = InvenTreePlugin.list(self.api)
+
+        self.assertGreater(len(plugins), 0)
+
+        p1 = plugins[0]
+
+        # Access the plugin via primary key value
+        p2 = InvenTreePlugin(self.api, p1.key)
+
+        self.assertEqual(p1.key, p2.key)
+        self.assertEqual(p1.name, p2.name)
+
+        self.assertEqual(p1._data['pk'], p2._data['pk'])
+
     def test_plugin_list(self):
         """Test plugin list API."""
 
-        if self.api.api_version < 197:
+        if self.api.api_version < InvenTreePlugin.MIN_API_VERSION:
             return
 
         plugins = InvenTreePlugin.list(self.api)
@@ -41,7 +61,7 @@ class PluginTest(InvenTreeTestCase):
     def test_filter_by_active(self):
         """Filter by plugin active status."""
 
-        if self.api.api_version < 197:
+        if self.api.api_version < InvenTreePlugin.MIN_API_VERSION:
             return
 
         plugins = InvenTreePlugin.list(self.api, active=True)
@@ -55,7 +75,7 @@ class PluginTest(InvenTreeTestCase):
     def test_filter_by_builtin(self):
         """Filter by plugin builtin status."""
 
-        if self.api.api_version < 197:
+        if self.api.api_version < InvenTreePlugin.MIN_API_VERSION:
             return
 
         plugins = InvenTreePlugin.list(self.api, builtin=True)
@@ -67,7 +87,7 @@ class PluginTest(InvenTreeTestCase):
     def test_filter_by_mixin(self):
         """Test that we can filter by 'mixin' attribute."""
 
-        if self.api.api_version < 197:
+        if self.api.api_version < InvenTreePlugin.MIN_API_VERSION:
             return
 
         n = InvenTreePlugin.count(self.api)
