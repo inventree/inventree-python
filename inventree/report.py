@@ -17,7 +17,7 @@ class ReportPrintingMixin:
         - REPORTNAME: The name of the report type, as given in the API (e.g. 'bom', 'build', 'po')
         - REPORTITEM: The name of items send to the report print endpoint.
         
-    Modern API: >= 197
+    Modern API: >= 198
         - MODEL_TYPE: The model type of the report (e.g. 'purchaseorder', 'stocklocation')
     """
 
