@@ -394,7 +394,7 @@ class PartTest(InvenTreeTestCase):
         with self.assertRaises(requests.exceptions.HTTPError) as ar:
             response = p.delete()
 
-        self.assertIn("is active: cannot delete", str(ar.exception))
+        self.assertIn("Cannot delete this part as it is still active", str(ar.exception))
 
         p.save(data={'active': False})
         response = p.delete()
