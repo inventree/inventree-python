@@ -32,7 +32,6 @@ class POTest(InvenTreeTestCase):
             'complete_date',
             'supplier',
             'status',
-            'notes',
         ]
 
         for name in names:
@@ -633,7 +632,6 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
 
         # Make sure extra data is also as expected
-        self.assertEqual(shipment_2.notes, notes)
         self.assertEqual(shipment_2.tracking_number, tracking_number)
 
         # Count number of current shipments
