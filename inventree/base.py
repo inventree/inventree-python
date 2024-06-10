@@ -430,7 +430,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         return api.api_version < 207
 
     @classmethod
-    def get_url(cls, api):
+    def get_attachment_url(cls, api):
         """Return the URL to be used for this attachment object."""
 
         return cls.URL if Attachment.use_legacy_tables(api) else cls.ATTACHMENT_URL
@@ -459,7 +459,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             data['model_id'] = model_id
             data['model_type'] = cls.MODEL_TYPE
 
-        url = cls.get_url(api)
+        url = cls.get_attachment_url(api)
 
         if response := api.post(url, data):
             logger.info(f"Link attachment added to {url}")
@@ -481,7 +481,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             kwargs: Additional kwargs to supply
         """
 
-        url = cls.get_url(api)
+        url = cls.get_attachment_url(api)
 
         data = kwargs
         data['comment'] = comment
