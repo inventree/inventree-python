@@ -115,6 +115,7 @@ class ManufacturerPartAttachment(inventree.base.Attachment):
 
     URL = 'company/part/manufacturer/attachment'
     ATTACH_TO = 'manufacturer_part'
+    MODEL_TYPE = 'manufacturerpart'
 
 
 class ManufacturerPart(

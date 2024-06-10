@@ -9,6 +9,7 @@ class BuildAttachment(inventree.base.Attachment):
 
     URL = 'build/attachment'
     ATTACH_TO = 'build'
+    MODEL_TYPE = 'build'
 
 
 class Build(

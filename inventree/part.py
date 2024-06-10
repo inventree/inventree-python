@@ -63,6 +63,7 @@ class PartAttachment(inventree.base.Attachment):
 
     URL = 'part/attachment'
     ATTACH_TO = 'part'
+    MODEL_TYPE = 'part'
 
 
 class Part(

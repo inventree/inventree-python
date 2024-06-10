@@ -12,9 +12,11 @@ import inventree.stock
 class ReturnOrderAttachment(inventree.base.InventreeObject):
     """Class representing the ReturnOrderAttachment model"""
 
+    MIN_API_VERSION = 104
+
     URL = 'order/ro/attachment'
     ATTACH_TO = 'order'
-    MIN_API_VERSION = 104
+    MODEL_TYPE = 'returnorder'
 
 
 class ReturnOrder(

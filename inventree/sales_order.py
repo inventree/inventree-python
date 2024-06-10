@@ -13,6 +13,7 @@ class SalesOrderAttachment(inventree.base.Attachment):
 
     URL = 'order/so/attachment'
     ATTACH_TO = 'order'
+    MODEL_TYPE = 'salesorder'
 
 
 class SalesOrder(

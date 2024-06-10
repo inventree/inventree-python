@@ -58,6 +58,7 @@ class StockItemAttachment(inventree.base.Attachment):
 
     URL = 'stock/attachment'
     ATTACH_TO = 'stock_item'
+    MODEL_TYPE = 'stockitem'
 
 
 class StockItem(

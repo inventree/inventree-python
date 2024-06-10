@@ -13,6 +13,7 @@ class PurchaseOrderAttachment(inventree.base.Attachment):
 
     URL = 'order/po/attachment'
     ATTACH_TO = 'order'
+    MODEL_TYPE = 'purchaseorder'
 
 
 class PurchaseOrder(
