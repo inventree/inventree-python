@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree import company  # noqa: E402
 from inventree import order  # noqa: E402
 from inventree import part  # noqa: E402
@@ -516,12 +517,12 @@ class SOTest(InvenTreeTestCase):
 
         pk = response['pk']
 
-        attachment = order.SalesOrderAttachment(self.api, pk=pk)
+        attachment = Attachment(self.api, pk=pk)
 
         self.assertEqual(attachment.order, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 
-        attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
+        attachments = order.getAttachments()
         self.assertEqual(len(attachments), n + 1)
 
     def test_so_shipment(self):
