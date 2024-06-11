@@ -70,7 +70,8 @@ class BuildOrderTest(InvenTreeTestCase):
 
         response = build.uploadAttachment(fn, comment='A self referencing upload!')
 
-        self.assertEqual(response['build'], build.pk)
+        self.assertEqual(response['model_type'], 'build')
+        self.assertEqual(response['model_id'], build.pk)
         self.assertEqual(response['comment'], 'A self referencing upload!')
 
         self.assertEqual(len(build.getAttachments()), n + 1)
