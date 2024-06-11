@@ -384,7 +384,7 @@ class POTest(InvenTreeTestCase):
             po.uploadAttachment('not_found.txt')
 
         # Check that attachments uploaded OK
-        attachments = order.getAttachments(self.api)
+        attachments = po.getAttachments(self.api)
         self.assertEqual(len(attachments), 3)
 
 
@@ -522,7 +522,7 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(attachment.order, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 
-        attachments = order.getAttachments()
+        attachments = so.getAttachments()
         self.assertEqual(len(attachments), n + 1)
 
     def test_so_shipment(self):

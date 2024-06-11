@@ -62,7 +62,7 @@ class LabelTemplateTests(InvenTreeTestCase):
 
         plugin = plugins[0]
 
-        response = part.printLabel(label=template, plugin=plugin)
+        response = part.printLabel(template, plugin=plugin)
 
         for key in ['created', 'model_type', 'complete', 'output', 'template', 'plugin']:
             self.assertIn(key, response)
