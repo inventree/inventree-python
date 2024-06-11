@@ -15,10 +15,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 from inventree.part import (BomItem, Parameter,  # noqa: E402
-                            ParameterTemplate, Part, PartAttachment,
+                            ParameterTemplate, Part,
                             PartCategory, PartCategoryParameterTemplate,
                             PartRelated, PartTestTemplate)
 from inventree.stock import StockItem  # noqa: E402
@@ -190,7 +191,7 @@ class PartTest(InvenTreeTestCase):
                 'getParameters': Parameter,
                 'getRelated': PartRelated,
                 'getInternalPriceList': InternalPrice,
-                'getAttachments': PartAttachment,
+                'getAttachments': Attachment,
             }
             for fnc, res in functions.items():
                 A = getattr(p, fnc)()
@@ -457,23 +458,20 @@ class PartTest(InvenTreeTestCase):
         """
 
         prt = Part(self.api, pk=1)
-        attachments = PartAttachment.list(self.api, part=1)
+        attachments = prt.getAttachments()
 
         for a in attachments:
-            self.assertEqual(a.part, 1)
+            self.assertEqual(a.model_type, 'part')
+            self.assertEqual(a.model_id, prt.pk)
 
         n = len(attachments)
 
-        # Test that a file upload without the required 'part' parameter fails
-        with self.assertRaises(ValueError):
-            PartAttachment.upload(self.api, 'test-file.txt')
-
         # Test that attempting to upload an invalid file fails
         with self.assertRaises(FileNotFoundError):
-            PartAttachment.upload(self.api, 'test-file.txt', part=1)
+            prt.uploadAttachment(self.api, 'test-file.txt')
 
         # Check that no new files have been uploaded
-        self.assertEqual(len(PartAttachment.list(self.api, part=1)), n)
+        self.assertEqual(len(prt.getAttachments()), n)
 
         # Test that we can upload a file by filename, directly from the Part instance
         filename = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
@@ -488,7 +486,7 @@ class PartTest(InvenTreeTestCase):
         pk = response['pk']
 
         # Check that a new attachment has been created!
-        attachment = PartAttachment(self.api, pk=pk)
+        attachment = Attachment(self.api, pk=pk)
         self.assertTrue(attachment.is_valid())
 
         # Download the attachment to a local file!
@@ -510,17 +508,13 @@ class PartTest(InvenTreeTestCase):
         test_link = "https://inventree.org/"
         test_comment = "inventree.org"
 
-        # Test that an external link attachment without the required 'part' parameter fails
-        with self.assertRaises(ValueError):
-            PartAttachment.add_link(self.api, link=test_link)
-
         # Add valid external link attachment
         part = Part(self.api, pk=1)
         response = part.addLinkAttachment(test_link, comment=test_comment)
         self.assertIsNotNone(response)
 
         # Check that the attachment has been created
-        attachment = PartAttachment(self.api, pk=response["pk"])
+        attachment = Attachment(self.api, pk=response["pk"])
         self.assertTrue(attachment.is_valid())
         self.assertEqual(attachment.link, test_link)
         self.assertEqual(attachment.comment, test_comment)
