@@ -8,7 +8,6 @@ import inventree.part
 import inventree.report
 
 
-
 class PurchaseOrder(
     inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,

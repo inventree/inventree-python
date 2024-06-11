@@ -493,7 +493,6 @@ class AttachmentMixin:
             model_id=self.pk
         )
 
-
     def uploadAttachment(self, attachment, comment=""):
         """Upload a file attachment against this model instance."""
 
@@ -504,7 +503,6 @@ class AttachmentMixin:
             model_type=self.getModelType(),
             model_id=self.pk
         )
-
         
     def addLinkAttachment(self, link, comment=""):
         """Add an external link attachment against this Object.

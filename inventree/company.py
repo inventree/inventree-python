@@ -110,7 +110,6 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-
 class ManufacturerPart(
     inventree.base.AttachmentMixin,
     inventree.base.BulkDeleteMixin,

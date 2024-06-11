@@ -58,7 +58,6 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
         )
 
 
-
 class Part(
     inventree.base.AttachmentMixin,
     inventree.base.BarcodeMixin,
