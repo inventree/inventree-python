@@ -3,7 +3,6 @@
 import json
 import logging
 import os
-from typing import Type
 
 from . import api as inventree_api
 

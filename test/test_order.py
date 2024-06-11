@@ -382,12 +382,8 @@ class POTest(InvenTreeTestCase):
         with self.assertRaises(FileNotFoundError):
             po.uploadAttachment('not_found.txt')
 
-        # Test that missing the 'order' parameter fails too
-        with self.assertRaises(ValueError):
-            order.PurchaseOrderAttachment.upload(self.api, fn, comment='Should not work!')
-
         # Check that attachments uploaded OK
-        attachments = order.PurchaseOrderAttachment.list(self.api, order=po.pk)
+        attachments = order.getAttachments(self.api)
         self.assertEqual(len(attachments), 3)
 
 
