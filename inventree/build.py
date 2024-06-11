@@ -4,16 +4,8 @@ import inventree.base
 import inventree.report
 
 
-class BuildAttachment(inventree.base.Attachment):
-    """Class representing an attachment against a Build object"""
-
-    URL = 'build/attachment'
-    ATTACH_TO = 'build'
-    MODEL_TYPE = 'build'
-
-
 class Build(
-    inventree.base.AttachmentMixin(BuildAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,
@@ -23,10 +15,6 @@ class Build(
 
     URL = 'build'
     MODEL_TYPE = 'build'
-
-    # Setup for Report mixin
-    REPORTNAME = 'build'
-    REPORTITEM = 'build'
 
     def complete(
         self,

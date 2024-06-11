@@ -381,9 +381,6 @@ class BulkDeleteMixin:
 
         """
 
-        if api.api_version < 58:
-            raise NotImplementedError("bulkDelete requires API version 58 or newer")
-
         if not items and not filters:
             raise ValueError("Must supply either 'items' or 'filters' argument")
 
@@ -402,38 +399,9 @@ class BulkDeleteMixin:
 
 
 class Attachment(BulkDeleteMixin, InventreeObject):
-    """
-    Class representing a file attachment object
+    """Class representing a file attachment object."""
 
-    Multiple sub-classes exist, representing various types of attachment models in the database.
-
-    API Versioning:
-    - For API versions < 207, attachments are stored in separate tables
-    - For API versions >= 207, attachments are stored in a single common table
-
-    Each sub-class must define the following attributes:
-    - URL (legacy API endpoint for attachment table)
-    - ATTACH_TO (primary key field name for the object the attachment is attached to) - LEGACY API
-    - MODEL_TYPE (string representing the model type for the attachment) - MODERN API
-    
-    """
-
-    # Name of the primary key field of the InventreeObject the attachment will be attached to
-    ATTACH_TO = None
-
-    # Note: Attachments were moved to a single common table in https://github.com/inventree/InvenTree/pull/7420
-    ATTACHMENT_URL = 'attachment/'
-
-    @staticmethod
-    def use_legacy_tables(api):
-        """Determine if legacy attachment tables should be used."""
-        return api.api_version < 207
-
-    @classmethod
-    def get_attachment_url(cls, api):
-        """Return the URL to be used for this attachment object."""
-
-        return cls.URL if Attachment.use_legacy_tables(api) else cls.ATTACHMENT_URL
+    URL = 'attachment/'
 
     @classmethod
     def add_link(cls, api, link, comment="", **kwargs):
@@ -451,20 +419,10 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         data["comment"] = comment
         data["link"] = link
 
-        if cls.ATTACH_TO not in kwargs:
-            raise ValueError(f"Required argument '{cls.ATTACH_TO}' not supplied to add_link method")
-
-        if not Attachment.use_legacy_tables(api):
-            model_id = kwargs.pop(cls.ATTACH_TO)
-            data['model_id'] = model_id
-            data['model_type'] = cls.MODEL_TYPE
-
-        url = cls.get_attachment_url(api)
-
-        if response := api.post(url, data):
-            logger.info(f"Link attachment added to {url}")
+        if response := api.post(cls.URL, data):
+            logger.info(f"Link attachment added to {cls.URL}")
         else:
-            logger.error(f"Link attachment failed at {url}")
+            logger.error(f"Link attachment failed at {cls.URL}")
 
         return response
 
@@ -481,18 +439,8 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             kwargs: Additional kwargs to supply
         """
 
-        url = cls.get_attachment_url(api)
-
         data = kwargs
         data['comment'] = comment
-
-        if cls.ATTACH_TO not in kwargs:
-            raise ValueError(f"Required argument '{cls.ATTACH_TO}' not supplied to upload method")
-
-        if not Attachment.use_legacy_tables(api):
-            model_id = kwargs.pop(cls.ATTACH_TO)
-            data['model_id'] = model_id
-            data['model_type'] = cls.MODEL_TYPE
 
         if type(attachment) is str:
             if not os.path.exists(attachment):
@@ -501,7 +449,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             # Load the file as an in-memory file object
             with open(attachment, 'rb') as fo:
                 response = api.post(
-                    url,
+                    cls.URL,
                     data,
                     files={
                         'attachment': (os.path.basename(attachment), fo),
@@ -512,7 +460,7 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             # Assumes a StringIO or BytesIO like object
             name = getattr(attachment, 'name', 'filename')
             response = api.post(
-                url,
+                cls.URL,
                 data,
                 files={
                     'attachment': (name, attachment),
@@ -520,9 +468,9 @@ class Attachment(BulkDeleteMixin, InventreeObject):
             )
 
         if response:
-            logger.info(f"File uploaded to {url}")
+            logger.info(f"File uploaded to {cls.URL}")
         else:
-            logger.error(f"File upload failed at {url}")
+            logger.error(f"File upload failed at {cls.URL}")
 
         return response
 
@@ -534,47 +482,46 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         return self._api.downloadFile(self.attachment, destination, **kwargs)
 
 
-def AttachmentMixin(AttachmentSubClass: Type[Attachment]):
-    class Mixin(Attachment):
-        def getAttachments(self):
-            return AttachmentSubClass.list(
-                self._api,
-                **{AttachmentSubClass.ATTACH_TO: self.pk},
-            )
+class AttachmentMixin:
+    """Mixin class which allows a model class to interact with attachments."""
 
-        def uploadAttachment(self, attachment, comment=""):
-            """
-            Upload an attachment (file) against this Object.
+    def getAttachments(self):
+        """Return a list of attachments associated with this object."""
 
-            Args:
-                attachment: Either a string (filename) or a file object
-                comment: Attachment comment
-            """
+        return Attachment.list(
+            self._api,
+            model_type=self.getModelType(),
+            model_id=self.pk
+        )
 
-            return AttachmentSubClass.upload(
-                self._api,
-                attachment,
-                comment=comment,
-                **{AttachmentSubClass.ATTACH_TO: self.pk},
-            )
+
+    def uploadAttachment(self, attachment, comment=""):
+        """Upload a file attachment against this model instance."""
+
+        return Attachment.upload(
+            self._api,
+            attachment,
+            comment=comment,
+            model_type=self.getModelType(),
+            model_id=self.pk
+        )
+
         
-        def addLinkAttachment(self, link, comment=""):
-            """
-            Add an external link attachment against this Object.
+    def addLinkAttachment(self, link, comment=""):
+        """Add an external link attachment against this Object.
 
-            Args:
-                link: The link to attach
-                comment: Attachment comment
-            """
+        Args:
+            link: The link to attach
+            comment: Attachment comment
+        """
 
-            return AttachmentSubClass.add_link(
-                self._api,
-                link,
-                comment=comment,
-                **{AttachmentSubClass.ATTACH_TO: self.pk},
-            )
-
-    return Mixin
+        return Attachment.add_link(
+            self._api,
+            link,
+            comment=comment,
+            model_type=self.getModelType(),
+            model_id=self.pk
+        )
 
 
 class MetadataMixin:
@@ -597,10 +544,6 @@ class MetadataMixin:
         """Read model instance metadata"""
         if self._api:
 
-            if self._api.api_version < 49:
-                logger.error("API version 49 or newer required to access instance metadata")
-                return {}
-
             response = self._api.get(self.metadata_url)
 
             return response['metadata']
@@ -619,10 +562,6 @@ class MetadataMixin:
             raise TypeError("Data provided to 'setMetadata' method must be a dict object")
 
         if self._api:
-
-            if self._api.api_version < 49:
-                logger.error("API version 49 or newer required to access instance metadata")
-                return None
 
             if overwrite:
                 return self._api.put(
