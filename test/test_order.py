@@ -519,7 +519,7 @@ class SOTest(InvenTreeTestCase):
 
         attachment = Attachment(self.api, pk=pk)
 
-        self.assertEqual(attachment.modeL_type, 'salesorder')
+        self.assertEqual(attachment.model_type, 'salesorder')
         self.assertEqual(attachment.model_id, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 

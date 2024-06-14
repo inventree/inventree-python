@@ -26,6 +26,7 @@ class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree
     """ Class representing the Company database model """
 
     URL = 'company'
+    MODEL_TYPE = "company"
 
     def getContacts(self, **kwargs):
         """Return contacts associated with this Company"""
@@ -122,6 +123,7 @@ class ManufacturerPart(
     """
 
     URL = 'company/part/manufacturer'
+    MODEL_TYPE = "manufacturerpart"
 
     def getParameters(self, **kwargs):
         """
