@@ -468,7 +468,7 @@ class PartTest(InvenTreeTestCase):
 
         # Test that attempting to upload an invalid file fails
         with self.assertRaises(FileNotFoundError):
-            prt.uploadAttachment(self.api, 'test-file.txt')
+            prt.uploadAttachment('test-file.txt')
 
         # Check that no new files have been uploaded
         self.assertEqual(len(prt.getAttachments()), n)

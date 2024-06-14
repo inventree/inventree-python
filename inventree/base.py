@@ -441,8 +441,6 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         data = kwargs
         data['comment'] = comment
 
-        print("Attachment.upload:", cls, api, attachment, comment, kwargs)
-
         if type(attachment) is str:
             if not os.path.exists(attachment):
                 raise FileNotFoundError(f"Attachment file '{attachment}' does not exist")
@@ -460,8 +458,6 @@ class Attachment(BulkDeleteMixin, InventreeObject):
         else:
             # Assumes a StringIO or BytesIO like object
             name = getattr(attachment, 'name', 'filename')
-
-            print("Uploading:", Attachment.URL, data)
 
             response = api.post(
                 Attachment.URL,
