@@ -11,6 +11,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree.build import Build  # noqa: E402
 
 
@@ -59,6 +60,9 @@ class BuildOrderTest(InvenTreeTestCase):
         """
         Test that we can upload an attachment against a Build
         """
+
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
 
         build = self.get_build()
 

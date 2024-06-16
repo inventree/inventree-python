@@ -181,18 +181,22 @@ class PartTest(InvenTreeTestCase):
         # Get list of parts
         parts = Part.list(self.api)
 
+        functions = {
+            'getSupplierParts': SupplierPart,
+            'getBomItems': BomItem,
+            'isUsedIn': BomItem,
+            'getStockItems': StockItem,
+            'getParameters': Parameter,
+            'getRelated': PartRelated,
+            'getInternalPriceList': InternalPrice,
+        }
+
+        if self.api.api_version >= Attachment.MIN_API_VERSION:
+            functions['getAttachments'] = Attachment
+
         # For each part in list, test some functions
         for p in parts:
-            functions = {
-                'getSupplierParts': SupplierPart,
-                'getBomItems': BomItem,
-                'isUsedIn': BomItem,
-                'getStockItems': StockItem,
-                'getParameters': Parameter,
-                'getRelated': PartRelated,
-                'getInternalPriceList': InternalPrice,
-                'getAttachments': Attachment,
-            }
+
             for fnc, res in functions.items():
                 A = getattr(p, fnc)()
                 # Make sure a list is returned
@@ -301,7 +305,7 @@ class PartTest(InvenTreeTestCase):
 
         name = p.name
 
-        # Ajdust the name
+        # Adjust the name
         if len(name) < 40:
             name += '_append'
         else:
@@ -456,6 +460,9 @@ class PartTest(InvenTreeTestCase):
         """
         Check that we can upload attachment files against the part
         """
+
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
 
         prt = Part(self.api, pk=1)
         attachments = prt.getAttachments()

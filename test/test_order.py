@@ -359,6 +359,9 @@ class POTest(InvenTreeTestCase):
         Test upload of attachment against a PurchaseOrder
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         # Ensure we have a least one purchase order to work with
         n = len(order.PurchaseOrder.list(self.api))
 
@@ -497,6 +500,9 @@ class SOTest(InvenTreeTestCase):
         """
         Test upload of attachment against a SalesOrder
         """
+
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
 
         # Grab the first available SalesOrder
         orders = order.SalesOrder.list(self.api)

@@ -22,8 +22,7 @@ class InvenTreeAPI(object):
     Basic class for performing Inventree API requests.
     """
 
-    # Ref: https://github.com/inventree/InvenTree/pull/7420
-    MIN_SUPPORTED_API_VERSION = 207
+    MIN_SUPPORTED_API_VERSION = 206
 
     @staticmethod
     def getMinApiVersion():

@@ -402,6 +402,9 @@ class Attachment(BulkDeleteMixin, InventreeObject):
 
     URL = 'attachment/'
 
+    # Ref: https://github.com/inventree/InvenTree/pull/7420
+    MIN_API_VERSION = 207
+
     @classmethod
     def add_link(cls, api, link, comment="", **kwargs):
         """
