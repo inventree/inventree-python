@@ -512,6 +512,9 @@ class PartTest(InvenTreeTestCase):
         Check that we can add an external link attachment to the part
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         test_link = "https://inventree.org/"
         test_comment = "inventree.org"
 
