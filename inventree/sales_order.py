@@ -8,15 +8,8 @@ import inventree.part
 import inventree.report
 
 
-class SalesOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a SalesOrder"""
-
-    URL = 'order/so/attachment'
-    ATTACH_TO = 'order'
-
-
 class SalesOrder(
-    inventree.base.AttachmentMixin(SalesOrderAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -26,10 +19,6 @@ class SalesOrder(
 
     URL = 'order/so'
     MODEL_TYPE = 'salesorder'
-
-    # Setup for Report mixin
-    REPORTNAME = 'so'
-    REPORTITEM = 'order'
 
     def getCustomer(self):
         """Return the customer associated with this order"""

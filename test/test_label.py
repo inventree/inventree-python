@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from test_api import InvenTreeTestCase  # noqa: E402
 
 from inventree.label import LabelTemplate  # noqa: E402
-from inventree.label import MODERN_LABEL_PRINTING_API  # noqa: E402
 from inventree.part import Part  # noqa: E402
 from inventree.plugin import InvenTreePlugin  # noqa: E402
 
@@ -18,10 +17,6 @@ class LabelTemplateTests(InvenTreeTestCase):
 
     def test_label_template_list(self):
         """List available label templates."""
-
-        # Test only for the modern API
-        if self.api.api_version < MODERN_LABEL_PRINTING_API:
-            return
 
         n = LabelTemplate.count(self.api)
         templates = LabelTemplate.list(self.api)
@@ -53,10 +48,6 @@ class LabelTemplateTests(InvenTreeTestCase):
     def test_label_print(self):
         """Print a template!"""
 
-        # Test only for the modern API
-        if self.api.api_version < MODERN_LABEL_PRINTING_API:
-            return
-
         # Find a part to print
         part = Part.list(self.api, limit=1)[0]
 
@@ -71,7 +62,7 @@ class LabelTemplateTests(InvenTreeTestCase):
 
         plugin = plugins[0]
 
-        response = part.printLabel(label=template, plugin=plugin)
+        response = part.printLabel(template, plugin=plugin)
 
         for key in ['created', 'model_type', 'complete', 'output', 'template', 'plugin']:
             self.assertIn(key, response)

@@ -7,23 +7,9 @@ import inventree.base
 
 logger = logging.getLogger('inventree')
 
-# The InvenTree API endpoint changed considerably @ version 197
-# Ref: https://github.com/inventree/InvenTree/pull/7074
-MODERN_LABEL_PRINTING_API = 201
-
 
 class LabelPrintingMixin:
-    """Mixin class for label printing.
-
-    Classes which implement this mixin should define the following attributes:
-
-    Legacy API: < 198
-        - LABELNAME: The name of the label type (e.g. 'part', 'stock', 'location')
-        - LABELITEM: The name of the label item (e.g. 'parts', 'items', 'locations')
-    
-    Modern API: >= 198
-        - MODEL_TYPE: The model type for the label printing class (e.g. 'part', 'stockitem', 'location')
-    """
+    """Mixin class for label printing."""
 
     LABELNAME = ''
     LABELITEM = ''
@@ -50,69 +36,7 @@ class LabelPrintingMixin:
         
         return self._api.downloadFile(url=output, destination=filename)
 
-    def printLabel(self, label=None, plugin=None, destination=None, *args, **kwargs):
-        """Print a label for the given item.
-
-        Check the connected API version to determine if the "modern" or "legacy" approach should be used.
-        """
-
-        if self._api.api_version < MODERN_LABEL_PRINTING_API:
-            return self.printLabelLegacy(label, plugin=plugin, destination=destination, *args, **kwargs)
-        else:
-            return self.printLabelModern(label, plugin=plugin, destination=destination, *args, **kwargs)
-
-    def printLabelLegacy(self, label, plugin=None, destination=None, *args, **kwargs):
-        """Print the label belonging to the given item.
-
-        Set the label with 'label' argument, as the ID of the corresponding
-        label. A corresponding label object can also be given.
-
-        If a plugin is given, the plugin will determine
-        how the label is printed, and a message is returned.
-
-        Otherwise, if a destination is given, the file will be downloaded to 'destination'.
-        Use overwrite=True to overwrite an existing file.
-
-        If neither plugin nor destination is given, nothing will be done.
-
-        Note: This legacy API support will be deprecated at some point in the future.
-        """
-
-        label_id = self.getTemplateId(label)
-        
-        # Set URL to use
-        URL = f'/label/{self.LABELNAME}/{label_id}/print/'
-
-        params = {
-            f'{self.LABELITEM}[]': self.pk
-        }
-
-        if plugin is not None:
-
-            # For the legacy printing API, plugin is provided as a 'slug' (string)
-            if type(plugin) is not str:
-                raise TypeError(f"Plugin must be a string, not {type(plugin)}")
-
-            # Append profile
-            params['plugin'] = plugin
-
-        # If API version less than 130, file download is provided directly
-        if self._api.api_version < 130 and plugin is None:
-            # Ensure we prefix the URL with '/api'
-            download_url = f"/api{URL}"
-        else:
-            # Perform API request, get response
-            response = self._api.get(URL, params=params)
-            download_url = response.get('file', None)
-
-        # Label file is available for download
-        if download_url and destination:
-            return self.saveOutput(download_url, destination)
-            
-        else:
-            return response
-
-    def printLabelModern(self, template, plugin=None, destination=None, *args, **kwargs):
+    def printLabel(self, template, plugin=None, destination=None, *args, **kwargs):
         """Print a label against the provided label template."""
 
         print_url = '/label/print/'
@@ -150,10 +74,6 @@ class LabelPrintingMixin:
     def getLabelTemplates(self, **kwargs):
         """Return a list of label templates for this model class."""
 
-        if self._api.api_version < MODERN_LABEL_PRINTING_API:
-            logger.error("Legacy label printing API is not supported")
-            return []
-
         return LabelTemplate.list(
             self._api,
             model_type=self.getModelType(),
@@ -168,10 +88,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
     def template_key(self):
         """Return the attribute name for the template file."""
 
-        if self._api.api_version < MODERN_LABEL_PRINTING_API:
-            return 'label'
-        else:
-            return 'template'
+        return 'template'
 
     @classmethod
     def create(cls, api, data, label, **kwargs):
@@ -194,10 +111,8 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
             if label.readable() is False:
                 raise ValueError("Label template file must be readable")
 
-        template_key = 'template' if api.api_version >= MODERN_LABEL_PRINTING_API else 'label'
-
         try:
-            response = super().create(api, data=data, files={template_key: label}, **kwargs)
+            response = super().create(api, data=data, files={'template': label}, **kwargs)
         finally:
             if label is not None:
                 label.close()
@@ -210,9 +125,6 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
             data (optional): Dict of data to change for the template.
             label (optional): Either a string (filename) or a file object, to upload a new label template
         """
-
-        # PUT/PATCH endpoints for updating data were available before POST endpoints
-        self.MIN_API_VERSION = None
 
         if label is not None:
             try:
@@ -246,41 +158,10 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
         return self._api.downloadFile(url=self._data[self.template_key], destination=destination, overwrite=overwrite)
 
 
-class LabelLocation(LabelFunctions):
-    """Class representing the Label/Location database model.
-    
-    Note: This class will be deprecated at some point in the future.
-    """
-
-    URL = 'label/location'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
-
-
-class LabelPart(LabelFunctions):
-    """Class representing the Label/Part database model.
-    
-    Note: This class will be deprecated at some point in the future.
-    """
-
-    URL = 'label/part'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
-
-
-class LabelStock(LabelFunctions):
-    """Class representing the Label/stock database model.
-    
-    Note: This class will be deprecated at some point in the future.
-    """
-
-    URL = 'label/stock'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API - 1
-
-
 class LabelTemplate(LabelFunctions):
     """Class representing the LabelTemplate database model."""
 
     URL = 'label/template'
-    MIN_API_VERSION = MODERN_LABEL_PRINTING_API
 
     def __str__(self):
         """String representation of the LabelTemplate instance."""

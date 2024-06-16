@@ -26,6 +26,7 @@ class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree
     """ Class representing the Company database model """
 
     URL = 'company'
+    MODEL_TYPE = "company"
 
     def getContacts(self, **kwargs):
         """Return contacts associated with this Company"""
@@ -110,15 +111,8 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
         return SupplierPriceBreak.list(self._api, part=self.pk)
 
 
-class ManufacturerPartAttachment(inventree.base.Attachment):
-    """Class representing an attachment against a ManufacturerPart object"""
-
-    URL = 'company/part/manufacturer/attachment'
-    ATTACH_TO = 'manufacturer_part'
-
-
 class ManufacturerPart(
-    inventree.base.AttachmentMixin(ManufacturerPartAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
@@ -129,6 +123,7 @@ class ManufacturerPart(
     """
 
     URL = 'company/part/manufacturer'
+    MODEL_TYPE = "manufacturerpart"
 
     def getParameters(self, **kwargs):
         """

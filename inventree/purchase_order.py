@@ -8,15 +8,8 @@ import inventree.part
 import inventree.report
 
 
-class PurchaseOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a PurchaseOrder"""
-
-    URL = 'order/po/attachment'
-    ATTACH_TO = 'order'
-
-
 class PurchaseOrder(
-    inventree.base.AttachmentMixin(PurchaseOrderAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -26,10 +19,6 @@ class PurchaseOrder(
 
     URL = 'order/po'
     MODEL_TYPE = 'purchaseorder'
-
-    # Setup for Report mixin
-    REPORTNAME = 'po'
-    REPORTITEM = 'order'
 
     def getSupplier(self):
         """Return the supplier (Company) associated with this order"""

@@ -21,16 +21,7 @@ class StockLocation(
     """ Class representing the StockLocation database model """
 
     URL = 'stock/location'
-
     MODEL_TYPE = 'stocklocation'
-
-    # Setup for Label printing
-    LABELNAME = 'location'
-    LABELITEM = 'locations'
-
-    # Setup for Report mixin
-    REPORTNAME = 'slr'
-    REPORTITEM = 'location'
 
     def getStockItems(self, **kwargs):
         return StockItem.list(self._api, location=self.pk, **kwargs)
@@ -53,15 +44,8 @@ class StockLocation(
         return StockLocation.list(self._api, parent=self.pk, **kwargs)
 
 
-class StockItemAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a StockItem"""
-
-    URL = 'stock/attachment'
-    ATTACH_TO = 'stock_item'
-
-
 class StockItem(
-    inventree.base.AttachmentMixin(StockItemAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.BarcodeMixin,
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
@@ -73,10 +57,6 @@ class StockItem(
     URL = 'stock'
 
     MODEL_TYPE = 'stockitem'
-
-    # Setup for Label printing
-    LABELNAME = 'stock'
-    LABELITEM = 'items'
 
     @classmethod
     def adjustStockItems(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
@@ -270,12 +250,7 @@ class StockItem(
         else:
             quantity = kwargs.get('quantity', 1)
 
-        if self._api.api_version >= 148:
-            kwargs['quantity'] = kwargs.get('quantity', quantity)
-        else:
-            # Note that the 'quantity' parameter is not supported in API versions < 148
-            kwargs.pop('quantity')
-
+        kwargs['quantity'] = kwargs.get('quantity', quantity)
         kwargs['stock_item'] = item
 
         url = f"stock/{self.pk}/install/"
@@ -354,10 +329,7 @@ class StockItemTestResult(
     """
 
     URL = 'stock/test'
-
-    # Setup for Report mixin
-    REPORTNAME = 'test'
-    REPORTITEM = 'item'
+    MODEL_TYPE = 'stockitem'
 
     def getTestTemplate(self):
         '''Return the PartTestTemplate item for this StockItemTestResult'''

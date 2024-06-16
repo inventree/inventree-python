@@ -11,7 +11,8 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.build import Build, BuildAttachment  # noqa: E402
+from inventree.base import Attachment  # noqa: E402
+from inventree.build import Build  # noqa: E402
 
 
 class BuildOrderTest(InvenTreeTestCase):
@@ -60,63 +61,23 @@ class BuildOrderTest(InvenTreeTestCase):
         Test that we can upload an attachment against a Build
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         build = self.get_build()
 
-        n = len(BuildAttachment.list(self.api, build=build.pk))
+        n = len(build.getAttachments())
 
         # Upload *this* file
         fn = os.path.join(os.path.dirname(__file__), 'test_build.py')
 
         response = build.uploadAttachment(fn, comment='A self referencing upload!')
 
-        self.assertEqual(response['build'], build.pk)
+        self.assertEqual(response['model_type'], 'build')
+        self.assertEqual(response['model_id'], build.pk)
         self.assertEqual(response['comment'], 'A self referencing upload!')
 
         self.assertEqual(len(build.getAttachments()), n + 1)
-
-    def test_build_attachment_bulk_delete(self):
-        """Test 'bulk delete' operation for the BuildAttachment class"""
-
-        build = self.get_build()
-
-        n = len(BuildAttachment.list(self.api, build=build.pk))
-
-        fn = os.path.join(os.path.dirname(__file__), 'test_build.py')
-
-        pk_values = []
-
-        # Create a number of new attachments
-        for i in range(10):
-            response = build.uploadAttachment(fn, comment=f"Build attachment {i}")
-            pk_values.append(response['pk'])
-
-        self.assertEqual(len(BuildAttachment.list(self.api, build=build.pk)), n + 10)
-
-        # Call without providing required arguments
-        with self.assertRaises(ValueError):
-            BuildAttachment.bulkDelete(self.api)
-
-        BuildAttachment.bulkDelete(self.api, items=pk_values)
-
-        # The number of attachments has been reduced to the original value
-        self.assertEqual(len(BuildAttachment.list(self.api, build=build.pk)), n)
-
-        # Now, delete using the 'filters' argument
-        for i in range(99, 109):
-            response = build.uploadAttachment(fn, comment=f"Build attachment {i}")
-            pk_values.append(response['pk'])
-
-        self.assertEqual(len(BuildAttachment.list(self.api, build=build.pk)), n + 10)
-
-        response = BuildAttachment.bulkDelete(
-            self.api,
-            filters={
-                "build": build.pk,
-            }
-        )
-
-        # All attachments for this Build should have been deleted
-        self.assertEqual(len(BuildAttachment.list(self.api, build=build.pk)), 0)
 
     def test_build_cancel(self):
         """

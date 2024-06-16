@@ -9,16 +9,8 @@ import inventree.report
 import inventree.stock
 
 
-class ReturnOrderAttachment(inventree.base.InventreeObject):
-    """Class representing the ReturnOrderAttachment model"""
-
-    URL = 'order/ro/attachment'
-    ATTACH_TO = 'order'
-    MIN_API_VERSION = 104
-
-
 class ReturnOrder(
-    inventree.base.AttachmentMixin(ReturnOrderAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -29,10 +21,6 @@ class ReturnOrder(
     URL = 'order/ro'
     MIN_API_VERSION = 104
     MODEL_TYPE = 'returnorder'
-
-    # Setup for Report mixin
-    REPORTNAME = 'ro'
-    REPORTITEM = 'order'
 
     def getCustomer(self):
         """Return the customer associated with this order"""

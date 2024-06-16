@@ -3,26 +3,8 @@
 import inventree.base
 
 
-# The InvenTree API endpoint changed considerably @ version 197
-# Ref: https://github.com/inventree/InvenTree/pull/7074
-MODERN_LABEL_PRINTING_API = 201
-
-
 class ReportPrintingMixin:
-    """Mixin class for report printing.
-
-    Classes which implement this mixin should define the following attributes:
-
-    Legacy API:
-        - REPORTNAME: The name of the report type, as given in the API (e.g. 'bom', 'build', 'po')
-        - REPORTITEM: The name of items send to the report print endpoint.
-        
-    Modern API: >= 198
-        - MODEL_TYPE: The model type of the report (e.g. 'purchaseorder', 'stocklocation')
-    """
-
-    REPORTNAME = ''
-    REPORTITEM = ''
+    """Mixin class for report printing."""
 
     def getTemplateId(self, template):
         """Return the ID (pk) from the supplied template."""
@@ -47,9 +29,6 @@ class ReportPrintingMixin:
         If neither plugin nor destination is given, nothing will be done
         """
 
-        if self._api.api_version < MODERN_LABEL_PRINTING_API:
-            return self.printReportLegacy(report, destination, *args, **kwargs)
-
         print_url = '/report/print/'
         template_id = self.getTemplateId(report)
 
@@ -68,28 +47,10 @@ class ReportPrintingMixin:
         else:
             return response
 
-    def printReportLegacy(self, report, destination, *args, **kwargs):
-        """Print the report template against the legacy API."""
-
-        if isinstance(report, (ReportBoM, ReportBuild, ReportPurchaseOrder, ReportSalesOrder, ReportReturnOrder, ReportStockLocation, ReportTest)):
-            report_id = report.pk
-        else:
-            report_id = report
-
-        # Set URL to use
-        URL = f'/api/report/{self.REPORTNAME}/{report_id}/print/'
-
-        params = {
-            f'{self.REPORTITEM}[]': self.pk
-        }
-
-        # Use downloadFile method to get the file
-        return self._api.downloadFile(url=URL, destination=destination, params=params, *args, **kwargs)
-
     def getReportTemplates(self, **kwargs):
         """Return a list of report templates which match this model class."""
 
-        return ReportTemplate.list(self._api, model_type=self.MODEL_TYPE, **kwargs)
+        return ReportTemplate.list(self._api, model_type=self.getModelType(), **kwargs)
 
 
 class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObject):
@@ -103,9 +64,6 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
             data: Dict of data including at least name and description for the template
             template: Either a string (filename) or a file object
         """
-
-        # POST endpoints for creating new reports were added in API version 156
-        cls.MIN_API_VERSION = 156
 
         try:
             # If template is already a readable object, don't convert it
@@ -130,9 +88,6 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
             data (optional): Dict of data to change for the template.
             template (optional): Either a string (filename) or a file object, to upload a new template
         """
-
-        # PUT/PATCH endpoints for updating data were available before POST endpoints
-        self.MIN_API_VERSION = None
 
         if template is not None:
             try:
@@ -167,59 +122,6 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
 
 
 class ReportTemplate(ReportFunctions):
-    """Class representing the ReportTemplatel model."""
+    """Class representing the ReportTemplate model."""
 
     URL = 'report/template'
-    MIN_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportBoM(ReportFunctions):
-    """Class representing ReportBoM"""
-
-    URL = 'report/bom'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportBuild(ReportFunctions):
-    """Class representing ReportBuild"""
-
-    URL = 'report/build'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportPurchaseOrder(ReportFunctions):
-    """Class representing ReportPurchaseOrder"""
-
-    URL = 'report/po'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportSalesOrder(ReportFunctions):
-    """Class representing ReportSalesOrder"""
-
-    URL = 'report/so'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportReturnOrder(ReportFunctions):
-    """Class representing ReportReturnOrder"""
-
-    URL = 'report/ro'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportStockLocation(ReportFunctions):
-    """Class representing ReportStockLocation"""
-
-    # The Stock location report was added when API version was 127, but the API version was not incremented at the same time
-    # The closest API version which has the SLR report is 128
-    MIN_API_VERSION = 128
-    URL = 'report/slr'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API
-
-
-class ReportTest(ReportFunctions):
-    """Class representing ReportTest"""
-
-    URL = 'report/test'
-    MAX_API_VERSION = MODERN_LABEL_PRINTING_API

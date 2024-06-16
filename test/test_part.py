@@ -15,10 +15,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 from inventree.part import (BomItem, Parameter,  # noqa: E402
-                            ParameterTemplate, Part, PartAttachment,
+                            ParameterTemplate, Part,
                             PartCategory, PartCategoryParameterTemplate,
                             PartRelated, PartTestTemplate)
 from inventree.stock import StockItem  # noqa: E402
@@ -180,18 +181,22 @@ class PartTest(InvenTreeTestCase):
         # Get list of parts
         parts = Part.list(self.api)
 
+        functions = {
+            'getSupplierParts': SupplierPart,
+            'getBomItems': BomItem,
+            'isUsedIn': BomItem,
+            'getStockItems': StockItem,
+            'getParameters': Parameter,
+            'getRelated': PartRelated,
+            'getInternalPriceList': InternalPrice,
+        }
+
+        if self.api.api_version >= Attachment.MIN_API_VERSION:
+            functions['getAttachments'] = Attachment
+
         # For each part in list, test some functions
         for p in parts:
-            functions = {
-                'getSupplierParts': SupplierPart,
-                'getBomItems': BomItem,
-                'isUsedIn': BomItem,
-                'getStockItems': StockItem,
-                'getParameters': Parameter,
-                'getRelated': PartRelated,
-                'getInternalPriceList': InternalPrice,
-                'getAttachments': PartAttachment,
-            }
+
             for fnc, res in functions.items():
                 A = getattr(p, fnc)()
                 # Make sure a list is returned
@@ -300,7 +305,7 @@ class PartTest(InvenTreeTestCase):
 
         name = p.name
 
-        # Ajdust the name
+        # Adjust the name
         if len(name) < 40:
             name += '_append'
         else:
@@ -456,24 +461,24 @@ class PartTest(InvenTreeTestCase):
         Check that we can upload attachment files against the part
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         prt = Part(self.api, pk=1)
-        attachments = PartAttachment.list(self.api, part=1)
+        attachments = prt.getAttachments()
 
         for a in attachments:
-            self.assertEqual(a.part, 1)
+            self.assertEqual(a.model_type, 'part')
+            self.assertEqual(a.model_id, prt.pk)
 
         n = len(attachments)
 
-        # Test that a file upload without the required 'part' parameter fails
-        with self.assertRaises(ValueError):
-            PartAttachment.upload(self.api, 'test-file.txt')
-
         # Test that attempting to upload an invalid file fails
         with self.assertRaises(FileNotFoundError):
-            PartAttachment.upload(self.api, 'test-file.txt', part=1)
+            prt.uploadAttachment('test-file.txt')
 
         # Check that no new files have been uploaded
-        self.assertEqual(len(PartAttachment.list(self.api, part=1)), n)
+        self.assertEqual(len(prt.getAttachments()), n)
 
         # Test that we can upload a file by filename, directly from the Part instance
         filename = os.path.join(os.path.dirname(__file__), 'docker-compose.yml')
@@ -488,7 +493,7 @@ class PartTest(InvenTreeTestCase):
         pk = response['pk']
 
         # Check that a new attachment has been created!
-        attachment = PartAttachment(self.api, pk=pk)
+        attachment = Attachment(self.api, pk=pk)
         self.assertTrue(attachment.is_valid())
 
         # Download the attachment to a local file!
@@ -507,12 +512,11 @@ class PartTest(InvenTreeTestCase):
         Check that we can add an external link attachment to the part
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         test_link = "https://inventree.org/"
         test_comment = "inventree.org"
-
-        # Test that an external link attachment without the required 'part' parameter fails
-        with self.assertRaises(ValueError):
-            PartAttachment.add_link(self.api, link=test_link)
 
         # Add valid external link attachment
         part = Part(self.api, pk=1)
@@ -520,7 +524,7 @@ class PartTest(InvenTreeTestCase):
         self.assertIsNotNone(response)
 
         # Check that the attachment has been created
-        attachment = PartAttachment(self.api, pk=response["pk"])
+        attachment = Attachment(self.api, pk=response["pk"])
         self.assertTrue(attachment.is_valid())
         self.assertEqual(attachment.link, test_link)
         self.assertEqual(attachment.comment, test_comment)

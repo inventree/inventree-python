@@ -14,6 +14,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree import company  # noqa: E402
 from inventree.part import Part  # noqa: E402
 
@@ -268,6 +269,10 @@ class CompanyTest(InvenTreeTestCase):
             c.uploadImage(None)
 
     def test_attachments(self):
+        """Unit tests for attachments."""
+
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
 
         # Create a new manufacturer part, if one does not already exist
         mps = company.ManufacturerPart.list(self.api)
@@ -285,7 +290,7 @@ class CompanyTest(InvenTreeTestCase):
         for attachment in mp.getAttachments():
             attachment.delete()
 
-        attachments = company.ManufacturerPartAttachment.list(self.api, manufacturer_part=mp.pk)
+        attachments = mp.getAttachments()
 
         self.assertTrue(len(attachments) == 0)
 
@@ -300,7 +305,7 @@ class CompanyTest(InvenTreeTestCase):
 
         self.assertIsNotNone(response)
 
-        attachments = company.ManufacturerPartAttachment.list(self.api)
+        attachments = mp.getAttachments()
 
         self.assertEqual(len(attachments), 1)
 

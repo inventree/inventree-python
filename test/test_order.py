@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree import company  # noqa: E402
 from inventree import order  # noqa: E402
 from inventree import part  # noqa: E402
@@ -358,6 +359,9 @@ class POTest(InvenTreeTestCase):
         Test upload of attachment against a PurchaseOrder
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         # Ensure we have a least one purchase order to work with
         n = len(order.PurchaseOrder.list(self.api))
 
@@ -382,12 +386,8 @@ class POTest(InvenTreeTestCase):
         with self.assertRaises(FileNotFoundError):
             po.uploadAttachment('not_found.txt')
 
-        # Test that missing the 'order' parameter fails too
-        with self.assertRaises(ValueError):
-            order.PurchaseOrderAttachment.upload(self.api, fn, comment='Should not work!')
-
         # Check that attachments uploaded OK
-        attachments = order.PurchaseOrderAttachment.list(self.api, order=po.pk)
+        attachments = po.getAttachments()
         self.assertEqual(len(attachments), 3)
 
 
@@ -501,6 +501,9 @@ class SOTest(InvenTreeTestCase):
         Test upload of attachment against a SalesOrder
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         # Grab the first available SalesOrder
         orders = order.SalesOrder.list(self.api)
 
@@ -520,12 +523,13 @@ class SOTest(InvenTreeTestCase):
 
         pk = response['pk']
 
-        attachment = order.SalesOrderAttachment(self.api, pk=pk)
+        attachment = Attachment(self.api, pk=pk)
 
-        self.assertEqual(attachment.order, so.pk)
+        self.assertEqual(attachment.model_type, 'salesorder')
+        self.assertEqual(attachment.model_id, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 
-        attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
+        attachments = so.getAttachments()
         self.assertEqual(len(attachments), n + 1)
 
     def test_so_shipment(self):
