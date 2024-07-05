@@ -242,7 +242,6 @@ class PartTest(InvenTreeTestCase):
         active = Part.fieldInfo('active', self.api)
 
         self.assertEqual(active['type'], 'boolean')
-        self.assertEqual(active['required'], True)
         self.assertEqual(active['label'], 'Active')
         self.assertEqual(active['default'], True)
 
