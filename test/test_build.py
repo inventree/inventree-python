@@ -122,6 +122,22 @@ class BuildOrderTest(InvenTreeTestCase):
             }
         )
 
+        # Check that build status is pending
+        self.assertEqual(build.status, 10)
+
+        if self.api.api_version >= 233:
+            # Issue the build order
+            build.issue()
+            self.assertEqual(build.status, 20)
+
+            # Mark build order as "on hold" again
+            build.hold()
+            self.assertEqual(build.status, 25)
+
+            # Issue again
+            build.issue()
+            self.assertEqual(build.status, 20)
+
         # Complete the build, even though it is not completed
         build.complete(accept_unallocated=True, accept_incomplete=True)
 
