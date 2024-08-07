@@ -65,6 +65,14 @@ class PurchaseOrder(
         # Return
         return self._statusupdate(status='issue', **kwargs)
 
+    def hold(self, **kwargs):
+        """
+        Hold the purchase order
+        """
+
+        # Return
+        return self._statusupdate(status='hold', **kwargs)
+
     def receiveAll(self, location, status=10):
         """
         Receive all of the purchase order items, into the given location.

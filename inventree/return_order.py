@@ -55,6 +55,10 @@ class ReturnOrder(
         """Issue (send) this order"""
         return self._statusupdate(status='issue', **kwargs)
 
+    def hold(self, **kwargs):
+        """Place this order on hold"""
+        return self._statusupdate(status='hold', **kwargs)
+
     def cancel(self, **kwargs):
         """Cancel this order"""
         return self._statusupdate(status='cancel', **kwargs)
