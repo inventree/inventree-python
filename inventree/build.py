@@ -16,6 +16,14 @@ class Build(
     URL = 'build'
     MODEL_TYPE = 'build'
 
+    def issue(self):
+        """Mark this build as 'issued'."""
+        return self._statusupdate(status='issue')
+    
+    def hold(self):
+        """Mark this build as 'on hold'."""
+        return self._statusupdate(status='hold')
+
     def complete(
         self,
         accept_overallocated='reject',
