@@ -648,6 +648,7 @@ class StatusMixin:
         if status not in [
             'complete',
             'cancel',
+            'hold',
             'ship',
             'issue',
             'finish',
