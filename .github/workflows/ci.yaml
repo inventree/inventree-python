@@ -43,8 +43,8 @@ jobs:
           cd inventree_server
           invoke install
           invoke migrate
-          invoke import-fixtures
-          invoke server -a 127.0.0.1:12345 &
+          invoke dev.import-fixtures
+          invoke dev.server -a 127.0.0.1:12345 &
           invoke wait
       - name: Run Tests
         run: |
