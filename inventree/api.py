@@ -46,6 +46,7 @@ class InvenTreeAPI(object):
             token-name - Name of the token to use (default = 'inventree-python-client')
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
+            strict - Enforce strict HTTPS certificate checking (default = True)
             timeout - Set timeout to use (in seconds). Default: 10
             proxies - Definition of proxies as a dict (defaults to an empty dict)
 
@@ -66,6 +67,7 @@ class InvenTreeAPI(object):
         self.token_name = kwargs.get('token_name', os.environ.get('INVENTREE_API_TOKEN_NAME', 'inventree-python-client'))
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
+        self.strict = bool(kwargs.get('strict', True))
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
@@ -325,6 +327,9 @@ class InvenTreeAPI(object):
             payload['files'] = files
         else:
             payload['json'] = data
+
+        # Enforce strict HTTPS certificate checking?
+        payload['verify'] = self.strict
 
         # Debug request information
         logger.debug("Sending Request:")
