@@ -34,9 +34,9 @@ def reset_data(c, debug=False):
 
     hide = None if debug else 'both'
 
-    c.run("docker-compose -f test/docker-compose.yml run --rm inventree-py-test-server invoke delete-data -f", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run --rm inventree-py-test-server invoke dev.delete-data -f", hide=hide)
     c.run("docker-compose -f test/docker-compose.yml run --rm inventree-py-test-server invoke migrate", hide=hide)
-    c.run("docker-compose -f test/docker-compose.yml run --rm inventree-py-test-server invoke import-fixtures", hide=hide)
+    c.run("docker-compose -f test/docker-compose.yml run --rm inventree-py-test-server invoke dev.import-fixtures", hide=hide)
 
 
 @task(post=[reset_data])
