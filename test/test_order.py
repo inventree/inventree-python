@@ -674,6 +674,10 @@ class SOTest(InvenTreeTestCase):
         # Make sure date is not None
         self.assertIsNotNone(shipment_2.shipment_date)
 
+        # SalesOrderAllocations are broken prior to server API version 267
+        if self.api.api_version < 267:
+            return
+
         # Try to complete this order
         # Ship remaining shipments first
         for shp in so.getShipments():
