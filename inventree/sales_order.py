@@ -6,6 +6,7 @@ import inventree.base
 import inventree.company
 import inventree.part
 import inventree.report
+import inventree.stock
 
 
 class SalesOrder(
@@ -190,6 +191,35 @@ class SalesOrderExtraLineItem(
         return SalesOrder(self._api, self.order)
 
 
+class SalesOrderAllocation(
+    inventree.base.InventreeObject
+):
+    """Class representing the SalesOrderAllocation database model."""
+
+    URL = 'order/so-allocation'
+
+    def getOrder(self):
+        """Return the SalesOrder to which this SalesOrderAllocation belongs."""
+        return SalesOrder(self._api, self.order)
+
+    def getShipment(self):
+        """Return the SalesOrderShipment to which this SalesOrderAllocation belongs."""
+        from sales_order import SalesOrderShipment
+        return SalesOrderShipment(self._api, self.shipment)
+
+    def getLineItem(self):
+        """Return the SalesOrderLineItem to which this SalesOrderAllocation belongs."""
+        return SalesOrderLineItem(self._api, self.line)
+
+    def getStockItem(self):
+        """Return the StockItem to which this SalesOrderAllocation belongs."""
+        return inventree.stock.StockItem(self._api, self.item)
+
+    def getPart(self):
+        """Return the Part to which this SalesOrderAllocation belongs."""
+        return inventree.part.Part(self._api, self.part)
+
+
 class SalesOrderShipment(
     inventree.base.InventreeObject,
     inventree.base.StatusMixin,
@@ -200,9 +230,7 @@ class SalesOrderShipment(
     URL = 'order/so/shipment'
 
     def getOrder(self):
-        """
-        Return the SalesOrder to which this SalesOrderShipment belongs
-        """
+        """Return the SalesOrder to which this SalesOrderShipment belongs."""
         return SalesOrder(self._api, self.order)
 
     def allocateItems(self, items=[]):
@@ -219,7 +247,7 @@ class SalesOrderShipment(
             }
         """
 
-        # Customise URL
+        # Customize URL
         url = f'order/so/{self.getOrder().pk}/allocate'
 
         # Create data from given inputs
@@ -236,6 +264,18 @@ class SalesOrderShipment(
 
         # Return
         return response
+
+    def getAllocations(self):
+        """Return the allocations associated with this shipment"""
+        return SalesOrderAllocation.list(self._api, shipment=self.pk)
+
+    @property
+    def allocations(self):
+        """Return the allocations associated with this shipment.
+
+        Note: This is an overload of getAllocations() method, for legacy compatibility.
+        """
+        return self.getAllocations()
 
     def complete(
         self,

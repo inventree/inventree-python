@@ -674,16 +674,25 @@ class SOTest(InvenTreeTestCase):
         # Make sure date is not None
         self.assertIsNotNone(shipment_2.shipment_date)
 
+        # SalesOrderAllocations are broken prior to server API version 267
+        if self.api.api_version < 267:
+            return
+
         # Try to complete this order
         # Ship remaining shipments first
         for shp in so.getShipments():
+
+            allocations = shp.getAllocations()
+
             # Delete shipment if it has no allocations
-            if len(shp.allocations) == 0:
+            if len(allocations) == 0:
                 shp.delete()
                 continue
+            
             # If the shipment has no date, try to mark it shipped
             if shp.shipment_date is None:
                 shp.ship()
+        
         so.complete()
         self.assertEqual(so.status, 20)
         self.assertEqual(so.status_text, 'Shipped')
