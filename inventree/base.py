@@ -2,11 +2,12 @@
 
 import json
 import logging
+import requests
 import os
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.17.1"
+INVENTREE_PYTHON_VERSION = "0.17.2"
 
 
 logger = logging.getLogger('inventree')
@@ -231,10 +232,15 @@ class InventreeObject(object):
         else:
             url = cls.URL
 
-        response = api.get(url=url, params=kwargs)
+        try:
+            response = api.get(url=url, params=kwargs)
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Error during list request: {e}")
+            # Return an empty list
+            return []
 
         if response is None:
-            return None
+            return []
 
         items = []
 

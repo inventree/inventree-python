@@ -390,6 +390,34 @@ class POTest(InvenTreeTestCase):
         attachments = po.getAttachments()
         self.assertEqual(len(attachments), 3)
 
+    def test_invalid_list(self):
+        """Test list with an invalid parameter.
+        
+        Ref: https://github.com/inventree/inventree-python/issues/246
+        """
+
+        from inventree.project_code import ProjectCode
+
+        results = order.PurchaseOrder.list(self.api, project_code=999999999)
+        self.assertEqual(len(results), 0)
+
+        # Find a valid project code
+        n = ProjectCode.count(self.api)
+
+        # Create a new project code
+        pc = ProjectCode.create(self.api, {
+            'code': f"TEST-{n+1}",
+            'description': 'Test project code',
+        })
+
+        # Attach project code to an order
+        po = order.PurchaseOrder.list(self.api, limit=1)[0]
+        po.save({'project_code': pc.pk})
+
+        # Now, list orders with the project code
+        results = order.PurchaseOrder.list(self.api, project_code=pc.pk)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].pk, po.pk)
 
 class SOTest(InvenTreeTestCase):
     """
