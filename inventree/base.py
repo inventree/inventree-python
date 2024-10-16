@@ -237,7 +237,13 @@ class InventreeObject(object):
         except requests.exceptions.HTTPError as e:
             logger.error(f"Error during list request: {e}")
             # Return an empty list
-            return []
+
+            raise_error = kwargs.get('raise_error', False)
+
+            if raise_error:
+                raise e
+            else:
+                return []
 
         if response is None:
             return []

@@ -401,6 +401,14 @@ class POTest(InvenTreeTestCase):
         results = order.PurchaseOrder.list(self.api, project_code=999999999)
         self.assertEqual(len(results), 0)
 
+        # Try the same again, but raise the eror
+        with self.assertRaises(HTTPError):
+            results = order.PurchaseOrder.list(
+                self.api,
+                project_code=999999999,
+                raise_error=True
+            )
+
         # Find a valid project code
         n = ProjectCode.count(self.api)
 
