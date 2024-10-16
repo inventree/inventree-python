@@ -427,6 +427,7 @@ class POTest(InvenTreeTestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].pk, po.pk)
 
+
 class SOTest(InvenTreeTestCase):
     """
     Unit test for SalesOrder
