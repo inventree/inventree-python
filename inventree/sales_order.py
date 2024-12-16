@@ -196,6 +196,7 @@ class SalesOrderAllocation(
 ):
     """Class representing the SalesOrderAllocation database model."""
 
+    MIN_API_VERSION = 267
     URL = 'order/so-allocation'
 
     def getOrder(self):
@@ -275,7 +276,10 @@ class SalesOrderShipment(
 
         Note: This is an overload of getAllocations() method, for legacy compatibility.
         """
-        return self.getAllocations()
+        try:
+            return self.getAllocations()
+        except NotImplementedError:
+            return self._data['allocations']
 
     def complete(
         self,
