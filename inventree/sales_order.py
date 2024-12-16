@@ -205,7 +205,7 @@ class SalesOrderAllocation(
 
     def getShipment(self):
         """Return the SalesOrderShipment to which this SalesOrderAllocation belongs."""
-        # from sales_order import SalesOrderShipment
+        from sales_order import SalesOrderShipment
         return SalesOrderShipment(self._api, self.shipment)
 
     def getLineItem(self):
