@@ -14,6 +14,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import Timeout
 
+from requests_cache import CachedSession
+
 logger = logging.getLogger('inventree')
 
 
@@ -291,13 +293,15 @@ class InvenTreeAPI(object):
         # Use provided HTTP method
         method = kwargs.get('method', 'get')
 
+        session = CachedSession('inventree_api')
+
         methods = {
-            'GET': requests.get,
-            'POST': requests.post,
-            'PUT': requests.put,
-            'PATCH': requests.patch,
-            'DELETE': requests.delete,
-            'OPTIONS': requests.options,
+            'GET': session.get,
+            'POST': session.post,
+            'PUT': session.put,
+            'PATCH': session.patch,
+            'DELETE': session.delete,
+            'OPTIONS': session.options,
         }
 
         if method.upper() not in methods.keys():
