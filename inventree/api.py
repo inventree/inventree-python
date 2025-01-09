@@ -76,7 +76,6 @@ class InvenTreeAPI(object):
         self.auth = None
         self.connected = False
         self.dns_cache = dns_cache
-        self.dns_cache.set_cache_expiration_time(100)
 
         if kwargs.get('connect', True):
             self.connect()
