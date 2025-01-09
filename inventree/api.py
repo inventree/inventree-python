@@ -9,12 +9,11 @@ import json
 import logging
 import os
 from urllib.parse import urljoin, urlparse
+from . import dns_cache
 
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import Timeout
-
-from requests_cache import CachedSession
 
 logger = logging.getLogger('inventree')
 
@@ -76,6 +75,8 @@ class InvenTreeAPI(object):
 
         self.auth = None
         self.connected = False
+        self.dns_cache = dns_cache
+        self.dns_cache.set_cache_expiration_time(100)
 
         if kwargs.get('connect', True):
             self.connect()
@@ -293,15 +294,13 @@ class InvenTreeAPI(object):
         # Use provided HTTP method
         method = kwargs.get('method', 'get')
 
-        session = CachedSession('inventree_api')
-
         methods = {
-            'GET': session.get,
-            'POST': session.post,
-            'PUT': session.put,
-            'PATCH': session.patch,
-            'DELETE': session.delete,
-            'OPTIONS': session.options,
+            'GET': requests.get,
+            'POST': requests.post,
+            'PUT': requests.put,
+            'PATCH': requests.patch,
+            'DELETE': requests.delete,
+            'OPTIONS': requests.options,
         }
 
         if method.upper() not in methods.keys():
