@@ -1,10 +1,8 @@
-version: "3.8"
-
 # Docker compose recipe for spawning a simple InvenTree server instance,
 # to use for running local tests of the InvenTree python API
 # We use the latest (master branch) InvenTree code for testing.
 
-# The tests should be targetted at localhost:12345
+# The tests should be targeted at localhost:12345
 
 services:
 
@@ -16,12 +14,14 @@ services:
       - 12345:8000
     environment:
       - INVENTREE_DEBUG=True
+      - INVENTREE_SITE_URL=http://localhost:12345
       - INVENTREE_DB_ENGINE=sqlite
       - INVENTREE_DB_NAME=/home/inventree/data/test_db.sqlite3
       - INVENTREE_DEBUG_LEVEL=error
       - INVENTREE_ADMIN_USER=testuser
       - INVENTREE_ADMIN_PASSWORD=testpassword
       - INVENTREE_ADMIN_EMAIL=test@test.com
+      - INVENTREE_COOKIE_SAMESITE=False
     restart: unless-stopped
     volumes:
       - ./data:/home/inventree/data
