@@ -21,6 +21,7 @@ services:
       - INVENTREE_ADMIN_USER=testuser
       - INVENTREE_ADMIN_PASSWORD=testpassword
       - INVENTREE_ADMIN_EMAIL=test@test.com
+      - INVENTREE_COOKIE_SAMESITE=False
     restart: unless-stopped
     volumes:
       - ./data:/home/inventree/data
