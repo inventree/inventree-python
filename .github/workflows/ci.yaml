@@ -8,6 +8,7 @@ jobs:
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      INVENTREE_SITE_URL: http://localhost:8000
       INVENTREE_DB_ENGINE: django.db.backends.sqlite3
       INVENTREE_DB_NAME: ../inventree_unit_test_db.sqlite3
       INVENTREE_MEDIA_ROOT: ../test_inventree_media
@@ -44,7 +45,7 @@ jobs:
           invoke install
           invoke migrate
           invoke dev.import-fixtures
-          invoke dev.server -a 127.0.0.1:12345 &
+          invoke dev.server -a 0.0.0.0:12345 &
           invoke wait
       - name: Run Tests
         run: |
