@@ -163,7 +163,7 @@ class PurchaseOrderLineItem(
         """
         return PurchaseOrder(self._api, self.order)
 
-    def receive(self, quantity=None, status=10, location=None, expiry_date=None, batch_code='', serial_numbers=''):
+    def receive(self, quantity=None, status=10, location=None, expiry_date=None, batch_code=None, serial_numbers=None):
         """
         Mark this line item as received.
 
@@ -202,19 +202,28 @@ class PurchaseOrderLineItem(
             except:  # noqa:E722
                 location_id = int(location)
 
+        item_data = {
+            'line_item': self.pk,
+            'supplier_part': self.part,
+            'quantity': quantity,
+            'status': status,
+            'location': location_id
+        }
+
+        # Optional fields which may be set
+        if expiry_date:
+            item_data['expiry_date'] = expiry_date
+
+        if batch_code:
+            item_data['batch_code'] = batch_code
+        
+        if serial_numbers:
+            item_data['serial_numbers'] = serial_numbers
+
         # Prepare request data
         data = {
             'items': [
-                {
-                    'line_item': self.pk,
-                    'supplier_part': self.part,
-                    'quantity': quantity,
-                    'status': status,
-                    'location': location_id,
-                    'expiry_date': expiry_date,
-                    'batch_code': batch_code,
-                    'serial_numbers': serial_numbers
-                }
+                item_data,
             ],
             'location': location_id
         }
