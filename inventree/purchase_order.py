@@ -163,7 +163,7 @@ class PurchaseOrderLineItem(
         """
         return PurchaseOrder(self._api, self.order)
 
-    def receive(self, quantity=None, status=10, location=None, expiry_date='', batch_code='', serial_numbers=''):
+    def receive(self, quantity=None, status=10, location=None, expiry_date=None, batch_code='', serial_numbers=''):
         """
         Mark this line item as received.
 
