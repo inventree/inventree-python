@@ -196,7 +196,12 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url, timeout=self.timeout, proxies=self.proxies)
+            response = requests.get(
+                self.api_url,
+                timeout=self.timeout,
+                proxies=self.proxies,
+                verify=self.strict
+            )
         except requests.exceptions.ConnectionError as e:
             logger.fatal(f"Server connection error: {str(type(e))}")
             return False
@@ -583,13 +588,15 @@ class InvenTreeAPI(object):
             auth = self.auth
 
         with requests.get(
-                fullurl,
-                stream=True,
-                auth=auth,
-                headers=headers,
-                params=params,
-                timeout=self.timeout,
-                proxies=self.proxies) as response:
+            fullurl,
+            stream=True,
+            auth=auth,
+            headers=headers,
+            params=params,
+            timeout=self.timeout,
+            proxies=self.proxies,
+            verify=self.strict,
+        ) as response:
 
             # Error code
             if response.status_code >= 300:
