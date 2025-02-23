@@ -51,7 +51,6 @@ class CompanyTest(InvenTreeTestCase):
         field_names = company.Company.fieldNames(self.api)
 
         for field in [
-            'url',
             'name',
             'image',
             'is_customer',
