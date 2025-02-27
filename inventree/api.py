@@ -9,6 +9,7 @@ import json
 import logging
 import os
 from urllib.parse import urljoin, urlparse
+from . import dns_cache
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -74,6 +75,7 @@ class InvenTreeAPI(object):
 
         self.auth = None
         self.connected = False
+        self.dns_cache = dns_cache
 
         if kwargs.get('connect', True):
             self.connect()
