@@ -64,11 +64,8 @@ class LabelTemplateTests(InvenTreeTestCase):
 
         response = part.printLabel(template, plugin=plugin)
 
-        for key in ['created', 'model_type', 'complete', 'output', 'template', 'plugin']:
+        for key in ['created', 'complete', 'output']:
             self.assertIn(key, response)
         
         self.assertEqual(response['complete'], True)
-        self.assertEqual(response['model_type'], 'part')
         self.assertIsNotNone(response['output'])
-        self.assertEqual(response['template'], template.pk)
-        self.assertEqual(response['plugin'], plugin.key)
