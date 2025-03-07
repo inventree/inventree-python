@@ -6,17 +6,11 @@ import inventree.base
 import inventree.company
 import inventree.part
 import inventree.report
-
-
-class SalesOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a SalesOrder"""
-
-    URL = 'order/so/attachment'
-    ATTACH_TO = 'order'
+import inventree.stock
 
 
 class SalesOrder(
-    inventree.base.AttachmentMixin(SalesOrderAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -26,10 +20,6 @@ class SalesOrder(
 
     URL = 'order/so'
     MODEL_TYPE = 'salesorder'
-
-    # Setup for Report mixin
-    REPORTNAME = 'so'
-    REPORTITEM = 'order'
 
     def getCustomer(self):
         """Return the customer associated with this order"""
@@ -81,6 +71,18 @@ class SalesOrder(
         kwargs['reference'] = reference
 
         return SalesOrderShipment.create(self._api, data=kwargs)
+
+    def issue(self, **kwargs):
+        """Issue (send) this order"""
+        return self._statusupdate(status='issue', **kwargs)
+
+    def hold(self, **kwargs):
+        """Place this order on hold"""
+        return self._statusupdate(status='hold', **kwargs)
+
+    def cancel(self, **kwargs):
+        """Cancel this order"""
+        return self._statusupdate(status='cancel', **kwargs)
 
 
 class SalesOrderLineItem(
@@ -189,6 +191,36 @@ class SalesOrderExtraLineItem(
         return SalesOrder(self._api, self.order)
 
 
+class SalesOrderAllocation(
+    inventree.base.InventreeObject
+):
+    """Class representing the SalesOrderAllocation database model."""
+
+    MIN_API_VERSION = 267
+    URL = 'order/so-allocation'
+
+    def getOrder(self):
+        """Return the SalesOrder to which this SalesOrderAllocation belongs."""
+        return SalesOrder(self._api, self.order)
+
+    def getShipment(self):
+        """Return the SalesOrderShipment to which this SalesOrderAllocation belongs."""
+        from sales_order import SalesOrderShipment
+        return SalesOrderShipment(self._api, self.shipment)
+
+    def getLineItem(self):
+        """Return the SalesOrderLineItem to which this SalesOrderAllocation belongs."""
+        return SalesOrderLineItem(self._api, self.line)
+
+    def getStockItem(self):
+        """Return the StockItem to which this SalesOrderAllocation belongs."""
+        return inventree.stock.StockItem(self._api, self.item)
+
+    def getPart(self):
+        """Return the Part to which this SalesOrderAllocation belongs."""
+        return inventree.part.Part(self._api, self.part)
+
+
 class SalesOrderShipment(
     inventree.base.InventreeObject,
     inventree.base.StatusMixin,
@@ -199,9 +231,7 @@ class SalesOrderShipment(
     URL = 'order/so/shipment'
 
     def getOrder(self):
-        """
-        Return the SalesOrder to which this SalesOrderShipment belongs
-        """
+        """Return the SalesOrder to which this SalesOrderShipment belongs."""
         return SalesOrder(self._api, self.order)
 
     def allocateItems(self, items=[]):
@@ -218,7 +248,7 @@ class SalesOrderShipment(
             }
         """
 
-        # Customise URL
+        # Customize URL
         url = f'order/so/{self.getOrder().pk}/allocate'
 
         # Create data from given inputs
@@ -235,6 +265,21 @@ class SalesOrderShipment(
 
         # Return
         return response
+
+    def getAllocations(self):
+        """Return the allocations associated with this shipment"""
+        return SalesOrderAllocation.list(self._api, shipment=self.pk)
+
+    @property
+    def allocations(self):
+        """Return the allocations associated with this shipment.
+
+        Note: This is an overload of getAllocations() method, for legacy compatibility.
+        """
+        try:
+            return self.getAllocations()
+        except NotImplementedError:
+            return self._data['allocations']
 
     def complete(
         self,

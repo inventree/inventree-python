@@ -22,7 +22,7 @@ class InvenTreeAPI(object):
     Basic class for performing Inventree API requests.
     """
 
-    MIN_SUPPORTED_API_VERSION = 51
+    MIN_SUPPORTED_API_VERSION = 206
 
     @staticmethod
     def getMinApiVersion():
@@ -46,6 +46,7 @@ class InvenTreeAPI(object):
             token-name - Name of the token to use (default = 'inventree-python-client')
             use_token_auth - Use token authentication? (default = True)
             verbose - Print extra debug messages (default = False)
+            strict - Enforce strict HTTPS certificate checking (default = True)
             timeout - Set timeout to use (in seconds). Default: 10
             proxies - Definition of proxies as a dict (defaults to an empty dict)
 
@@ -66,6 +67,7 @@ class InvenTreeAPI(object):
         self.token_name = kwargs.get('token_name', os.environ.get('INVENTREE_API_TOKEN_NAME', 'inventree-python-client'))
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
+        self.strict = bool(kwargs.get('strict', True))
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
         self.verbose = kwargs.get('verbose', False)
@@ -194,7 +196,12 @@ class InvenTreeAPI(object):
         logger.info("Checking InvenTree server connection...")
 
         try:
-            response = requests.get(self.api_url, timeout=self.timeout, proxies=self.proxies)
+            response = requests.get(
+                self.api_url,
+                timeout=self.timeout,
+                proxies=self.proxies,
+                verify=self.strict
+            )
         except requests.exceptions.ConnectionError as e:
             logger.fatal(f"Server connection error: {str(type(e))}")
             return False
@@ -325,6 +332,9 @@ class InvenTreeAPI(object):
             payload['files'] = files
         else:
             payload['json'] = data
+
+        # Enforce strict HTTPS certificate checking?
+        payload['verify'] = self.strict
 
         # Debug request information
         logger.debug("Sending Request:")
@@ -578,13 +588,15 @@ class InvenTreeAPI(object):
             auth = self.auth
 
         with requests.get(
-                fullurl,
-                stream=True,
-                auth=auth,
-                headers=headers,
-                params=params,
-                timeout=self.timeout,
-                proxies=self.proxies) as response:
+            fullurl,
+            stream=True,
+            auth=auth,
+            headers=headers,
+            params=params,
+            timeout=self.timeout,
+            proxies=self.proxies,
+            verify=self.strict,
+        ) as response:
 
             # Error code
             if response.status_code >= 300:

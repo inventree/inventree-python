@@ -23,16 +23,10 @@ class CurrencyManager(object):
     def refreshExchangeRates(self):
         """Request the server update exchange rates from external service"""
 
-        if self.api.api_version < 93:
-            raise ValueError(f"Server API version ({self.api.api_version}) is older than v93, which is required for manual exchange rate updates")
-
         return self.api.post('currency/refresh/', {})
 
     def updateFromServer(self):
         """Retrieve currency data from the server"""
-
-        if self.api.api_version < 92:
-            raise ValueError(f"Server API version ({self.api.api_version}) is older than v92, which is required for currency support")
 
         response = self.api.get(self.CURRENCY_ENDPOINT)
 

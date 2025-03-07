@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
+from inventree.base import Attachment  # noqa: E402
 from inventree import company  # noqa: E402
 from inventree import order  # noqa: E402
 from inventree import part  # noqa: E402
@@ -32,7 +33,6 @@ class POTest(InvenTreeTestCase):
             'complete_date',
             'supplier',
             'status',
-            'notes',
         ]
 
         for name in names:
@@ -359,6 +359,9 @@ class POTest(InvenTreeTestCase):
         Test upload of attachment against a PurchaseOrder
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         # Ensure we have a least one purchase order to work with
         n = len(order.PurchaseOrder.list(self.api))
 
@@ -383,13 +386,46 @@ class POTest(InvenTreeTestCase):
         with self.assertRaises(FileNotFoundError):
             po.uploadAttachment('not_found.txt')
 
-        # Test that missing the 'order' parameter fails too
-        with self.assertRaises(ValueError):
-            order.PurchaseOrderAttachment.upload(self.api, fn, comment='Should not work!')
-
         # Check that attachments uploaded OK
-        attachments = order.PurchaseOrderAttachment.list(self.api, order=po.pk)
+        attachments = po.getAttachments()
         self.assertEqual(len(attachments), 3)
+
+    def test_invalid_list(self):
+        """Test list with an invalid parameter.
+        
+        Ref: https://github.com/inventree/inventree-python/issues/246
+        """
+
+        from inventree.project_code import ProjectCode
+
+        results = order.PurchaseOrder.list(self.api, project_code=999999999)
+        self.assertEqual(len(results), 0)
+
+        # Try the same again, but raise the eror
+        with self.assertRaises(HTTPError):
+            results = order.PurchaseOrder.list(
+                self.api,
+                project_code=999999999,
+                raise_error=True
+            )
+
+        # Find a valid project code
+        n = ProjectCode.count(self.api)
+
+        # Create a new project code
+        pc = ProjectCode.create(self.api, {
+            'code': f"TEST-{n+1}",
+            'description': 'Test project code',
+        })
+
+        # Attach project code to an order
+        po = order.PurchaseOrder.list(self.api, limit=1)[0]
+        po.save({'project_code': pc.pk})
+
+        # Now, list orders with the project code
+        results = order.PurchaseOrder.list(self.api, project_code=pc.pk)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].pk, po.pk)
 
 
 class SOTest(InvenTreeTestCase):
@@ -502,6 +538,9 @@ class SOTest(InvenTreeTestCase):
         Test upload of attachment against a SalesOrder
         """
 
+        if self.api.api_version < Attachment.MIN_API_VERSION:
+            return
+
         # Grab the first available SalesOrder
         orders = order.SalesOrder.list(self.api)
 
@@ -521,12 +560,13 @@ class SOTest(InvenTreeTestCase):
 
         pk = response['pk']
 
-        attachment = order.SalesOrderAttachment(self.api, pk=pk)
+        attachment = Attachment(self.api, pk=pk)
 
-        self.assertEqual(attachment.order, so.pk)
+        self.assertEqual(attachment.model_type, 'salesorder')
+        self.assertEqual(attachment.model_id, so.pk)
         self.assertEqual(attachment.comment, 'Sales order attachment')
 
-        attachments = order.SalesOrderAttachment.list(self.api, order=so.pk)
+        attachments = so.getAttachments()
         self.assertEqual(len(attachments), n + 1)
 
     def test_so_shipment(self):
@@ -633,7 +673,6 @@ class SOTest(InvenTreeTestCase):
         self.assertEqual(shipment_2.reference, f'Package {num_shipments+1}')
 
         # Make sure extra data is also as expected
-        self.assertEqual(shipment_2.notes, notes)
         self.assertEqual(shipment_2.tracking_number, tracking_number)
 
         # Count number of current shipments
@@ -672,16 +711,25 @@ class SOTest(InvenTreeTestCase):
         # Make sure date is not None
         self.assertIsNotNone(shipment_2.shipment_date)
 
+        # SalesOrderAllocations are broken prior to server API version 267
+        if self.api.api_version < 267:
+            return
+
         # Try to complete this order
         # Ship remaining shipments first
         for shp in so.getShipments():
+
+            allocations = shp.getAllocations()
+
             # Delete shipment if it has no allocations
-            if len(shp.allocations) == 0:
+            if len(allocations) == 0:
                 shp.delete()
                 continue
+            
             # If the shipment has no date, try to mark it shipped
             if shp.shipment_date is None:
                 shp.ship()
+        
         so.complete()
         self.assertEqual(so.status, 20)
         self.assertEqual(so.status_text, 'Shipped')

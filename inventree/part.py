@@ -58,15 +58,8 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
         )
 
 
-class PartAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a Part"""
-
-    URL = 'part/attachment'
-    ATTACH_TO = 'part'
-
-
 class Part(
-    inventree.base.AttachmentMixin(PartAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.BarcodeMixin,
     inventree.base.MetadataMixin,
     inventree.base.ImageMixin,
@@ -76,11 +69,6 @@ class Part(
     """ Class representing the Part database model """
 
     URL = 'part'
-
-    # Setup for Label printing
-    LABELNAME = 'part'
-    LABELITEM = 'parts'
-
     MODEL_TYPE = 'part'
 
     def getCategory(self):
@@ -196,10 +184,6 @@ class BomItem(
     """ Class representing the BomItem database model """
 
     URL = 'bom'
-
-    # Setup for Report mixin
-    REPORTNAME = 'bom'
-    REPORTITEM = 'part'
 
 
 class InternalPrice(inventree.base.InventreeObject):

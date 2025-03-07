@@ -8,15 +8,8 @@ import inventree.part
 import inventree.report
 
 
-class PurchaseOrderAttachment(inventree.base.Attachment):
-    """Class representing a file attachment for a PurchaseOrder"""
-
-    URL = 'order/po/attachment'
-    ATTACH_TO = 'order'
-
-
 class PurchaseOrder(
-    inventree.base.AttachmentMixin(PurchaseOrderAttachment),
+    inventree.base.AttachmentMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -26,10 +19,6 @@ class PurchaseOrder(
 
     URL = 'order/po'
     MODEL_TYPE = 'purchaseorder'
-
-    # Setup for Report mixin
-    REPORTNAME = 'po'
-    REPORTITEM = 'order'
 
     def getSupplier(self):
         """Return the supplier (Company) associated with this order"""
@@ -75,6 +64,14 @@ class PurchaseOrder(
 
         # Return
         return self._statusupdate(status='issue', **kwargs)
+
+    def hold(self, **kwargs):
+        """
+        Hold the purchase order
+        """
+
+        # Return
+        return self._statusupdate(status='hold', **kwargs)
 
     def receiveAll(self, location, status=10):
         """
@@ -166,7 +163,7 @@ class PurchaseOrderLineItem(
         """
         return PurchaseOrder(self._api, self.order)
 
-    def receive(self, quantity=None, status=10, location=None, batch_code='', serial_numbers=''):
+    def receive(self, quantity=None, status=10, location=None, expiry_date=None, batch_code=None, serial_numbers=None):
         """
         Mark this line item as received.
 
@@ -187,6 +184,7 @@ class PurchaseOrderLineItem(
             location: Location ID, or a StockLocation item
 
         If given, the following arguments are also sent as parameters:
+            expiry_date
             batch_code
             serial_numbers
         """
@@ -204,18 +202,28 @@ class PurchaseOrderLineItem(
             except:  # noqa:E722
                 location_id = int(location)
 
+        item_data = {
+            'line_item': self.pk,
+            'supplier_part': self.part,
+            'quantity': quantity,
+            'status': status,
+            'location': location_id
+        }
+
+        # Optional fields which may be set
+        if expiry_date:
+            item_data['expiry_date'] = expiry_date
+
+        if batch_code:
+            item_data['batch_code'] = batch_code
+        
+        if serial_numbers:
+            item_data['serial_numbers'] = serial_numbers
+
         # Prepare request data
         data = {
             'items': [
-                {
-                    'line_item': self.pk,
-                    'supplier_part': self.part,
-                    'quantity': quantity,
-                    'status': status,
-                    'location': location_id,
-                    'batch_code': batch_code,
-                    'serial_numbers': serial_numbers
-                }
+                item_data,
             ],
             'location': location_id
         }
