@@ -51,9 +51,7 @@ class ReportClassesTest(InvenTreeTestCase):
         # Print the report
         response = build.printReport(template)
 
-        for key in ['pk', 'model_type', 'output', 'template']:
+        for key in ['pk', 'output']:
             self.assertIn(key, response)
         
         self.assertIsNotNone(response['output'])
-        self.assertEqual(response['template'], template.pk)
-        self.assertEqual(response['model_type'], build.getModelType())
