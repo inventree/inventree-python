@@ -29,6 +29,7 @@ setuptools.setup(
     install_requires=[
         "requests>=2.27.0",
         "pip-system-certs>=4.0",
+        "urllib3>=2.3.0"
     ],
     setup_requires=[
         "wheel",
