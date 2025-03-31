@@ -80,7 +80,9 @@ class InvenTreeAPI(object):
         self.oidc_scopes = kwargs.get('oidc_scopes', os.environ.get('INVENTREE_API_OIDC_SCOPES', ['openid', 'g:read']))
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
-        self.use_oidc_auth = kwargs.get('use_oidc_auth', os.environ.get('INVENTREE_API_OIDC', None))
+        self.use_oidc_auth = kwargs.get('use_oidc_auth', os.environ.get('INVENTREE_API_OIDC', False))
+        if self.use_oidc_auth and self.use_token_auth:
+            self.use_token_auth = False
         self.verbose = kwargs.get('verbose', False)
 
         self.auth = None
@@ -603,8 +605,9 @@ class InvenTreeAPI(object):
             raise FileExistsError(f"Destination file '{destination}' already exists")
 
         if self.token:
+            headername = 'Token' if self.use_token_auth else 'Bearer'
             headers = {
-                'AUTHORIZATION': f"Token {self.token}"
+                'AUTHORIZATION': f"{headername} {self.token}"
             }
             auth = None
         else:
