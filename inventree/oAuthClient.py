@@ -10,7 +10,7 @@ USABLE_PORT_RANGE = (29170, 292180)
 
 
 class OAuthClient:
-    def __init__(self, server_url: str = "http://localhost:8000", client_id: str ='', scopes: list[str] = None) -> None:
+    def __init__(self, server_url: str = "http://localhost:8000", client_id: str ='', scopes: list = None) -> None:
         self.server_url = server_url
         self.client_id = client_id
         self.scopes = scopes if scopes is not None else []
