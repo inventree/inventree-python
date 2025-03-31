@@ -38,7 +38,8 @@ setuptools.setup(
     ),
 
     install_requires=[
-        "requests>=2.27.0"
+        "requests>=2.27.0",
+        "requests-oauthlib"
     ],
 
     setup_requires=[
