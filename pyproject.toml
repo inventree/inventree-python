@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventree"
+dynamic = ["version"]
+description = "Python interface for InvenTree inventory management system"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Oliver Walters", email = "oliver.henry.walters@gmail.com" },
+]
+keywords = [
+    "barcode",
+    "bill",
+    "bom",
+    "inventory",
+    "management",
+    "materials",
+    "of",
+    "stock",
+]
+dependencies = [
+    "pip-system-certs>=4.0",
+    "requests>=2.27.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/inventree/inventree-python/"
+
+[tool.setuptools.dynamic]
+version = {attr = "inventree.base.INVENTREE_PYTHON_VERSION"} 
+
+[tool.setuptools]
+packages = ["inventree"]
