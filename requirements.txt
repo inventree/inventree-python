@@ -1,5 +1,5 @@
 requests[socks]>=2.21.0                # Python HTTP for humans with proxy support
-flake8==3.8.4                   # PEP checking
+flake8==7.2.0                   # PEP checking
 flake8-pyproject==1.2.3         # PEP 621 support 
 wheel>=0.34.2                   # Building package
 invoke>=1.4.0
