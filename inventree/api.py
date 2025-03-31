@@ -13,6 +13,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import Timeout
+
 from . import oAuthClient as oauth
 
 logger = logging.getLogger('inventree')
@@ -290,7 +291,6 @@ class InvenTreeAPI(object):
         self.token = client._access_token
 
         return self.token
-
 
     def request(self, api_url, **kwargs):
         """ Perform a URL request to the Inventree API """

@@ -1,8 +1,9 @@
 import os
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from requests_oauthlib import OAuth2Session
-import webbrowser
 import urllib.parse as urlparse
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+from requests_oauthlib import OAuth2Session
 
 # Environment setup
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -10,7 +11,7 @@ USABLE_PORT_RANGE = (29170, 292180)
 
 
 class OAuthClient:
-    def __init__(self, server_url: str = "http://localhost:8000", client_id: str ='', scopes: list = None) -> None:
+    def __init__(self, server_url: str = "http://localhost:8000", client_id: str = '', scopes: list = None) -> None:
         self.server_url = server_url
         self.client_id = client_id
         self.scopes = scopes if scopes is not None else []
@@ -18,7 +19,7 @@ class OAuthClient:
         self._handler_wrapper = RequestHandlerWrapper(self)
         self._setup_callback()
         self._poll_user()
-    
+
     def get_url(self, path: str) -> str:
         """Get the authorization URL."""
         return urlparse.urljoin(self.server_url, path)
@@ -53,7 +54,7 @@ class OAuthClient:
 
 
 class RequestHandlerWrapper:
-    """Provides callback for OIDC endpint."""
+    """Provides callback for OIDC endpoint."""
     def __init__(self, oauth_client) -> None:
         self.done = False
         self.error = None
@@ -96,6 +97,7 @@ class RequestHandlerWrapper:
                 pass  # Suppress logging
 
         return RequestHandler
+
 
 class OAuthError(Exception):
     """Exception raised during the OAuth process."""
