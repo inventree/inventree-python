@@ -7,7 +7,7 @@ name = "inventree"
 dynamic = ["version"]
 description = "Python interface for InvenTree inventory management system"
 readme = "README.md"
-license = "MIT"
+license = { file = "LICENSE" }
 requires-python = ">=3.9"
 authors = [
     { name = "Oliver Walters", email = "oliver.henry.walters@gmail.com" },
