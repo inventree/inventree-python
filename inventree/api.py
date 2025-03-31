@@ -137,6 +137,10 @@ class InvenTreeAPI(object):
         except Exception:
             raise ConnectionRefusedError("Could not connect to InvenTree server")
 
+        if self.use_oidc_auth:
+            self.requestOidcToken()
+            return
+
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
 
@@ -145,8 +149,6 @@ class InvenTreeAPI(object):
 
         if self.use_token_auth and not self.token:
             self.requestToken()
-        elif self.use_oidc_auth and not self.token:
-            self.requestOidcToken()
 
     def constructApiUrl(self, endpoint_url):
         """Construct an API endpoint URL based on the provided API URL.
@@ -335,8 +337,11 @@ class InvenTreeAPI(object):
             'timeout': kwargs.get('timeout', self.timeout),
         }
 
-        if (self.use_token_auth or self.use_oidc_auth) and self.token:
+        if self.use_token_auth and self.token:
             headers['AUTHORIZATION'] = f'Token {self.token}'
+            auth = None
+        elif self.use_oidc_auth and self.token:
+            headers['AUTHORIZATION'] = f'Bearer {self.token}'
             auth = None
         else:
             auth = self.auth
