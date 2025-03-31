@@ -35,3 +35,15 @@ version = {attr = "inventree.base.INVENTREE_PYTHON_VERSION"}
 
 [tool.setuptools]
 packages = ["inventree"]
+
+[tool.flake8]
+ignore =[
+	'C901',
+	# - W293 - blank lines contain whitespace
+	'W293',
+	# - E501 - line too long (82 characters)
+	'E501',
+	'N802']
+exclude = ['.git','__pycache__','inventree_server','dist','build','test.py']
+max-complexity = 20
+
