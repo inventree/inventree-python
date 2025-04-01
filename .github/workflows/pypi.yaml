@@ -25,10 +25,10 @@ jobs:
       - name: Install Python Dependencies
         run: |
           pip install -U -r requirements.txt
-          pip install --upgrade wheel setuptools twine
+          pip install --upgrade wheel setuptools twine build
       - name: Build Binary
         run: |
-          python3 setup.py sdist bdist_wheel --universal
+          python3 -m build
       - name: Publish
         run: |
           python3 -m twine upload dist/*

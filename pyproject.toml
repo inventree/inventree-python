@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools >= 75.3.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventree"
+dynamic = ["version"]
+description = "Python interface for InvenTree inventory management system"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Oliver Walters", email = "oliver.henry.walters@gmail.com" },
+]
+keywords = [
+    "barcode",
+    "bill",
+    "bom",
+    "inventory",
+    "management",
+    "materials",
+    "of",
+    "stock",
+]
+dependencies = [
+    "pip-system-certs>=4.0",
+    "requests>=2.27.0",
+    "urllib3>=2.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/inventree/inventree-python/"
+
+[tool.setuptools.dynamic]
+version = {attr = "inventree.base.INVENTREE_PYTHON_VERSION"} 
+
+[tool.setuptools]
+packages = ["inventree"]
+
+[tool.flake8]
+ignore =[
+	'C901',
+	# - W293 - blank lines contain whitespace
+	'W293',
+	# - E501 - line too long (82 characters)
+	'E501',
+	'N802']
+exclude = ['.git','__pycache__','inventree_server','dist','build','test.py']
+max-complexity = 20
+
