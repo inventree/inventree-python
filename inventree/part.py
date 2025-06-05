@@ -186,6 +186,15 @@ class BomItem(
     URL = 'bom'
 
 
+class BomItemSubstitute(
+    inventree.base.InventreeObject,
+    inventree.base.MetadataMixin,
+):
+    """Class representing the BomItemSubstitute database model"""
+
+    URL = "bom/substitute"
+
+
 class InternalPrice(inventree.base.InventreeObject):
     """ Class representing the InternalPrice model """
 
