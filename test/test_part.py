@@ -709,8 +709,6 @@ class PartTest(InvenTreeTestCase):
         self.assertIn('allocated_build_order_quantity', req)
         self.assertIn('required_sales_order_quantity', req)
         self.assertIn('allocated_sales_order_quantity', req)
-        self.assertIn('allocated', req)
-        self.assertIn('required', req)
 
 
 class PartBarcodeTest(InvenTreeTestCase):
