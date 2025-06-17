@@ -704,7 +704,8 @@ class PartTest(InvenTreeTestCase):
         # Check for expected content
         self.assertIsInstance(req, dict)
 
-        if self.api.api_version < 350:  # Ref: https://github.com/inventree/InvenTree/pull/9798
+        # Ref: https://github.com/inventree/InvenTree/pull/9798
+        if self.api.api_version < 350:
             fields = [
                 'on_order',
                 'allocated_build_order_quantity',
