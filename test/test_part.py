@@ -703,13 +703,31 @@ class PartTest(InvenTreeTestCase):
 
         # Check for expected content
         self.assertIsInstance(req, dict)
-        self.assertIn('available_stock', req)
-        self.assertIn('on_order', req)
-        self.assertIn('required_build_order_quantity', req)
-        self.assertIn('allocated_build_order_quantity', req)
-        self.assertIn('required_sales_order_quantity', req)
-        self.assertIn('allocated_sales_order_quantity', req)
 
+        if self.api.api_version < 350:  # Ref: https://github.com/inventree/InvenTree/pull/9798
+            fields = [
+                'on_order',
+                'allocated_build_order_quantity',
+                'allocated_sales_order_quantity',
+                'required_build_order_quantity',
+                'required_sales_order_quantity',
+            ]
+        else:
+            fields = [
+                'total_stock',
+                'unallocated_stock',
+                'can_build',
+                'ordering',
+                'building',
+                'scheduled_to_build',
+                'required_for_build_orders',
+                'allocated_to_build_orders',
+                'required_for_sales_orders',
+                'allocated_to_sales_orders',
+            ]
+        
+        for f in fields:
+            self.assertIn(f, req)
 
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""
