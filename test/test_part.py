@@ -730,6 +730,7 @@ class PartTest(InvenTreeTestCase):
         for f in fields:
             self.assertIn(f, req)
 
+
 class PartBarcodeTest(InvenTreeTestCase):
     """Tests for Part barcode functionality"""
 
