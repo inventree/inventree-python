@@ -426,6 +426,10 @@ class StockAdjustTest(InvenTreeTestCase):
             }
         )
 
+        # Verify a single result was returned
+        self.assertEqual(1, len(assignitem))
+        assignitem = assignitem[0]
+
         # Assign the item
         assignitem.assignStock(customer=customer, notes='Sell on the side')
 
