@@ -209,7 +209,8 @@ class TestCreate(InvenTreeTestCase):
             'part': p.pk,
             'quantity': 45,
             'notes': 'This is a note',
-        })[0]
+
+        })
 
         self.assertIsNotNone(s)
         self.assertEqual(s.part, p.pk)

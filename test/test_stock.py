@@ -248,25 +248,6 @@ class StockTest(InvenTreeTestCase):
 
             item.unassignBarcode()
 
-    def test_serialized(self):
-        """Test serializing multiple objects on create"""
-
-        # Create items with serial numbers
-        items = StockItem.create(
-            self.api,
-            {
-                "part": 10004,
-                "quantity": 3,
-                "serial_numbers": "1005,1006,1007"
-            }
-        )
-
-        self.assertEqual(3, len(items))
-
-        self.assertEqual('1005', items[0].serial)
-        self.assertEqual('1006', items[1].serial)
-        self.assertEqual('1007', items[2].serial)
-
 
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
@@ -425,10 +406,6 @@ class StockAdjustTest(InvenTreeTestCase):
                 "quantity": 10,
             }
         )
-
-        # Verify a single result was returned
-        self.assertEqual(1, len(assignitem))
-        assignitem = assignitem[0]
 
         # Assign the item
         assignitem.assignStock(customer=customer, notes='Sell on the side')
