@@ -273,12 +273,12 @@ class TemplateTest(InvenTreeTestCase):
             'value': '0x123456',
         }
 
-        result = item.uploadTestResult('firmware', False, **args)
+        result = item.uploadTestResult('firmwareversion', False, **args)
 
         self.assertTrue(result)
 
-        item.uploadTestResult('paint', True)
-        item.uploadTestResult('extra test', False, value='some data')
+        item.uploadTestResult('temperaturetest', True)
+        item.uploadTestResult('settingschecksum', False, value='some data')
 
         # There should be 3 more test results now!
         results = item.getTestResults()
