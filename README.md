@@ -18,6 +18,14 @@ The InvenTree python library can be easily installed using PIP:
 pip install inventree
 ```
 
+If you need to rely on system certificates from the OS certificate store instead of the bundled certificates, use
+
+```
+pip install inventree[system-certs]
+```
+
+This allows pip and Python applications to verify TLS/SSL connections to servers whose certificates are trusted by your system, and can be helpful if you're using a custom certificate authority (CA) for your InvenTree instance's cert.
+
 ## Documentation
 
 Refer to the [InvenTree documentation](https://docs.inventree.org/en/latest/api/python/python/)
