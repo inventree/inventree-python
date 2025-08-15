@@ -269,11 +269,15 @@ class POTest(InvenTreeTestCase):
         result = po.receiveAll(location=use_location.pk)
 
         # Check the result returned
-        self.assertIsInstance(result, dict)
-        self.assertIn('items', result)
-        self.assertIn('location', result)
-        # Check that all except one line were marked
-        self.assertEqual(len(result['items']), len(po.getLineItems()) - 1)
+        if self.api.api_version < 385:  # Ref: https://github.com/inventree/InvenTree/pull/10174/
+            self.assertIsInstance(result, dict)
+            self.assertIn('items', result)
+            self.assertIn('location', result)
+            # Check that all except one line were marked
+            self.assertEqual(len(result['items']), len(po.getLineItems()) - 1)
+        else:
+            self.assertIsInstance(result, list)
+            self.assertEqual(len(result), len(po.getLineItems()) - 1)
 
         # Receive all line items again - make sure answer is None
         # use the StockLocation item here
