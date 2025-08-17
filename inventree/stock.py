@@ -11,6 +11,9 @@ import inventree.part
 import inventree.report
 
 
+logger = logging.getLogger('inventree')
+
+
 class StockLocation(
     inventree.base.BarcodeMixin,
     inventree.base.MetadataMixin,
@@ -57,6 +60,31 @@ class StockItem(
     URL = 'stock'
 
     MODEL_TYPE = 'stockitem'
+
+    @classmethod
+    def create(cls, api, data, **kwargs):
+        """ Override default create method to support multiple object return. """
+
+        cls.checkApiVersion(api)
+
+        # Ensure the pk value is None so an existing object is not updated
+        if cls.getPkField() in data.keys():
+            data.pop(cls.getPkField())
+
+        response = api.post(cls.URL, data, **kwargs)
+
+        if response is None:
+            logger.error("Error creating new object")
+            return None
+
+        if isinstance(response, list):
+            allResponses = []
+            for element in response:
+                allResponses.append(cls(api, data=element))
+            return allResponses
+
+        else:
+            return [cls(api, data=response)]
 
     @classmethod
     def adjustStockItems(cls, api: inventree.api.InvenTreeAPI, method: str, items: list, **kwargs):
