@@ -10,4 +10,4 @@ logger = logging.getLogger('inventree')
 class User(inventree.base.InventreeObject):
     """ Class representing the User database model """
 
-    URL = 'user'
+    URL = 'user/'

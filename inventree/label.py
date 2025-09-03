@@ -39,7 +39,7 @@ class LabelPrintingMixin:
     def printLabel(self, template, plugin=None, destination=None, *args, **kwargs):
         """Print a label against the provided label template."""
 
-        print_url = '/label/print/'
+        print_url = 'label/print/'
 
         template_id = self.getTemplateId(template)
 
@@ -161,7 +161,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
 class LabelTemplate(LabelFunctions):
     """Class representing the LabelTemplate database model."""
 
-    URL = 'label/template'
+    URL = 'label/template/'
 
     def __str__(self):
         """String representation of the LabelTemplate instance."""

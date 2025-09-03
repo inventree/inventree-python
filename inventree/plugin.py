@@ -6,7 +6,7 @@ import inventree.base
 class InvenTreePlugin(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Represents a PluginConfig instance on the InvenTree server."""
 
-    URL = 'plugins'
+    URL = 'plugins/'
     MIN_API_VERSION = 197
 
     @classmethod
