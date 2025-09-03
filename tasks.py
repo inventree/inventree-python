@@ -200,4 +200,5 @@ def test(c, source=None, update=False, reset=False, debug=False, host=None, user
         c.run(f'coverage run -m unittest {source}')
     else:
         # Automatically discover tests, and run only those
+        print("Running all unit tests")
         c.run('coverage run -m unittest discover -s test/')
