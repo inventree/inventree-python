@@ -271,6 +271,7 @@ class StockTest(InvenTreeTestCase):
         for item in items:
             item.delete()
 
+
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
 
