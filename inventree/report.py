@@ -29,7 +29,7 @@ class ReportPrintingMixin:
         If neither plugin nor destination is given, nothing will be done
         """
 
-        print_url = '/report/print/'
+        print_url = 'report/print/'
         template_id = self.getTemplateId(report)
 
         response = self._api.post(

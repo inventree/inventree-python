@@ -623,7 +623,7 @@ class InvenTreeAPI(object):
             barcode_data = json.dumps(barcode_data)
 
         response = self.post(
-            '/barcode/',
+            'barcode/',
             {
                 'barcode': str(barcode_data),
             }

@@ -39,7 +39,7 @@ class LabelPrintingMixin:
     def printLabel(self, template, plugin=None, destination=None, *args, **kwargs):
         """Print a label against the provided label template."""
 
-        print_url = '/label/print/'
+        print_url = 'label/print/'
 
         template_id = self.getTemplateId(template)
 

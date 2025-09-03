@@ -549,7 +549,7 @@ class MetadataMixin:
     - The 'metadata' is not used for any InvenTree business logic
     - Instead it can be used by plugins for storing arbitrary information
     - Internally it is stored as a JSON database field
-    - Metadata is accessed via the API by appending '/metadata/' to the API URL
+    - Metadata is accessed via the API by appending './metadata/' to the API URL
 
     Note: Requires server API version 49 or newer
 
@@ -724,7 +724,7 @@ class BarcodeMixin:
         model_type = self.barcodeModelType()
 
         response = self._api.post(
-            '/barcode/link/',
+            'barcode/link/',
             {
                 'barcode': barcode_data,
                 model_type: self.pk,
@@ -736,13 +736,13 @@ class BarcodeMixin:
 
         return response
 
-    def unassignBarcode(self, reload=True):
+    def unassignBarcode(self, reload: bool = True):
         """Unassign a barcode from this object"""
 
         model_type = self.barcodeModelType()
 
         response = self._api.post(
-            '/barcode/unlink/',
+            'barcode/unlink/',
             {
                 model_type: self.pk,
             }

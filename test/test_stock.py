@@ -267,6 +267,9 @@ class StockTest(InvenTreeTestCase):
         self.assertEqual('1006', items[1].serial)
         self.assertEqual('1007', items[2].serial)
 
+        # Delete the items after the test
+        for item in items:
+            item.delete()
 
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
