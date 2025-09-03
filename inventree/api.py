@@ -145,17 +145,8 @@ class InvenTreeAPI(object):
         Returns: A fully qualified URL for the subsequent request
         """
 
-        # Strip leading / character if provided
-        if endpoint_url.startswith("/"):
-            endpoint_url = endpoint_url[1:]
+        return urljoin(self.api_url, endpoint_url)
 
-        url = urljoin(self.api_url, endpoint_url)
-
-        # Ensure the API URL ends with a trailing slash
-        if not url.endswith('/'):
-            url += '/'
-
-        return url
 
     def testAuth(self):
         """
@@ -169,7 +160,7 @@ class InvenTreeAPI(object):
             return False
 
         try:
-            response = self.get('/user/me/')
+            response = self.get('user/me/')
         except requests.exceptions.HTTPError as e:
             logger.fatal(f"Authentication error: {str(type(e))}")
             return False
@@ -254,7 +245,7 @@ class InvenTreeAPI(object):
         # Request an auth token from the server
         try:
             response = self.get(
-                '/user/token/',
+                'user/token/',
                 params={
                     'name': self.token_name,
                 }
