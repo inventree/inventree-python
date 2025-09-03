@@ -147,7 +147,6 @@ class InvenTreeAPI(object):
 
         return urljoin(self.api_url, endpoint_url)
 
-
     def testAuth(self):
         """
         Checks if the set user credentials or the used token
