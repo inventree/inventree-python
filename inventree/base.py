@@ -20,9 +20,15 @@ class InventreeObject(object):
     URL = ""
 
     @classmethod
-    def get_url(cls, api):
+    def get_url(cls):
         """Helper method to get the URL associated with this model."""
-        return cls.URL
+
+        url = cls.URL
+
+        if not url.endswith('/'):
+            url += '/'
+
+        return url
 
     # Minimum server version for the particular model type
     MIN_API_VERSION = None
@@ -90,7 +96,7 @@ class InventreeObject(object):
             if pk <= 0:
                 raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
-        url = self.get_url(api)
+        url = self.get_url()
 
         self._url = f"{url}/{pk}/"
         self._api = api
@@ -134,7 +140,7 @@ class InventreeObject(object):
         cls.checkApiVersion(api)
 
         response = api.request(
-            cls.URL,
+            cls.get_url(),
             method='OPTIONS',
         )
 
@@ -668,7 +674,7 @@ class StatusMixin:
             raise ValueError(f"Order stats {status} not supported.")
 
         # Set the url
-        URL = self.URL + f"/{self.pk}/{status}"
+        URL = self.URL + f"/{self.pk}/{status}/"
 
         if data is None:
             data = {}

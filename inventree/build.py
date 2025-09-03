@@ -13,7 +13,7 @@ class Build(
 ):
     """ Class representing the Build database model """
 
-    URL = 'build'
+    URL = 'build/'
     MODEL_TYPE = 'build'
 
     def issue(self):

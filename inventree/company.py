@@ -25,7 +25,7 @@ class Address(inventree.base.InventreeObject):
 class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
-    URL = 'company'
+    URL = 'company/'
     MODEL_TYPE = "company"
 
     def getContacts(self, **kwargs):
@@ -103,7 +103,7 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
     - Implements the BulkDeleteMixin
     """
 
-    URL = 'company/part'
+    URL = 'company/part/'
 
     def getPriceBreaks(self):
         """ Get a list of price break objects for this SupplierPart """
@@ -122,7 +122,7 @@ class ManufacturerPart(
     - Implements the BulkDeleteMixin
     """
 
-    URL = 'company/part/manufacturer'
+    URL = 'company/part/manufacturer/'
     MODEL_TYPE = "manufacturerpart"
 
     def getParameters(self, **kwargs):
@@ -139,10 +139,10 @@ class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.I
     - Implements the BulkDeleteMixin
     """
 
-    URL = 'company/part/manufacturer/parameter'
+    URL = 'company/part/manufacturer/parameter/'
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
     """ Class representing the SupplierPriceBreak database model """
 
-    URL = 'company/price-break'
+    URL = 'company/price-break/'

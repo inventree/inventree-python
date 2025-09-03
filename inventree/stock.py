@@ -23,7 +23,7 @@ class StockLocation(
 ):
     """ Class representing the StockLocation database model """
 
-    URL = 'stock/location'
+    URL = 'stock/location/'
     MODEL_TYPE = 'stocklocation'
 
     def getStockItems(self, **kwargs):
@@ -57,7 +57,7 @@ class StockItem(
 ):
     """Class representing the StockItem database model."""
 
-    URL = 'stock'
+    URL = 'stock/'
 
     MODEL_TYPE = 'stockitem'
 
@@ -338,7 +338,7 @@ class StockItem(
 class StockItemTracking(inventree.base.InventreeObject):
     """Class representing a StockItem tracking object."""
 
-    URL = 'stock/track'
+    URL = 'stock/track/'
 
 
 class StockItemTestResult(
@@ -356,7 +356,7 @@ class StockItemTestResult(
     and will be associated with the correct PartTestTemplate on the server.
     """
 
-    URL = 'stock/test'
+    URL = 'stock/test/'
     MODEL_TYPE = 'stockitem'
 
     def getTestTemplate(self):

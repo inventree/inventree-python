@@ -124,4 +124,4 @@ class ReportFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObje
 class ReportTemplate(ReportFunctions):
     """Class representing the ReportTemplate model."""
 
-    URL = 'report/template'
+    URL = 'report/template/'

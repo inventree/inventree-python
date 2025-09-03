@@ -161,7 +161,7 @@ class LabelFunctions(inventree.base.MetadataMixin, inventree.base.InventreeObjec
 class LabelTemplate(LabelFunctions):
     """Class representing the LabelTemplate database model."""
 
-    URL = 'label/template'
+    URL = 'label/template/'
 
     def __str__(self):
         """String representation of the LabelTemplate instance."""
