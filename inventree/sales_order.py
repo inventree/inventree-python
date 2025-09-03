@@ -249,7 +249,7 @@ class SalesOrderShipment(
         """
 
         # Customize URL
-        url = f'order/so/{self.getOrder().pk}/allocate'
+        url = f'order/so/{self.getOrder().pk}/allocate/'
 
         # Create data from given inputs
         data = {
