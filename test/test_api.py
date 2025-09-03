@@ -60,7 +60,7 @@ class URLTests(unittest.TestCase):
             'part/': 'http://localhost:1234/api/part/',
             '/api/stock/': 'http://localhost:1234/api/stock/',
             '/plugin/part/': 'http://localhost:1234/plugin/part/',
-            'order/so/shipment': 'http://localhost:1234/api/order/so/shipment/',
+            'order/so/shipment': 'http://localhost:1234/api/order/so/shipment',
             'https://example.com/': 'https://example.com/',
         }
 
