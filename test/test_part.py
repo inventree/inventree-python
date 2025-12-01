@@ -589,7 +589,15 @@ class PartTest(InvenTreeTestCase):
             parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
 
         # Now create a proper parameter template
-        parametertemplate = ParameterTemplate.create(self.api, data={'name': f'Test parameter no {existingTemplates}', 'units': "kg A"})
+        parametertemplate = ParameterTemplate.create(
+            self.api,
+            data={
+                'name': f'Test parameter no {existingTemplates}',
+                'description': 'A parameter template for testing',
+                'model_type': None,
+                'units': "kg A"
+            }
+        )
 
         # result should not be None
         self.assertIsNotNone(parametertemplate)
