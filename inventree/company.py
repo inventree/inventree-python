@@ -22,7 +22,10 @@ class Address(inventree.base.InventreeObject):
     MIN_API_VERSION = 126
 
 
-class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class Company(
+    inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
+    inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the Company database model """
 
     URL = 'company/'
@@ -97,7 +100,10 @@ class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree
         return inventree.order.ReturnOrder.create(self._api, data=kwargs)
 
 
-class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class SupplierPart(
+    inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
+    inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """Class representing the SupplierPart database model
 
     - Implements the BulkDeleteMixin
@@ -113,6 +119,7 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
 
 class ManufacturerPart(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
