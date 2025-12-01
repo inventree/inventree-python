@@ -15,11 +15,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.base import Attachment  # noqa: E402
+from inventree.base import Attachment, Parameter, ParameterTemplate # noqa: E402
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
-from inventree.part import (BomItem, Parameter,  # noqa: E402
-                            ParameterTemplate, Part,
+from inventree.part import (BomItem, PartParameter,  # noqa: E402
+                            Part,
                             PartCategory, PartCategoryParameterTemplate,
                             PartRelated, PartTestTemplate)
 from inventree.stock import StockItem  # noqa: E402
@@ -186,10 +186,14 @@ class PartTest(InvenTreeTestCase):
             'getBomItems': BomItem,
             'isUsedIn': BomItem,
             'getStockItems': StockItem,
-            'getParameters': Parameter,
             'getRelated': PartRelated,
             'getInternalPriceList': InternalPrice,
         }
+
+        if self.api.api_version >= Parameter.MIN_API_VERSION:
+            functions['getParameters'] = Parameter
+        else: 
+            functions['getParameters'] = PartParameter
 
         if self.api.api_version >= Attachment.MIN_API_VERSION:
             functions['getAttachments'] = Attachment
@@ -567,9 +571,11 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(ip_price_clean, test_price)
 
     def test_parameters(self):
-        """
-        Test setting and getting Part parameter templates, as well as parameter values
-        """
+        """Test setting and getting PartParameterTemplates, as well as PartParameter values."""
+
+        # Skip test if modernized Parameter API is not supported
+        if self.api.api_version < Parameter.MIN_API_VERSION:
+            return
 
         # Count number of existing Parameter Templates
         existingTemplates = len(ParameterTemplate.list(self.api))
