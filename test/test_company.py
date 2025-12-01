@@ -3,8 +3,6 @@
 import os
 import sys
 
-from requests.exceptions import HTTPError
-
 try:
     import Image
 except ImportError:

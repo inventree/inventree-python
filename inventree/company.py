@@ -150,6 +150,7 @@ class ManufacturerPart(
 
         return super().getParameters(**kwargs)
 
+
 class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
     """Class representing the ManufacturerPartParameter database model.
 
