@@ -130,6 +130,10 @@ class PartCategoryTest(InvenTreeTestCase):
     def test_part_category_parameter_templates(self):
         """Unit tests for the PartCategoryParameterTemplate model"""
 
+        # Ignore these tests for "legacy" Parameter API
+        if self.api.api_version < Parameter.MIN_API_VERSION:
+            return
+
         electronics = PartCategory(self.api, pk=3)
 
         # Ensure there are some parameter templates associated with this category

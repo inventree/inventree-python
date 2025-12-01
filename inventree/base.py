@@ -570,7 +570,7 @@ class ParameterMixin:
     def getParameters(self):
         """Return a list of parameters associated with this object."""
 
-        if self._api.get_api_version() < Parameter.MIN_API_VERSION:
+        if self._api.api_version < Parameter.MIN_API_VERSION:
             raise NotImplementedError(f"Server API Version ({self._api.api_version}) is too old for ParameterMixin, which requires API version >= {Parameter.MIN_API_VERSION}")
 
         return Parameter.list(

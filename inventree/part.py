@@ -110,7 +110,7 @@ class Part(
     def getParameters(self):
         """ Return parameters associated with this part """
 
-        if self._api.get_api_version() < inventree.base.Parameter.MIN_API_VERSION:
+        if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
             # Return legacy PartParameter objects
             return PartParameter.list(self._api, part=self.pk)
         
