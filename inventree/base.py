@@ -7,7 +7,7 @@ import os
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.19.0"
+INVENTREE_PYTHON_VERSION = "0.20.0"
 
 
 logger = logging.getLogger('inventree')
@@ -538,6 +538,31 @@ class AttachmentMixin:
             self._api,
             link,
             comment=comment,
+            model_type=self.getModelType(),
+            model_id=self.pk
+        )
+
+
+class Parameter(BulkDeleteMixin, InventreeObject):
+    """Class representing a custom parameter object."""
+
+    URL = "parameter/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
+class ParameterMixin:
+    """Mixin class which allows a model class to interact with parameters.
+    
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
+
+    def getParameters(self):
+        """Return a list of parameters associated with this object."""
+
+        return Parameter.list(
+            self._api,
             model_type=self.getModelType(),
             model_id=self.pk
         )
