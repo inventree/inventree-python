@@ -552,6 +552,15 @@ class Parameter(BulkDeleteMixin, InventreeObject):
     MIN_API_VERSION = 429
 
 
+class ParameterTemplate(InventreeObject):
+    """Class representing a parameter template object."""
+
+    URL = "parameter/template/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
 class ParameterMixin:
     """Mixin class which allows a model class to interact with parameters.
     
@@ -560,6 +569,9 @@ class ParameterMixin:
 
     def getParameters(self):
         """Return a list of parameters associated with this object."""
+
+        if self._api.get_api_version() < Parameter.MIN_API_VERSION:
+            raise NotImplementedError(f"Server API Version ({self._api.api_version}) is too old for ParameterMixin, which requires API version >= {Parameter.MIN_API_VERSION}")
 
         return Parameter.list(
             self._api,
