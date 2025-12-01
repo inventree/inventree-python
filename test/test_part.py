@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.base import Attachment, Parameter, ParameterTemplate # noqa: E402
+from inventree.base import Attachment, Parameter, ParameterTemplate  # noqa: E402
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
 from inventree.part import (BomItem, PartParameter,  # noqa: E402
@@ -192,7 +192,7 @@ class PartTest(InvenTreeTestCase):
 
         if self.api.api_version >= Parameter.MIN_API_VERSION:
             functions['getParameters'] = Parameter
-        else: 
+        else:
             functions['getParameters'] = PartParameter
 
         if self.api.api_version >= Attachment.MIN_API_VERSION:

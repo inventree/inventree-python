@@ -25,7 +25,10 @@ class Address(inventree.base.InventreeObject):
 class Company(
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
-    inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+    inventree.base.ImageMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject
+):
     """ Class representing the Company database model """
 
     URL = 'company/'
@@ -103,7 +106,11 @@ class Company(
 class SupplierPart(
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
-    inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+    inventree.base.BarcodeMixin,
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject
+):
     """Class representing the SupplierPart database model
 
     - Implements the BulkDeleteMixin
