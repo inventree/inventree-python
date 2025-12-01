@@ -506,13 +506,14 @@ class Attachment(BulkDeleteMixin, InventreeObject):
 class AttachmentMixin:
     """Mixin class which allows a model class to interact with attachments."""
 
-    def getAttachments(self):
+    def getAttachments(self, **kwargs):
         """Return a list of attachments associated with this object."""
 
         return Attachment.list(
             self._api,
             model_type=self.getModelType(),
-            model_id=self.pk
+            model_id=self.pk,
+            **kwargs
         )
 
     def uploadAttachment(self, attachment, comment=""):
@@ -567,7 +568,7 @@ class ParameterMixin:
     Ref: https://github.com/inventree/InvenTree/pull/10699
     """
 
-    def getParameters(self):
+    def getParameters(self, **kwargs):
         """Return a list of parameters associated with this object."""
 
         if self._api.api_version < Parameter.MIN_API_VERSION:
@@ -576,7 +577,8 @@ class ParameterMixin:
         return Parameter.list(
             self._api,
             model_type=self.getModelType(),
-            model_id=self.pk
+            model_id=self.pk,
+            **kwargs
         )
 
 
