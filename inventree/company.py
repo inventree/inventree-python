@@ -144,16 +144,21 @@ class ManufacturerPart(
         GET a list of all ManufacturerPartParameter objects for this ManufacturerPart
         """
 
-        return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
+        # Support legacy API version which uses a different endpoint
+        if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
+            return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
 
+        return super().getParameters(**kwargs)
 
 class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
     """Class representing the ManufacturerPartParameter database model.
 
-    - Implements the BulkDeleteMixin
+    Note: This class was removed in API version 418 and later.
+    Ref: https://github.com/inventree/InvenTree/pull/10699
     """
 
     URL = 'company/part/manufacturer/parameter/'
+    MAX_API_VERSION = 428
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):
