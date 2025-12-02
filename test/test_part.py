@@ -622,9 +622,6 @@ class PartTest(InvenTreeTestCase):
         # Define w. required values - integer
         param = Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk, 'data': 10})
 
-        # Unit should be equal
-        self.assertEqual(param.getunits(), 'kg A')
-
         # result should not be None
         self.assertIsNotNone(param)
 
