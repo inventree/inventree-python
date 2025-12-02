@@ -22,7 +22,13 @@ class Address(inventree.base.InventreeObject):
     MIN_API_VERSION = 126
 
 
-class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class Company(
+    inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
+    inventree.base.ImageMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject
+):
     """ Class representing the Company database model """
 
     URL = 'company/'
@@ -97,7 +103,14 @@ class Company(inventree.base.ImageMixin, inventree.base.MetadataMixin, inventree
         return inventree.order.ReturnOrder.create(self._api, data=kwargs)
 
 
-class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class SupplierPart(
+    inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
+    inventree.base.BarcodeMixin,
+    inventree.base.BulkDeleteMixin,
+    inventree.base.MetadataMixin,
+    inventree.base.InventreeObject
+):
     """Class representing the SupplierPart database model
 
     - Implements the BulkDeleteMixin
@@ -113,6 +126,7 @@ class SupplierPart(inventree.base.BarcodeMixin, inventree.base.BulkDeleteMixin, 
 
 class ManufacturerPart(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.base.InventreeObject,
@@ -130,16 +144,22 @@ class ManufacturerPart(
         GET a list of all ManufacturerPartParameter objects for this ManufacturerPart
         """
 
-        return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
+        # Support legacy API version which uses a different endpoint
+        if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
+            return ManufacturerPartParameter.list(self._api, manufacturer_part=self.pk, **kwargs)
+
+        return super().getParameters(**kwargs)
 
 
 class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.InventreeObject):
     """Class representing the ManufacturerPartParameter database model.
 
-    - Implements the BulkDeleteMixin
+    Note: This class was removed in API version 418 and later.
+    Ref: https://github.com/inventree/InvenTree/pull/10699
     """
 
     URL = 'company/part/manufacturer/parameter/'
+    MAX_API_VERSION = 428
 
 
 class SupplierPriceBreak(inventree.base.InventreeObject):

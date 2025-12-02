@@ -10,6 +10,7 @@ import inventree.report
 
 class PurchaseOrder(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,

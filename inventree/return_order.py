@@ -11,6 +11,7 @@ import inventree.stock
 
 class ReturnOrder(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,

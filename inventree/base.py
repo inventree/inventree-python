@@ -7,7 +7,7 @@ import os
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.19.0"
+INVENTREE_PYTHON_VERSION = "0.20.0"
 
 
 logger = logging.getLogger('inventree')
@@ -506,13 +506,14 @@ class Attachment(BulkDeleteMixin, InventreeObject):
 class AttachmentMixin:
     """Mixin class which allows a model class to interact with attachments."""
 
-    def getAttachments(self):
+    def getAttachments(self, **kwargs):
         """Return a list of attachments associated with this object."""
 
         return Attachment.list(
             self._api,
             model_type=self.getModelType(),
-            model_id=self.pk
+            model_id=self.pk,
+            **kwargs
         )
 
     def uploadAttachment(self, attachment, comment=""):
@@ -540,6 +541,44 @@ class AttachmentMixin:
             comment=comment,
             model_type=self.getModelType(),
             model_id=self.pk
+        )
+
+
+class Parameter(BulkDeleteMixin, InventreeObject):
+    """Class representing a custom parameter object."""
+
+    URL = "parameter/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
+class ParameterTemplate(InventreeObject):
+    """Class representing a parameter template object."""
+
+    URL = "parameter/template/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
+class ParameterMixin:
+    """Mixin class which allows a model class to interact with parameters.
+    
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
+
+    def getParameters(self, **kwargs):
+        """Return a list of parameters associated with this object."""
+
+        if self._api.api_version < Parameter.MIN_API_VERSION:
+            raise NotImplementedError(f"Server API Version ({self._api.api_version}) is too old for ParameterMixin, which requires API version >= {Parameter.MIN_API_VERSION}")
+
+        return Parameter.list(
+            self._api,
+            model_type=self.getModelType(),
+            model_id=self.pk,
+            **kwargs
         )
 
 

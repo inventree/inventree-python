@@ -24,7 +24,14 @@ class PartCategoryParameterTemplate(inventree.base.InventreeObject):
 
     def getTemplate(self):
         """Return the referenced ParameterTemplate instance"""
-        return ParameterTemplate(self._api, self.parameter_template)
+
+        template_id = getattr(self, 'template', None) or getattr(self, 'parameter_template', None)
+
+        if self._api.api_version < inventree.base.ParameterTemplate.MIN_API_VERSION:
+            # Return legacy PartParameterTemplate object
+            return PartParameterTemplate(self._api, template_id)
+
+        return inventree.base.ParameterTemplate(self._api, template_id)
 
 
 class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
@@ -60,6 +67,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
 
 class Part(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.BarcodeMixin,
     inventree.base.MetadataMixin,
     inventree.base.ImageMixin,
@@ -108,7 +116,12 @@ class Part(
 
     def getParameters(self):
         """ Return parameters associated with this part """
-        return Parameter.list(self._api, part=self.pk)
+
+        if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
+            # Return legacy PartParameter objects
+            return PartParameter.list(self._api, part=self.pk)
+        
+        return super().getParameters()
 
     def getRelated(self):
         """ Return related parts associated with this part """
@@ -264,9 +277,16 @@ class PartRelated(inventree.base.InventreeObject):
         return api.post(cls.URL, data)
 
 
-class Parameter(inventree.base.InventreeObject):
-    """class representing the Parameter database model """
+class PartParameter(inventree.base.InventreeObject):
+    """Legacy class representing the PartParameter database model.
+    
+    This has now been replaced with the generic Parameter model.
+
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
     URL = 'part/parameter/'
+
+    MAX_API_VERSION = 428
 
     def getunits(self):
         """ Get the units for this parameter """
@@ -274,7 +294,13 @@ class Parameter(inventree.base.InventreeObject):
         return self._data['template_detail']['units']
 
 
-class ParameterTemplate(inventree.base.InventreeObject):
-    """ class representing the Parameter Template database model"""
+class PartParameterTemplate(inventree.base.InventreeObject):
+    """Legacy class representing the PartParameterTemplate database model.
+
+    This has now been replaced with the generic ParameterTemplate model.
+     
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
 
     URL = 'part/parameter/template/'
+    MAX_API_VERSION = 428

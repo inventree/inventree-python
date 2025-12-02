@@ -6,6 +6,7 @@ import inventree.report
 
 class Build(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,

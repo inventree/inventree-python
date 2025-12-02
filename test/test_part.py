@@ -15,11 +15,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.base import Attachment  # noqa: E402
+from inventree.base import Attachment, Parameter, ParameterTemplate  # noqa: E402
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
-from inventree.part import (BomItem, Parameter,  # noqa: E402
-                            ParameterTemplate, Part,
+from inventree.part import (BomItem, PartParameter,  # noqa: E402
+                            Part,
                             PartCategory, PartCategoryParameterTemplate,
                             PartRelated, PartTestTemplate)
 from inventree.stock import StockItem  # noqa: E402
@@ -130,6 +130,10 @@ class PartCategoryTest(InvenTreeTestCase):
     def test_part_category_parameter_templates(self):
         """Unit tests for the PartCategoryParameterTemplate model"""
 
+        # Ignore these tests for "legacy" Parameter API
+        if self.api.api_version < Parameter.MIN_API_VERSION:
+            return
+
         electronics = PartCategory(self.api, pk=3)
 
         # Ensure there are some parameter templates associated with this category
@@ -146,7 +150,7 @@ class PartCategoryTest(InvenTreeTestCase):
                     self.api,
                     data={
                         'category': electronics.pk,
-                        'parameter_template': template.pk,
+                        'template': template.pk,
                         'default_value': 123,
                     }
                 )
@@ -186,10 +190,14 @@ class PartTest(InvenTreeTestCase):
             'getBomItems': BomItem,
             'isUsedIn': BomItem,
             'getStockItems': StockItem,
-            'getParameters': Parameter,
             'getRelated': PartRelated,
             'getInternalPriceList': InternalPrice,
         }
+
+        if self.api.api_version >= Parameter.MIN_API_VERSION:
+            functions['getParameters'] = Parameter
+        else:
+            functions['getParameters'] = PartParameter
 
         if self.api.api_version >= Attachment.MIN_API_VERSION:
             functions['getAttachments'] = Attachment
@@ -567,9 +575,11 @@ class PartTest(InvenTreeTestCase):
         self.assertEqual(ip_price_clean, test_price)
 
     def test_parameters(self):
-        """
-        Test setting and getting Part parameter templates, as well as parameter values
-        """
+        """Test setting and getting PartParameterTemplates, as well as PartParameter values."""
+
+        # Skip test if modernized Parameter API is not supported
+        if self.api.api_version < Parameter.MIN_API_VERSION:
+            return
 
         # Count number of existing Parameter Templates
         existingTemplates = len(ParameterTemplate.list(self.api))
@@ -579,7 +589,15 @@ class PartTest(InvenTreeTestCase):
             parametertemplate = ParameterTemplate.create(self.api, data={'units': "kg A"})
 
         # Now create a proper parameter template
-        parametertemplate = ParameterTemplate.create(self.api, data={'name': f'Test parameter no {existingTemplates}', 'units': "kg A"})
+        parametertemplate = ParameterTemplate.create(
+            self.api,
+            data={
+                'name': f'Test parameter no {existingTemplates}',
+                'description': 'A parameter template for testing',
+                'model_type': None,
+                'units': "kg A"
+            }
+        )
 
         # result should not be None
         self.assertIsNotNone(parametertemplate)
@@ -595,17 +613,14 @@ class PartTest(InvenTreeTestCase):
 
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk})
 
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'data': 10})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'data': 10})
 
         # Define w. required values - integer
-        param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
-
-        # Unit should be equal
-        self.assertEqual(param.getunits(), 'kg A')
+        param = Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk, 'data': 10})
 
         # result should not be None
         self.assertIsNotNone(param)
@@ -613,7 +628,7 @@ class PartTest(InvenTreeTestCase):
         # Same parameter for same part - should fail
         # Define w. required values - string
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
 
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters + 1)
