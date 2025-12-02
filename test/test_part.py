@@ -150,7 +150,7 @@ class PartCategoryTest(InvenTreeTestCase):
                     self.api,
                     data={
                         'category': electronics.pk,
-                        'parameter_template': template.pk,
+                        'template': template.pk,
                         'default_value': 123,
                     }
                 )

@@ -24,7 +24,14 @@ class PartCategoryParameterTemplate(inventree.base.InventreeObject):
 
     def getTemplate(self):
         """Return the referenced ParameterTemplate instance"""
-        return PartParameterTemplate(self._api, self.parameter_template)
+
+        template_id = getattr(self, 'template', None) or getattr(self, 'parameter_template', None)
+
+        if self._api.api_version < inventree.base.ParameterTemplate.MIN_API_VERSION:
+            # Return legacy PartParameterTemplate object
+            return PartParameterTemplate(self._api, template_id)
+
+        return inventree.base.ParameterTemplate(self._api, template_id)
 
 
 class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
