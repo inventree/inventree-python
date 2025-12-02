@@ -613,14 +613,14 @@ class PartTest(InvenTreeTestCase):
 
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk})
 
         # Define parameter value for this part - without all required values
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'data': 10})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'data': 10})
 
         # Define w. required values - integer
-        param = Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 10})
+        param = Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk, 'data': 10})
 
         # Unit should be equal
         self.assertEqual(param.getunits(), 'kg A')
@@ -631,7 +631,7 @@ class PartTest(InvenTreeTestCase):
         # Same parameter for same part - should fail
         # Define w. required values - string
         with self.assertRaises(HTTPError):
-            Parameter.create(self.api, data={'part': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
+            Parameter.create(self.api, data={'model_type': 'part', 'model_id': p.pk, 'template': parametertemplate.pk, 'data': 'String value'})
 
         # Number of parameters should be one higher than before
         self.assertEqual(len(p.getParameters()), existingParameters + 1)
