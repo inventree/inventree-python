@@ -57,10 +57,11 @@ class URLTests(unittest.TestCase):
         a = api.InvenTreeAPI("http://localhost:1234", connect=False)
 
         tests = {
-            'part': 'http://localhost:1234/api/part/',
-            '/part': 'http://localhost:1234/api/part/',
-            '/part/': 'http://localhost:1234/api/part/',
-            'order/so/shipment': 'http://localhost:1234/api/order/so/shipment/',
+            'part/': 'http://localhost:1234/api/part/',
+            '/api/stock/': 'http://localhost:1234/api/stock/',
+            '/plugin/part/': 'http://localhost:1234/plugin/part/',
+            'order/so/shipment': 'http://localhost:1234/api/order/so/shipment',
+            'https://example.com/': 'https://example.com/',
         }
 
         for endpoint, url in tests.items():

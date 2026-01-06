@@ -16,7 +16,7 @@ logger = logging.getLogger('inventree')
 class PartCategoryParameterTemplate(inventree.base.InventreeObject):
     """A model which link a ParameterTemplate to a PartCategory"""
 
-    URL = 'part/category/parameters'
+    URL = 'part/category/parameters/'
 
     def getCategory(self):
         """Return the referenced PartCategory instance"""
@@ -24,13 +24,20 @@ class PartCategoryParameterTemplate(inventree.base.InventreeObject):
 
     def getTemplate(self):
         """Return the referenced ParameterTemplate instance"""
-        return ParameterTemplate(self._api, self.parameter_template)
+
+        template_id = getattr(self, 'template', None) or getattr(self, 'parameter_template', None)
+
+        if self._api.api_version < inventree.base.ParameterTemplate.MIN_API_VERSION:
+            # Return legacy PartParameterTemplate object
+            return PartParameterTemplate(self._api, template_id)
+
+        return inventree.base.ParameterTemplate(self._api, template_id)
 
 
 class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
-    URL = 'part/category'
+    URL = 'part/category/'
 
     def getParts(self, **kwargs):
         return Part.list(self._api, category=self.pk, **kwargs)
@@ -60,6 +67,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
 
 class Part(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.BarcodeMixin,
     inventree.base.MetadataMixin,
     inventree.base.ImageMixin,
@@ -68,7 +76,7 @@ class Part(
 ):
     """ Class representing the Part database model """
 
-    URL = 'part'
+    URL = 'part/'
     MODEL_TYPE = 'part'
 
     def getCategory(self):
@@ -108,7 +116,12 @@ class Part(
 
     def getParameters(self):
         """ Return parameters associated with this part """
-        return Parameter.list(self._api, part=self.pk)
+
+        if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
+            # Return legacy PartParameter objects
+            return PartParameter.list(self._api, part=self.pk)
+        
+        return super().getParameters()
 
     def getRelated(self):
         """ Return related parts associated with this part """
@@ -149,7 +162,7 @@ class Part(
 class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing a test template for a Part """
 
-    URL = 'part/test-template'
+    URL = 'part/test-template/'
 
     @classmethod
     def generateTestKey(cls, test_name):
@@ -183,7 +196,7 @@ class BomItem(
 ):
     """ Class representing the BomItem database model """
 
-    URL = 'bom'
+    URL = 'bom/'
 
 
 class BomItemSubstitute(
@@ -192,13 +205,13 @@ class BomItemSubstitute(
 ):
     """Class representing the BomItemSubstitute database model"""
 
-    URL = "bom/substitute"
+    URL = "bom/substitute/"
 
 
 class InternalPrice(inventree.base.InventreeObject):
     """ Class representing the InternalPrice model """
 
-    URL = 'part/internal-price'
+    URL = 'part/internal-price/'
 
     @classmethod
     def setInternalPrice(cls, api, part, quantity: int, price: float):
@@ -219,7 +232,7 @@ class InternalPrice(inventree.base.InventreeObject):
 class SalePrice(inventree.base.InventreeObject):
     """ Class representing the SalePrice model """
 
-    URL = 'part/sale-price'
+    URL = 'part/sale-price/'
 
     @classmethod
     def setSalePrice(cls, api, part, quantity: int, price: float, price_currency: str):
@@ -241,7 +254,7 @@ class SalePrice(inventree.base.InventreeObject):
 class PartRelated(inventree.base.InventreeObject):
     """ Class representing a relationship between parts"""
 
-    URL = 'part/related'
+    URL = 'part/related/'
 
     @classmethod
     def add_related(cls, api, part1, part2):
@@ -264,9 +277,16 @@ class PartRelated(inventree.base.InventreeObject):
         return api.post(cls.URL, data)
 
 
-class Parameter(inventree.base.InventreeObject):
-    """class representing the Parameter database model """
-    URL = 'part/parameter'
+class PartParameter(inventree.base.InventreeObject):
+    """Legacy class representing the PartParameter database model.
+    
+    This has now been replaced with the generic Parameter model.
+
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
+    URL = 'part/parameter/'
+
+    MAX_API_VERSION = 428
 
     def getunits(self):
         """ Get the units for this parameter """
@@ -274,7 +294,13 @@ class Parameter(inventree.base.InventreeObject):
         return self._data['template_detail']['units']
 
 
-class ParameterTemplate(inventree.base.InventreeObject):
-    """ class representing the Parameter Template database model"""
+class PartParameterTemplate(inventree.base.InventreeObject):
+    """Legacy class representing the PartParameterTemplate database model.
 
-    URL = 'part/parameter/template'
+    This has now been replaced with the generic ParameterTemplate model.
+     
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
+
+    URL = 'part/parameter/template/'
+    MAX_API_VERSION = 428

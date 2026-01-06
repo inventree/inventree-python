@@ -6,6 +6,7 @@ import inventree.report
 
 class Build(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,
@@ -13,7 +14,7 @@ class Build(
 ):
     """ Class representing the Build database model """
 
-    URL = 'build'
+    URL = 'build/'
     MODEL_TYPE = 'build'
 
     def issue(self):

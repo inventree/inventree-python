@@ -7,7 +7,7 @@ import os
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.18.0"
+INVENTREE_PYTHON_VERSION = "0.21.1"
 
 
 logger = logging.getLogger('inventree')
@@ -20,9 +20,15 @@ class InventreeObject(object):
     URL = ""
 
     @classmethod
-    def get_url(cls, api):
+    def get_url(cls):
         """Helper method to get the URL associated with this model."""
-        return cls.URL
+
+        url = cls.URL
+
+        if not url.endswith('/'):
+            url += '/'
+
+        return url
 
     # Minimum server version for the particular model type
     MIN_API_VERSION = None
@@ -90,7 +96,7 @@ class InventreeObject(object):
             if pk <= 0:
                 raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
-        url = self.get_url(api)
+        url = self.get_url()
 
         self._url = f"{url}/{pk}/"
         self._api = api
@@ -134,7 +140,7 @@ class InventreeObject(object):
         cls.checkApiVersion(api)
 
         response = api.request(
-            cls.URL,
+            cls.get_url(),
             method='OPTIONS',
         )
 
@@ -346,11 +352,17 @@ class InventreeObject(object):
         return name in self._data
 
     def __getattr__(self, name):
+        try:
+            data = object.__getattribute__(self, "_data")
+        except AttributeError:
+            # Appears to happen during pickling. Raise immediately to prevent recursion errors
+            raise AttributeError(name)
 
-        if name in self._data.keys():
-            return self._data[name]
-        else:
-            return super().__getattribute__(name)
+        if name in data:
+            return data[name]
+
+        # if we're in this block, there already wasn't a "normal" attribute with this name. Raise
+        raise AttributeError(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():
@@ -500,13 +512,14 @@ class Attachment(BulkDeleteMixin, InventreeObject):
 class AttachmentMixin:
     """Mixin class which allows a model class to interact with attachments."""
 
-    def getAttachments(self):
+    def getAttachments(self, **kwargs):
         """Return a list of attachments associated with this object."""
 
         return Attachment.list(
             self._api,
             model_type=self.getModelType(),
-            model_id=self.pk
+            model_id=self.pk,
+            **kwargs
         )
 
     def uploadAttachment(self, attachment, comment=""):
@@ -537,21 +550,64 @@ class AttachmentMixin:
         )
 
 
+class Parameter(BulkDeleteMixin, InventreeObject):
+    """Class representing a custom parameter object."""
+
+    URL = "parameter/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
+class ParameterTemplate(InventreeObject):
+    """Class representing a parameter template object."""
+
+    URL = "parameter/template/"
+
+    # Ref: https://github.com/inventree/InvenTree/pull/10699
+    MIN_API_VERSION = 429
+
+
+class ParameterMixin:
+    """Mixin class which allows a model class to interact with parameters.
+    
+    Ref: https://github.com/inventree/InvenTree/pull/10699
+    """
+
+    def getParameters(self, **kwargs):
+        """Return a list of parameters associated with this object."""
+
+        if self._api.api_version < Parameter.MIN_API_VERSION:
+            raise NotImplementedError(f"Server API Version ({self._api.api_version}) is too old for ParameterMixin, which requires API version >= {Parameter.MIN_API_VERSION}")
+
+        return Parameter.list(
+            self._api,
+            model_type=self.getModelType(),
+            model_id=self.pk,
+            **kwargs
+        )
+
+
 class MetadataMixin:
     """Mixin class for models which support a 'metadata' attribute.
 
     - The 'metadata' is not used for any InvenTree business logic
     - Instead it can be used by plugins for storing arbitrary information
     - Internally it is stored as a JSON database field
-    - Metadata is accessed via the API by appending '/metadata/' to the API URL
+    - Metadata is accessed via the API by appending './metadata/' to the API URL
 
     Note: Requires server API version 49 or newer
 
     """
+    NEW_METADATA_API_VERSION = 436
 
     @property
     def metadata_url(self):
-        return os.path.join(self._url, "metadata/")
+        """Return the metadata URL for this model instance."""
+        if self._api.api_version < self.NEW_METADATA_API_VERSION:
+            return os.path.join(self._url, "metadata/")
+        model_type = self.getModelType()
+        return f"metadata/{model_type}/{self.pk}/"
 
     def getMetadata(self):
         """Read model instance metadata"""
@@ -668,7 +724,7 @@ class StatusMixin:
             raise ValueError(f"Order stats {status} not supported.")
 
         # Set the url
-        URL = self.URL + f"/{self.pk}/{status}"
+        URL = self.URL + f"/{self.pk}/{status}/"
 
         if data is None:
             data = {}
@@ -718,7 +774,7 @@ class BarcodeMixin:
         model_type = self.barcodeModelType()
 
         response = self._api.post(
-            '/barcode/link/',
+            'barcode/link/',
             {
                 'barcode': barcode_data,
                 model_type: self.pk,
@@ -730,13 +786,13 @@ class BarcodeMixin:
 
         return response
 
-    def unassignBarcode(self, reload=True):
+    def unassignBarcode(self, reload: bool = True):
         """Unassign a barcode from this object"""
 
         model_type = self.barcodeModelType()
 
         response = self._api.post(
-            '/barcode/unlink/',
+            'barcode/unlink/',
             {
                 model_type: self.pk,
             }

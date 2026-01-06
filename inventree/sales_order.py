@@ -11,6 +11,7 @@ import inventree.stock
 
 class SalesOrder(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -18,7 +19,7 @@ class SalesOrder(
 ):
     """ Class representing the SalesOrder database model """
 
-    URL = 'order/so'
+    URL = 'order/so/'
     MODEL_TYPE = 'salesorder'
 
     def getCustomer(self):
@@ -91,7 +92,7 @@ class SalesOrderLineItem(
 ):
     """ Class representing the SalesOrderLineItem database model """
 
-    URL = 'order/so-line'
+    URL = 'order/so-line/'
 
     def getPart(self):
         """
@@ -182,7 +183,7 @@ class SalesOrderExtraLineItem(
 ):
     """ Class representing the SalesOrderExtraLineItem database model """
 
-    URL = 'order/so-extra-line'
+    URL = 'order/so-extra-line/'
 
     def getOrder(self):
         """
@@ -197,7 +198,7 @@ class SalesOrderAllocation(
     """Class representing the SalesOrderAllocation database model."""
 
     MIN_API_VERSION = 267
-    URL = 'order/so-allocation'
+    URL = 'order/so-allocation/'
 
     def getOrder(self):
         """Return the SalesOrder to which this SalesOrderAllocation belongs."""
@@ -228,7 +229,7 @@ class SalesOrderShipment(
 ):
     """Class representing a shipment for a SalesOrder"""
 
-    URL = 'order/so/shipment'
+    URL = 'order/so/shipment/'
 
     def getOrder(self):
         """Return the SalesOrder to which this SalesOrderShipment belongs."""
@@ -249,7 +250,7 @@ class SalesOrderShipment(
         """
 
         # Customize URL
-        url = f'order/so/{self.getOrder().pk}/allocate'
+        url = f'order/so/{self.getOrder().pk}/allocate/'
 
         # Create data from given inputs
         data = {

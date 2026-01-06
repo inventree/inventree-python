@@ -10,6 +10,7 @@ import inventree.report
 
 class PurchaseOrder(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -17,7 +18,7 @@ class PurchaseOrder(
 ):
     """ Class representing the PurchaseOrder database model """
 
-    URL = 'order/po'
+    URL = 'order/po/'
     MODEL_TYPE = 'purchaseorder'
 
     def getSupplier(self):
@@ -143,7 +144,7 @@ class PurchaseOrderLineItem(
 ):
     """ Class representing the PurchaseOrderLineItem database model """
 
-    URL = 'order/po-line'
+    URL = 'order/po-line/'
 
     def getSupplierPart(self):
         """
@@ -247,7 +248,7 @@ class PurchaseOrderExtraLineItem(
 ):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
-    URL = 'order/po-extra-line'
+    URL = 'order/po-extra-line/'
 
     def getOrder(self):
         """

@@ -11,6 +11,7 @@ import inventree.stock
 
 class ReturnOrder(
     inventree.base.AttachmentMixin,
+    inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
     inventree.base.StatusMixin,
     inventree.report.ReportPrintingMixin,
@@ -18,7 +19,7 @@ class ReturnOrder(
 ):
     """Class representing the ReturnOrder database model"""
 
-    URL = 'order/ro'
+    URL = 'order/ro/'
     MIN_API_VERSION = 104
     MODEL_TYPE = 'returnorder'
 

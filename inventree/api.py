@@ -91,7 +91,7 @@ class InvenTreeAPI(object):
         if kwargs.get('connect', True):
             self.connect()
 
-    def setHostName(self, host):
+    def setHostName(self, host: str):
         """Validate that the provided base URL is valid"""
 
         if host is None:
@@ -152,7 +152,7 @@ class InvenTreeAPI(object):
         if self.use_token_auth and not self.token:
             self.requestToken()
 
-    def constructApiUrl(self, endpoint_url):
+    def constructApiUrl(self, endpoint_url: str) -> str:
         """Construct an API endpoint URL based on the provided API URL.
 
         Arguments:
@@ -161,17 +161,7 @@ class InvenTreeAPI(object):
         Returns: A fully qualified URL for the subsequent request
         """
 
-        # Strip leading / character if provided
-        if endpoint_url.startswith("/"):
-            endpoint_url = endpoint_url[1:]
-
-        url = urljoin(self.api_url, endpoint_url)
-
-        # Ensure the API URL ends with a trailing slash
-        if not url.endswith('/'):
-            url += '/'
-
-        return url
+        return urljoin(self.api_url, endpoint_url)
 
     def testAuth(self):
         """
@@ -185,7 +175,7 @@ class InvenTreeAPI(object):
             return False
 
         try:
-            response = self.get('/user/me/')
+            response = self.get('user/me/')
         except requests.exceptions.HTTPError as e:
             logger.fatal(f"Authentication error: {str(type(e))}")
             return False
@@ -270,7 +260,7 @@ class InvenTreeAPI(object):
         # Request an auth token from the server
         try:
             response = self.get(
-                '/user/token/',
+                'user/token/',
                 params={
                     'name': self.token_name,
                 }
@@ -296,14 +286,15 @@ class InvenTreeAPI(object):
 
         return self.token
 
-    def request(self, api_url, **kwargs):
+
+    def request(self, url: str, **kwargs):
         """ Perform a URL request to the Inventree API """
 
         if not self.connected:
             # If we have not established a connection to the server yet, attempt now
             self.connect()
 
-        api_url = self.constructApiUrl(api_url)
+        api_url = self.constructApiUrl(url)
 
         data = kwargs.get('data', kwargs.get('json', {}))
         files = kwargs.get('files', {})
@@ -427,7 +418,7 @@ class InvenTreeAPI(object):
 
         return response
 
-    def delete(self, url, **kwargs):
+    def delete(self, url: str, **kwargs):
         """ Perform a DELETE request. Used to remove a record in the database.
 
         """
@@ -446,7 +437,7 @@ class InvenTreeAPI(object):
 
         return response
 
-    def post(self, url, data, **kwargs):
+    def post(self, url: str, data: dict, **kwargs):
         """ Perform a POST request. Used to create a new record in the database.
 
         Args:
@@ -483,7 +474,7 @@ class InvenTreeAPI(object):
 
         return data
 
-    def patch(self, url, data, **kwargs):
+    def patch(self, url: str, data: dict, **kwargs):
         """
         Perform a PATCH request.
 
@@ -521,7 +512,7 @@ class InvenTreeAPI(object):
 
         return data
 
-    def put(self, url, data, **kwargs):
+    def put(self, url: str, data: dict, **kwargs):
         """
         Perform a PUT request. Used to update existing records in the database.
 
@@ -557,7 +548,7 @@ class InvenTreeAPI(object):
 
         return data
 
-    def get(self, url, **kwargs):
+    def get(self, url: str, **kwargs):
         """ Perform a GET request.
 
         For argument information, refer to the 'request' method
@@ -660,7 +651,7 @@ class InvenTreeAPI(object):
             barcode_data = json.dumps(barcode_data)
 
         response = self.post(
-            '/barcode/',
+            'barcode/',
             {
                 'barcode': str(barcode_data),
             }
