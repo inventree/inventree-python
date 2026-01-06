@@ -7,7 +7,7 @@ import os
 
 from . import api as inventree_api
 
-INVENTREE_PYTHON_VERSION = "0.20.0"
+INVENTREE_PYTHON_VERSION = "0.21.0"
 
 
 logger = logging.getLogger('inventree')
