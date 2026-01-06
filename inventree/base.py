@@ -628,14 +628,14 @@ class MetadataMixin:
 
             if overwrite:
                 return self._api.put(
-                    self.metadata_url, 
+                    self.metadata_url,
                     data={
                         "metadata": data,
                     }
                 )
             else:
                 return self._api.patch(
-                    self.metadata_url, 
+                    self.metadata_url,
                     data={
                         "metadata": data
                     }
