@@ -352,11 +352,17 @@ class InventreeObject(object):
         return name in self._data
 
     def __getattr__(self, name):
+        try:
+            data = object.__getattribute__(self, "_data")
+        except AttributeError:
+            # Appears to happen during pickling. Raise immediately to prevent recursion errors
+            raise AttributeError(name)
 
-        if name in self._data.keys():
-            return self._data[name]
-        else:
-            return super().__getattribute__(name)
+        if name in data:
+            return data[name]
+
+        # if we're in this block, there already wasn't a "normal" attribute with this name. Raise
+        raise AttributeError(name)
 
     def __getitem__(self, name):
         if name in self._data.keys():
