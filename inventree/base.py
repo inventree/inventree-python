@@ -593,10 +593,15 @@ class MetadataMixin:
     Note: Requires server API version 49 or newer
 
     """
+    NEW_METADATA_API_VERSION = 436
 
     @property
     def metadata_url(self):
-        return os.path.join(self._url, "metadata/")
+        """Return the metadata URL for this model instance."""
+        if self._api.api_version < self.NEW_METADATA_API_VERSION:
+            return os.path.join(self._url, "metadata/")
+        model_type = self.getModelType()
+        return f"metadata/{model_type}/{self.pk}/"
 
     def getMetadata(self):
         """Read model instance metadata"""
