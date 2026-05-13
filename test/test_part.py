@@ -15,18 +15,30 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree.base import Attachment, Parameter, ParameterTemplate  # noqa: E402
+from inventree.base import (Attachment, Parameter,  # noqa: E402
+                            ParameterTemplate)
 from inventree.company import SupplierPart  # noqa: E402
 from inventree.part import InternalPrice  # noqa: E402
-from inventree.part import (BomItem, PartParameter,  # noqa: E402
-                            Part,
-                            PartCategory, PartCategoryParameterTemplate,
+from inventree.part import (BomItem, Part, PartCategory,  # noqa: E402
+                            PartCategoryParameterTemplate, PartParameter,
                             PartRelated, PartTestTemplate)
 from inventree.stock import StockItem  # noqa: E402
 
 
 class PartCategoryTest(InvenTreeTestCase):
     """Tests for PartCategory models"""
+
+    def test_metadata(self):
+        """Fetch metadata for a particular category."""
+
+        cat = PartCategory.list(self.api, limit=1)[0]
+
+        url = cat.metadata_url
+
+        self.assertEqual(url, f"metadata/partcategory/{cat.pk}/")
+
+        metadata = cat.getMetadata()
+        self.assertIsInstance(metadata, dict)
 
     def test_part_cats(self):
         """
@@ -74,7 +86,7 @@ class PartCategoryTest(InvenTreeTestCase):
 
         # Create some new categories under this one
         for idx in range(3):
-            name = f"Subcategory {n+idx}"
+            name = f"Subcategory {n + idx}"
 
             cat = PartCategory.create(self.api, {
                 "parent": child.pk,
@@ -290,7 +302,7 @@ class PartTest(InvenTreeTestCase):
         for i in range(5):
             prt = Part.create(self.api, {
                 "category": 5,
-                "name": f"Special Part {n+i}",
+                "name": f"Special Part {n + i}",
                 "description": "A new part in this category!",
             })
 
@@ -741,7 +753,7 @@ class PartTest(InvenTreeTestCase):
                 'required_for_sales_orders',
                 'allocated_to_sales_orders',
             ]
-        
+
         for f in fields:
             self.assertIn(f, req)
 

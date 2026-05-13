@@ -10,7 +10,6 @@ import inventree.label
 import inventree.part
 import inventree.report
 
-
 logger = logging.getLogger('inventree')
 
 
@@ -58,7 +57,6 @@ class StockItem(
     """Class representing the StockItem database model."""
 
     URL = 'stock/'
-
     MODEL_TYPE = 'stockitem'
 
     @classmethod
