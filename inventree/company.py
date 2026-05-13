@@ -13,6 +13,7 @@ class Contact(inventree.base.InventreeObject):
 
     URL = 'company/contact/'
     MIN_API_VERSION = 104
+    MODEL_TYPE = 'contact'
 
 
 class Address(inventree.base.InventreeObject):
@@ -20,6 +21,7 @@ class Address(inventree.base.InventreeObject):
 
     URL = 'company/address/'
     MIN_API_VERSION = 126
+    MODEL_TYPE = 'address'
 
 
 class Company(
@@ -117,6 +119,7 @@ class SupplierPart(
     """
 
     URL = 'company/part/'
+    MODEL_TYPE = "supplierpart"
 
     def getPriceBreaks(self):
         """ Get a list of price break objects for this SupplierPart """

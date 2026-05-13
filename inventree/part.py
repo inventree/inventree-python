@@ -38,6 +38,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
     """ Class representing the PartCategory database model """
 
     URL = 'part/category/'
+    MODEL_TYPE = 'partcategory'
 
     def getParts(self, **kwargs):
         return Part.list(self._api, category=self.pk, **kwargs)
@@ -120,7 +121,7 @@ class Part(
         if self._api.api_version < inventree.base.Parameter.MIN_API_VERSION:
             # Return legacy PartParameter objects
             return PartParameter.list(self._api, part=self.pk)
-        
+
         return super().getParameters()
 
     def getRelated(self):
@@ -140,7 +141,7 @@ class Part(
         """
 
         return InternalPrice.setInternalPrice(self._api, self.pk, quantity, price)
-    
+
     def getSalePrice(self):
         """
         Get sales prices for this part
@@ -197,6 +198,7 @@ class BomItem(
     """ Class representing the BomItem database model """
 
     URL = 'bom/'
+    MODEL_TYPE = 'bomitem'
 
 
 class BomItemSubstitute(
@@ -279,7 +281,7 @@ class PartRelated(inventree.base.InventreeObject):
 
 class PartParameter(inventree.base.InventreeObject):
     """Legacy class representing the PartParameter database model.
-    
+
     This has now been replaced with the generic Parameter model.
 
     Ref: https://github.com/inventree/InvenTree/pull/10699
@@ -298,7 +300,7 @@ class PartParameterTemplate(inventree.base.InventreeObject):
     """Legacy class representing the PartParameterTemplate database model.
 
     This has now been replaced with the generic ParameterTemplate model.
-     
+
     Ref: https://github.com/inventree/InvenTree/pull/10699
     """
 
