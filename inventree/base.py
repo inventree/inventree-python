@@ -2,8 +2,9 @@
 
 import json
 import logging
-import requests
 import os
+
+import requests
 
 from . import api as inventree_api
 
@@ -60,7 +61,7 @@ class InventreeObject(object):
         # Coerce 'pk' values to integer
         if self.getPkField() == 'pk':
             val = int(val)
-        
+
         return val
 
     def __str__(self):
@@ -92,7 +93,7 @@ class InventreeObject(object):
                 pk = int(str(pk).strip())
             except Exception:
                 raise TypeError(f"Invalid primary key value '{pk}' for {self.__class__}")
-            
+
             if pk <= 0:
                 raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
@@ -113,7 +114,13 @@ class InventreeObject(object):
     @classmethod
     def getModelType(cls):
         """Return the model type for this label printing class."""
-        return cls.MODEL_TYPE
+        model_type = cls.MODEL_TYPE
+
+        if not model_type:
+            # Default to the class name (lower case) if the model type is not explicitly defined
+            model_type = cls.__name__.lower()
+
+        return model_type
 
     @classmethod
     def checkApiVersion(cls, api):
@@ -532,7 +539,7 @@ class AttachmentMixin:
             model_type=self.getModelType(),
             model_id=self.pk
         )
-        
+
     def addLinkAttachment(self, link, comment=""):
         """Add an external link attachment against this Object.
 
@@ -570,7 +577,7 @@ class ParameterTemplate(InventreeObject):
 
 class ParameterMixin:
     """Mixin class which allows a model class to interact with parameters.
-    
+
     Ref: https://github.com/inventree/InvenTree/pull/10699
     """
 
@@ -604,9 +611,13 @@ class MetadataMixin:
     @property
     def metadata_url(self):
         """Return the metadata URL for this model instance."""
+
+        # Legacy metadata API endpoints
         if self._api.api_version < self.NEW_METADATA_API_VERSION:
             return os.path.join(self._url, "metadata/")
+
         model_type = self.getModelType()
+
         return f"metadata/{model_type}/{self.pk}/"
 
     def getMetadata(self):
