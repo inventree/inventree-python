@@ -14,6 +14,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import Timeout
 
+from . import oAuthClient as oauth
+
 logger = logging.getLogger('inventree')
 
 
@@ -45,6 +47,9 @@ class InvenTreeAPI(object):
             token - Authentication token (if provided, username/password are ignored)
             token-name - Name of the token to use (default = 'inventree-python-client')
             use_token_auth - Use token authentication? (default = True)
+            use_oidc_auth - Use OIDC authentication? (default = False)
+            oidc_client_id - OIDC client ID (defaults to InvenTree public client)
+            oidc_scopes - OIDC scopes (default = ['openid', 'g:read'])
             verbose - Print extra debug messages (default = False)
             strict - Enforce strict HTTPS certificate checking (default = True)
             timeout - Set timeout to use (in seconds). Default: 10
@@ -56,6 +61,9 @@ class InvenTreeAPI(object):
             INVENTREE_API_PASSWORD - Password
             INVENTREE_API_TOKEN - User access token
             INVENTREE_API_TIMEOUT - Timeout value, in seconds
+            INVENTREE_API_OIDC - Use OIDC
+            INVENTREE_API_OIDC_CLIENT_ID - OIDC client ID
+            INVENTREE_API_OIDC_SCOPES - OIDC scopes
         """
 
         self.setHostName(host or os.environ.get('INVENTREE_API_HOST', None))
@@ -68,8 +76,13 @@ class InvenTreeAPI(object):
         self.timeout = kwargs.get('timeout', os.environ.get('INVENTREE_API_TIMEOUT', 10))
         self.proxies = kwargs.get('proxies', dict())
         self.strict = bool(kwargs.get('strict', True))
+        self.oidc_client_id = kwargs.get('oidc_client_id', os.environ.get('INVENTREE_API_OIDC_CLIENT_ID', 'zDFnsiRheJIOKNx6aCQ0quBxECg1QBHtVFDPloJ6'))
+        self.oidc_scopes = kwargs.get('oidc_scopes', os.environ.get('INVENTREE_API_OIDC_SCOPES', ['openid', 'g:read']))
 
         self.use_token_auth = kwargs.get('use_token_auth', True)
+        self.use_oidc_auth = kwargs.get('use_oidc_auth', os.environ.get('INVENTREE_API_OIDC', False))
+        if self.use_oidc_auth and self.use_token_auth:
+            self.use_token_auth = False
         self.verbose = kwargs.get('verbose', False)
 
         self.auth = None
@@ -126,15 +139,18 @@ class InvenTreeAPI(object):
         except Exception:
             raise ConnectionRefusedError("Could not connect to InvenTree server")
 
+        if self.use_oidc_auth:
+            self.requestOidcToken()
+            return
+
         # Basic authentication
         self.auth = HTTPBasicAuth(self.username, self.password)
 
         if not self.testAuth():
             raise ConnectionError("Authentication at InvenTree server failed")
 
-        if self.use_token_auth:
-            if not self.token:
-                self.requestToken()
+        if self.use_token_auth and not self.token:
+            self.requestToken()
 
     def constructApiUrl(self, endpoint_url: str) -> str:
         """Construct an API endpoint URL based on the provided API URL.
@@ -263,6 +279,14 @@ class InvenTreeAPI(object):
 
         return self.token
 
+    def requestOidcToken(self):
+        """Return authentication token from the server using OIDC."""
+        client = oauth.OAuthClient(self.base_url, self.oidc_client_id, self.oidc_scopes)
+        self.token = client._access_token
+
+        return self.token
+
+
     def request(self, url: str, **kwargs):
         """ Perform a URL request to the Inventree API """
 
@@ -308,6 +332,9 @@ class InvenTreeAPI(object):
 
         if self.use_token_auth and self.token:
             headers['AUTHORIZATION'] = f'Token {self.token}'
+            auth = None
+        elif self.use_oidc_auth and self.token:
+            headers['AUTHORIZATION'] = f'Bearer {self.token}'
             auth = None
         else:
             auth = self.auth
@@ -569,8 +596,9 @@ class InvenTreeAPI(object):
             raise FileExistsError(f"Destination file '{destination}' already exists")
 
         if self.token:
+            headername = 'Token' if self.use_token_auth else 'Bearer'
             headers = {
-                'AUTHORIZATION': f"Token {self.token}"
+                'AUTHORIZATION': f"{headername} {self.token}"
             }
             auth = None
         else:

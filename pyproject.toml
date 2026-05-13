@@ -25,6 +25,7 @@ keywords = [
 dependencies = [
     "requests>=2.27.0", 
     "urllib3>=2.3.0",
+    "requests-oauthlib",
 ]
 [project.optional-dependencies]
 "system-certs" = ["pip-system-certs>=4.0"]
