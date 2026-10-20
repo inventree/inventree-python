@@ -2,7 +2,7 @@
 [![PyPI](https://img.shields.io/pypi/v/inventree)](https://pypi.org/project/inventree/)
 ![Build Status](https://github.com/inventree/inventree-python/actions/workflows/ci.yaml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/inventree/inventree-python/badge.svg)](https://coveralls.io/github/inventree/inventree-python)
-![PEP](https://github.com/inventree/inventree-python/actions/workflows/pep.yaml/badge.svg)
+![Code Style](https://github.com/inventree/inventree-python/actions/workflows/style.yaml/badge.svg)
 
 ## InvenTree Python Interface
 
