@@ -18,10 +18,10 @@ from test_api import InvenTreeTestCase  # noqa: E402
 from inventree.base import (Attachment, Parameter,  # noqa: E402
                             ParameterTemplate)
 from inventree.company import SupplierPart  # noqa: E402
-from inventree.part import InternalPrice  # noqa: E402
 from inventree.part import (BomItem, Part, PartCategory,  # noqa: E402
                             PartCategoryParameterTemplate, PartParameter,
                             PartRelated, PartTestTemplate)
+from inventree.pricing import InternalPrice  # noqa: E402
 from inventree.stock import StockItem  # noqa: E402
 
 

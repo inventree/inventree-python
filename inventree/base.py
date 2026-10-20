@@ -21,8 +21,13 @@ class InventreeObject(object):
     URL = ""
 
     @classmethod
-    def get_url(cls):
-        """Helper method to get the URL associated with this model."""
+    def get_url(cls, api=None):
+        """Helper method to get the URL associated with this model.
+
+        Arguments:
+            api: Optional InvenTreeAPI instance. Subclasses may override this method
+                 to return a different URL based on the server API version.
+        """
 
         url = cls.URL
 
@@ -97,7 +102,7 @@ class InventreeObject(object):
             if pk <= 0:
                 raise ValueError(f"Supplier <pk> value ({pk}) for {self.__class__} must be positive.")
 
-        url = self.get_url()
+        url = self.get_url(api)
 
         self._url = f"{url}/{pk}/"
         self._api = api
@@ -147,18 +152,18 @@ class InventreeObject(object):
         cls.checkApiVersion(api)
 
         response = api.request(
-            cls.get_url(),
+            cls.get_url(api),
             method='OPTIONS',
         )
 
         if not response.status_code == 200:
-            logger.error(f"OPTIONS for '{cls.URL}' returned code {response.status_code}")
+            logger.error(f"OPTIONS for '{cls.get_url(api)}' returned code {response.status_code}")
             return {}
 
         try:
             data = json.loads(response.text)
         except json.decoder.JSONDecodeError:
-            logger.error(f"Error decoding OPTIONS response for '{cls.URL}'")
+            logger.error(f"Error decoding OPTIONS response for '{cls.get_url(api)}'")
             return {}
 
         return data
@@ -187,7 +192,7 @@ class InventreeObject(object):
         if field_name in fields:
             return fields[field_name]
         else:
-            logger.warning(f"Field '{field_name}' not found in OPTIONS request for {cls.URL}")
+            logger.warning(f"Field '{field_name}' not found in OPTIONS request for {cls.get_url(api)}")
             return {}
 
     @classmethod
@@ -208,7 +213,7 @@ class InventreeObject(object):
         if cls.getPkField() in data.keys():
             data.pop(cls.getPkField())
 
-        response = api.post(cls.URL, data, **kwargs)
+        response = api.post(cls.get_url(api), data, **kwargs)
 
         if response is None:
             logger.error("Error creating new object")
@@ -225,7 +230,7 @@ class InventreeObject(object):
         # By limiting to a single result, we perform a fast query, but get a total number of results
         params['limit'] = 1
 
-        response = api.get(url=cls.URL, params=params)
+        response = api.get(url=cls.get_url(api), params=params)
 
         return response['count']
 
@@ -243,7 +248,7 @@ class InventreeObject(object):
         if 'url' in kwargs:
             url = kwargs.pop('url')
         else:
-            url = cls.URL
+            url = cls.get_url(api)
 
         try:
             response = api.get(url=url, params=kwargs)
@@ -423,7 +428,7 @@ class BulkDeleteMixin:
             data['filters'] = filters
 
         return api.delete(
-            cls.URL,
+            cls.get_url(api),
             json=data,
         )
 
