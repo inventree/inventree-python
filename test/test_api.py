@@ -8,10 +8,12 @@ import requests
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from inventree import api  # noqa: E402
-from inventree import base  # noqa: E402
-from inventree import part  # noqa: E402
-from inventree import stock  # noqa: E402
+from inventree import (
+    api,  # noqa: E402
+    base,  # noqa: E402
+    part,  # noqa: E402
+    stock,  # noqa: E402
+)
 
 SERVER = os.environ.get('INVENTREE_PYTHON_TEST_SERVER', 'http://127.0.0.1:12345')
 USERNAME = os.environ.get('INVENTREE_PYTHON_TEST_USERNAME', 'testuser')
