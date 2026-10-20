@@ -9,9 +9,9 @@ import inventree.company
 import inventree.label
 import inventree.report
 import inventree.stock
+
 # Pricing models were moved to inventree.pricing - re-exported here for backwards compatibility
-from inventree.pricing import (InternalPrice, PartPricing,  # noqa: F401
-                               SalePrice)
+from inventree.pricing import InternalPrice, PartPricing, SalePrice  # noqa: F401
 
 logger = logging.getLogger('inventree')
 
@@ -135,6 +135,8 @@ class Part(
         """
         Returns the InternalPrice list for this part
         """
+
+
 
         return InternalPrice.list(self._api, part=self.pk)
 

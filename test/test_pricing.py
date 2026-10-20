@@ -10,8 +10,7 @@ from test_api import InvenTreeTestCase  # noqa: E402
 
 import inventree.part  # noqa: E402
 from inventree.part import Part  # noqa: E402
-from inventree.pricing import (InternalPrice, PartPricing,  # noqa: E402
-                               SalePrice)
+from inventree.pricing import InternalPrice, PartPricing, SalePrice  # noqa: E402
 
 
 class DummyAPI:
