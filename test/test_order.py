@@ -9,10 +9,12 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from test_api import InvenTreeTestCase  # noqa: E402
 
-from inventree import company  # noqa: E402
-from inventree import order  # noqa: E402
-from inventree import part  # noqa: E402
-from inventree import stock  # noqa: E402
+from inventree import (
+    company,  # noqa: E402
+    order,  # noqa: E402
+    part,  # noqa: E402
+    stock,  # noqa: E402
+)
 from inventree.base import Attachment  # noqa: E402
 
 
