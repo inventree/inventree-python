@@ -10,6 +10,9 @@ import inventree.label
 import inventree.report
 import inventree.stock
 
+# Pricing models were moved to inventree.pricing - re-exported here for backwards compatibility
+from inventree.pricing import InternalPrice, PartPricing, SalePrice  # noqa: F401
+
 logger = logging.getLogger('inventree')
 
 
@@ -133,6 +136,8 @@ class Part(
         Returns the InternalPrice list for this part
         """
 
+
+
         return InternalPrice.list(self._api, part=self.pk)
 
     def setInternalPrice(self, quantity: int, price: float):
@@ -147,6 +152,12 @@ class Part(
         Get sales prices for this part
         """
         return SalePrice.list(self._api, part=self.pk)[0].price
+
+    def getPricing(self):
+        """
+        Get the cached pricing data for this part
+        """
+        return PartPricing(self._api, part=self.pk)
 
     def getRequirements(self):
         """
@@ -208,49 +219,6 @@ class BomItemSubstitute(
     """Class representing the BomItemSubstitute database model"""
 
     URL = "bom/substitute/"
-
-
-class InternalPrice(inventree.base.InventreeObject):
-    """ Class representing the InternalPrice model """
-
-    URL = 'part/internal-price/'
-
-    @classmethod
-    def setInternalPrice(cls, api, part, quantity: int, price: float):
-        """
-        Set the internal price for this part
-        """
-
-        data = {
-            'part': part,
-            'quantity': quantity,
-            'price': price,
-        }
-
-        # Send the data to the server
-        return api.post(cls.URL, data)
-
-
-class SalePrice(inventree.base.InventreeObject):
-    """ Class representing the SalePrice model """
-
-    URL = 'part/sale-price/'
-
-    @classmethod
-    def setSalePrice(cls, api, part, quantity: int, price: float, price_currency: str):
-        """
-        Set the sale price for this part
-        """
-
-        data = {
-            'part': part,
-            'quantity': quantity,
-            'price': price,
-            'price_currency': price_currency,
-        }
-
-        # Send the data to the server
-        return api.post(cls.URL, data)
 
 
 class PartRelated(inventree.base.InventreeObject):
