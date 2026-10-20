@@ -19,8 +19,8 @@ def style(c):
     Run PEP style checks against the codebase
     """
 
-    print("Running PEP code style checks...")
-    c.run('flake8 .')
+    print("Running ruff code style checks...")
+    c.run('ruff check .')
 
 
 @task
