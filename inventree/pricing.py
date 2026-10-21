@@ -15,7 +15,7 @@ class PricingModelMixin:
     """
 
     # API version at which pricing endpoints moved from /api/part/ to /api/pricing/
-    PRICING_API_VERSION = 561
+    PRICING_API_VERSION = 562
 
     # URL for the endpoint on older servers
     LEGACY_URL = ""
