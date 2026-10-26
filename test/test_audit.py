@@ -73,10 +73,30 @@ class AuditLogTest(InvenTreeTestCase):
             Part.list(self.api, limit=1)[0],
             Company.list(self.api, limit=1)[0],
         ]:
-            for entry in instance.getAuditLog():
+            suffix = f'.{instance.getModelType()}'
+
+            # Entries for this model instance only
+            own = instance.getAuditLog(include_children=False)
+
+            for entry in own:
                 self.assertIsInstance(entry, AuditLog)
-                self.assertTrue(entry.model_type.endswith(f'.{instance.getModelType()}'))
+                self.assertTrue(entry.model_type.endswith(suffix))
                 self.assertEqual(str(entry.object_pk), str(instance.pk))
+
+            # By default, entries for child objects are also included
+            entries = instance.getAuditLog()
+
+            self.assertGreaterEqual(len(entries), len(own))
+
+            for entry in entries:
+                self.assertIsInstance(entry, AuditLog)
+
+                if entry.model_type.endswith(suffix) and str(entry.object_pk) == str(instance.pk):
+                    continue
+
+                # Otherwise, this must be an entry for a child object
+                self.assertTrue(entry.parent_model_type.endswith(suffix))
+                self.assertEqual(str(entry.parent_object_pk), str(instance.pk))
 
     def test_stock_item_history(self):
         """Test that stock item history is available via the audit log."""
