@@ -8,7 +8,7 @@ import inventree.order
 logger = logging.getLogger('inventree')
 
 
-class Contact(inventree.base.InventreeObject):
+class Contact(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """Class representing the Contact model"""
 
     URL = 'company/contact/'
@@ -16,7 +16,7 @@ class Contact(inventree.base.InventreeObject):
     MODEL_TYPE = 'contact'
 
 
-class Address(inventree.base.InventreeObject):
+class Address(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """Class representing the Address model"""
 
     URL = 'company/address/'
@@ -25,6 +25,7 @@ class Address(inventree.base.InventreeObject):
 
 
 class Company(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.ImageMixin,
@@ -106,6 +107,7 @@ class Company(
 
 
 class SupplierPart(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.BarcodeMixin,
@@ -128,6 +130,7 @@ class SupplierPart(
 
 
 class ManufacturerPart(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.BulkDeleteMixin,
@@ -165,7 +168,7 @@ class ManufacturerPartParameter(inventree.base.BulkDeleteMixin, inventree.base.I
     MAX_API_VERSION = 428
 
 
-class SupplierPriceBreak(inventree.base.InventreeObject):
+class SupplierPriceBreak(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """ Class representing the SupplierPriceBreak database model """
 
     URL = 'company/price-break/'

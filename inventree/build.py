@@ -6,6 +6,7 @@ import inventree.stock
 
 
 class Build(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.StatusMixin,

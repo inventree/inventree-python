@@ -433,7 +433,54 @@ class BulkDeleteMixin:
         )
 
 
-class Attachment(BulkDeleteMixin, InventreeObject):
+class AuditLog(InventreeObject):
+    """Class representing an entry in the InvenTree audit log.
+
+    Audit log entries are read-only.
+
+    Note: From API version 566 and onwards, stock item history is recorded
+    in the audit log (replacing the legacy StockItemTracking model).
+
+    Ref: https://github.com/inventree/InvenTree/pull/13101
+    """
+
+    URL = 'audit/'
+    MIN_API_VERSION = 565
+
+    @classmethod
+    def listForModel(cls, api, model_type, model_id=None, **kwargs):
+        """Return the audit log entries for a particular model type.
+
+        Arguments:
+            model_type: The model type (e.g. 'stockitem')
+            model_id: Optional primary key, to filter by a specific model instance
+
+        Entries are returned in reverse chronological order (most recent first)
+        """
+
+        kwargs['model_type'] = model_type
+
+        if model_id is not None:
+            kwargs['model_id'] = model_id
+
+        return cls.list(api, **kwargs)
+
+
+class AuditLogMixin:
+    """Mixin class for accessing the audit log entries for a model instance"""
+
+    def getAuditLog(self, **kwargs):
+        """Return the audit log entries for this model instance"""
+
+        return AuditLog.listForModel(
+            self._api,
+            self.getModelType(),
+            model_id=self.pk,
+            **kwargs
+        )
+
+
+class Attachment(AuditLogMixin, BulkDeleteMixin, InventreeObject):
     """Class representing a file attachment object."""
 
     URL = 'attachment/'
@@ -562,7 +609,7 @@ class AttachmentMixin:
         )
 
 
-class Parameter(BulkDeleteMixin, InventreeObject):
+class Parameter(AuditLogMixin, BulkDeleteMixin, InventreeObject):
     """Class representing a custom parameter object."""
 
     URL = "parameter/"
@@ -571,7 +618,7 @@ class Parameter(BulkDeleteMixin, InventreeObject):
     MIN_API_VERSION = 429
 
 
-class ParameterTemplate(InventreeObject):
+class ParameterTemplate(AuditLogMixin, InventreeObject):
     """Class representing a parameter template object."""
 
     URL = "parameter/template/"

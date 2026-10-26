@@ -9,6 +9,7 @@ import inventree.report
 
 
 class PurchaseOrder(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
@@ -139,6 +140,7 @@ class PurchaseOrder(
 
 
 class PurchaseOrderLineItem(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
 ):
@@ -217,7 +219,7 @@ class PurchaseOrderLineItem(
 
         if batch_code:
             item_data['batch_code'] = batch_code
-        
+
         if serial_numbers:
             item_data['serial_numbers'] = serial_numbers
 
@@ -243,12 +245,14 @@ class PurchaseOrderLineItem(
 
 
 class PurchaseOrderExtraLineItem(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
 ):
     """ Class representing the PurchaseOrderExtraLineItem database model """
 
     URL = 'order/po-extra-line/'
+    MODEL_TYPE = 'purchaseorderextraline'
 
     def getOrder(self):
         """

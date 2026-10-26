@@ -13,7 +13,8 @@ from inventree import (
     company,  # noqa: E402
     part,  # noqa: E402
 )
-from inventree.stock import StockItem, StockLocation  # noqa: E402
+from inventree.base import AuditLog  # noqa: E402
+from inventree.stock import StockItem, StockItemTracking, StockLocation  # noqa: E402
 
 
 class StockLocationTest(InvenTreeTestCase):
@@ -277,6 +278,20 @@ class StockTest(InvenTreeTestCase):
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
 
+    def legacyTracking(self):
+        """Return True if the server API supports the legacy stock tracking endpoint"""
+        return self.api.api_version <= StockItemTracking.MAX_API_VERSION
+
+    def entryLabel(self, entry):
+        """Return the label for a stock history entry"""
+
+        if self.legacyTracking():
+            self.assertIsInstance(entry, StockItemTracking)
+            return entry.label
+
+        self.assertIsInstance(entry, AuditLog)
+        return entry.event_label
+
     def test_count(self):
         """Test the 'count' action"""
 
@@ -298,14 +313,17 @@ class StockAdjustTest(InvenTreeTestCase):
         self.assertEqual(item.quantity, q)
 
         # 2 tracking entries should have been added
-        self.assertEqual(
-            len(item.getTrackingEntries()),
-            n_tracking + 2
-        )
+        if self.legacyTracking():
+            self.assertEqual(
+                len(item.getTrackingEntries()),
+                n_tracking + 2
+            )
+        else:
+            self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
 
         # The most recent tracking entry should have a note
         t = item.getTrackingEntries()[0]
-        self.assertEqual(t.label, 'Stock counted')
+        self.assertEqual(self.entryLabel(t), 'Stock counted')
 
         # Check error conditions
         with self.assertRaises(requests.exceptions.HTTPError):
@@ -409,7 +427,7 @@ class StockAdjustTest(InvenTreeTestCase):
             history = item.getTrackingEntries()
 
             self.assertTrue(len(history) >= 2)
-            self.assertEqual(history[0].label, 'Location changed')
+            self.assertEqual(self.entryLabel(history[0]), 'Location changed')
 
     def test_assign_stock(self):
         """Test assigning stock to customer"""

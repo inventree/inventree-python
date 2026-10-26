@@ -6,7 +6,7 @@ import inventree.base
 logger = logging.getLogger('inventree')
 
 
-class ProjectCode(inventree.base.InventreeObject):
+class ProjectCode(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """Class representing the 'ProjectCode' database model"""
 
     URL = 'project-code/'

@@ -37,7 +37,7 @@ class PartCategoryParameterTemplate(inventree.base.InventreeObject):
         return inventree.base.ParameterTemplate(self._api, template_id)
 
 
-class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject):
+class PartCategory(inventree.base.AuditLogMixin, inventree.base.MetadataMixin, inventree.base.InventreeObject):
     """ Class representing the PartCategory database model """
 
     URL = 'part/category/'
@@ -70,6 +70,7 @@ class PartCategory(inventree.base.MetadataMixin, inventree.base.InventreeObject)
 
 
 class Part(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.BarcodeMixin,
@@ -202,6 +203,7 @@ class PartTestTemplate(inventree.base.MetadataMixin, inventree.base.InventreeObj
 
 
 class BomItem(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
     inventree.report.ReportPrintingMixin,
@@ -213,6 +215,7 @@ class BomItem(
 
 
 class BomItemSubstitute(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
 ):
