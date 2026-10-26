@@ -470,7 +470,12 @@ class AuditLogMixin:
     """Mixin class for accessing the audit log entries for a model instance"""
 
     def getAuditLog(self, **kwargs):
-        """Return the audit log entries for this model instance"""
+        """Return the audit log entries for this model instance
+
+        Note: By default, the server also returns entries for "child" objects
+        (e.g. the line items of an order). Pass include_children=False to
+        return only the entries for this model instance.
+        """
 
         return AuditLog.listForModel(
             self._api,
