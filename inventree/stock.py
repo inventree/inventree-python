@@ -52,6 +52,7 @@ class StockItem(
     inventree.base.BulkDeleteMixin,
     inventree.base.MetadataMixin,
     inventree.label.LabelPrintingMixin,
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
 ):
     """Class representing the StockItem database model."""
@@ -318,7 +319,14 @@ class StockItem(
         return StockLocation(self._api, self.location)
 
     def getTrackingEntries(self, **kwargs):
-        """Return list of StockItemTracking instances associated with this StockItem"""
+        """Return the history entries associated with this StockItem.
+
+        - For API version <= 565, returns a list of StockItemTracking instances
+        - For API version >= 566, returns a list of AuditLog instances
+        """
+
+        if self._api.api_version > StockItemTracking.MAX_API_VERSION:
+            return self.getAuditLog(**kwargs)
 
         return StockItemTracking.list(self._api, item=self.pk, **kwargs)
 

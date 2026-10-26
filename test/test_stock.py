@@ -13,6 +13,7 @@ from inventree import (
     company,  # noqa: E402
     part,  # noqa: E402
 )
+from inventree.base import AuditLog  # noqa: E402
 from inventree.stock import StockItem, StockItemTracking, StockLocation  # noqa: E402
 
 
@@ -277,9 +278,19 @@ class StockTest(InvenTreeTestCase):
 class StockAdjustTest(InvenTreeTestCase):
     """Unit tests for stock 'adjustment' actions"""
 
-    def trackingSupported(self):
+    def legacyTracking(self):
         """Return True if the server API supports the legacy stock tracking endpoint"""
         return self.api.api_version <= StockItemTracking.MAX_API_VERSION
+
+    def entryLabel(self, entry):
+        """Return the label for a stock history entry"""
+
+        if self.legacyTracking():
+            self.assertIsInstance(entry, StockItemTracking)
+            return entry.label
+
+        self.assertIsInstance(entry, AuditLog)
+        return entry.event_label
 
     def test_count(self):
         """Test the 'count' action"""
@@ -288,8 +299,7 @@ class StockAdjustTest(InvenTreeTestCase):
         item = StockItem.list(self.api, in_stock=True, limit=1)[0]
 
         # Count number of tracking entries
-        if self.trackingSupported():
-            n_tracking = len(item.getTrackingEntries())
+        n_tracking = len(item.getTrackingEntries())
 
         q = item.quantity
 
@@ -302,19 +312,18 @@ class StockAdjustTest(InvenTreeTestCase):
         item.reload()
         self.assertEqual(item.quantity, q)
 
-        if self.trackingSupported():
-            # 2 tracking entries should have been added
+        # 2 tracking entries should have been added
+        if self.legacyTracking():
             self.assertEqual(
                 len(item.getTrackingEntries()),
                 n_tracking + 2
             )
-
-            # The most recent tracking entry should have a note
-            t = item.getTrackingEntries()[0]
-            self.assertEqual(t.label, 'Stock counted')
         else:
-            with self.assertRaises(NotImplementedError):
-                item.getTrackingEntries()
+            self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
+
+        # The most recent tracking entry should have a note
+        t = item.getTrackingEntries()[0]
+        self.assertEqual(self.entryLabel(t), 'Stock counted')
 
         # Check error conditions
         with self.assertRaises(requests.exceptions.HTTPError):
@@ -329,8 +338,7 @@ class StockAdjustTest(InvenTreeTestCase):
         # Find the first available stock item
         item = StockItem.list(self.api, in_stock=True, limit=1)[0]
 
-        if self.trackingSupported():
-            n_tracking = len(item.getTrackingEntries())
+        n_tracking = len(item.getTrackingEntries())
 
         q = item.quantity
 
@@ -345,8 +353,7 @@ class StockAdjustTest(InvenTreeTestCase):
         self.assertEqual(item.quantity, q)
 
         # 2 additional tracking entries should have been added
-        if self.trackingSupported():
-            self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
+        self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
 
         # Test error conditions
         for v in [-1, 'gg', None]:
@@ -360,8 +367,7 @@ class StockAdjustTest(InvenTreeTestCase):
 
         item = StockItem(self.api, pk=2)
 
-        if self.trackingSupported():
-            n_tracking = len(item.getTrackingEntries())
+        n_tracking = len(item.getTrackingEntries())
 
         # Transfer to a StockLocation instance
         location = StockLocation(self.api, pk=1)
@@ -376,8 +382,7 @@ class StockAdjustTest(InvenTreeTestCase):
         self.assertEqual(item.location, 2)
 
         # 2 additional tracking entries should have been added
-        if self.trackingSupported():
-            self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
+        self.assertTrue(len(item.getTrackingEntries()) > n_tracking)
 
         # Attempt to transfer to an invalid location
         for loc in [-1, 'qqq', 99999, None]:
@@ -419,11 +424,10 @@ class StockAdjustTest(InvenTreeTestCase):
             item.reload()
             self.assertEqual(item.location, 1)
 
-            if self.trackingSupported():
-                history = item.getTrackingEntries()
+            history = item.getTrackingEntries()
 
-                self.assertTrue(len(history) >= 2)
-                self.assertEqual(history[0].label, 'Location changed')
+            self.assertTrue(len(history) >= 2)
+            self.assertEqual(self.entryLabel(history[0]), 'Location changed')
 
     def test_assign_stock(self):
         """Test assigning stock to customer"""

@@ -10,6 +10,7 @@ import inventree.stock
 
 
 class ReturnOrder(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
@@ -69,7 +70,7 @@ class ReturnOrder(
         return self._statusupdate(status='complete', **kwargs)
 
 
-class ReturnOrderLineItem(inventree.base.InventreeObject):
+class ReturnOrderLineItem(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """Class representing the ReturnOrderLineItem model"""
 
     URL = 'order/ro-line/'
@@ -84,10 +85,11 @@ class ReturnOrderLineItem(inventree.base.InventreeObject):
         return inventree.stock.StockItem(self._api, self.item)
 
 
-class ReturnOrderExtraLineItem(inventree.base.InventreeObject):
+class ReturnOrderExtraLineItem(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
     """Class representing the ReturnOrderExtraLineItem model"""
 
     URL = 'order/ro-extra-line/'
+    MODEL_TYPE = 'returnorderextraline'
     MIN_API_VERSION = 104
 
     def getOrder(self):

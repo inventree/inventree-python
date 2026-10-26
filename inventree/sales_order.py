@@ -10,6 +10,7 @@ import inventree.stock
 
 
 class SalesOrder(
+    inventree.base.AuditLogMixin,
     inventree.base.AttachmentMixin,
     inventree.base.ParameterMixin,
     inventree.base.MetadataMixin,
@@ -87,6 +88,7 @@ class SalesOrder(
 
 
 class SalesOrderLineItem(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
 ):
@@ -178,12 +180,14 @@ class SalesOrderLineItem(
 
 
 class SalesOrderExtraLineItem(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.MetadataMixin,
 ):
     """ Class representing the SalesOrderExtraLineItem database model """
 
     URL = 'order/so-extra-line/'
+    MODEL_TYPE = 'salesorderextraline'
 
     def getOrder(self):
         """
@@ -223,6 +227,7 @@ class SalesOrderAllocation(
 
 
 class SalesOrderShipment(
+    inventree.base.AuditLogMixin,
     inventree.base.InventreeObject,
     inventree.base.StatusMixin,
     inventree.base.MetadataMixin,

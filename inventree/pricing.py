@@ -46,10 +46,11 @@ class PricingModelMixin:
         return super().get_url(api)
 
 
-class InternalPrice(PricingModelMixin, inventree.base.InventreeObject):
+class InternalPrice(inventree.base.AuditLogMixin, PricingModelMixin, inventree.base.InventreeObject):
     """ Class representing the InternalPrice model """
 
     URL = 'pricing/internal-price/'
+    MODEL_TYPE = 'partinternalpricebreak'
     LEGACY_URL = 'part/internal-price/'
 
     @classmethod
@@ -68,10 +69,11 @@ class InternalPrice(PricingModelMixin, inventree.base.InventreeObject):
         return api.post(cls.get_url(api), data)
 
 
-class SalePrice(PricingModelMixin, inventree.base.InventreeObject):
+class SalePrice(inventree.base.AuditLogMixin, PricingModelMixin, inventree.base.InventreeObject):
     """ Class representing the SalePrice model """
 
     URL = 'pricing/sale-price/'
+    MODEL_TYPE = 'partsellpricebreak'
     LEGACY_URL = 'part/sale-price/'
 
     @classmethod
