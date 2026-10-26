@@ -334,9 +334,15 @@ class StockItem(
 
 
 class StockItemTracking(inventree.base.InventreeObject):
-    """Class representing a StockItem tracking object."""
+    """Legacy class representing a StockItem tracking object.
+
+    The stock tracking API has been removed, and replaced with the audit log API.
+
+    Ref: https://github.com/inventree/InvenTree/pull/13101
+    """
 
     URL = 'stock/track/'
+    MAX_API_VERSION = 565
 
 
 class StockItemTestResult(
