@@ -3,7 +3,9 @@
 import logging
 
 import inventree.base
-import inventree.order
+import inventree.purchase_order
+import inventree.return_order
+import inventree.sales_order
 
 logger = logging.getLogger('inventree')
 
@@ -63,7 +65,7 @@ class Company(
         """
         Return list of PurchaseOrder objects associated with this company
         """
-        return inventree.order.PurchaseOrder.list(self._api, supplier=self.pk, **kwargs)
+        return inventree.purchase_order.PurchaseOrder.list(self._api, supplier=self.pk, **kwargs)
 
     def createPurchaseOrder(self, **kwargs):
         """
@@ -72,7 +74,7 @@ class Company(
 
         kwargs['supplier'] = self.pk
 
-        return inventree.order.PurchaseOrder.create(
+        return inventree.purchase_order.PurchaseOrder.create(
             self._api,
             data=kwargs
         )
@@ -81,7 +83,7 @@ class Company(
         """
         Return list of SalesOrder objects associated with this company
         """
-        return inventree.order.SalesOrder.list(self._api, customer=self.pk, **kwargs)
+        return inventree.sales_order.SalesOrder.list(self._api, customer=self.pk, **kwargs)
 
     def createSalesOrder(self, **kwargs):
         """
@@ -90,20 +92,20 @@ class Company(
 
         kwargs['customer'] = self.pk
 
-        return inventree.order.SalesOrder.create(
+        return inventree.sales_order.SalesOrder.create(
             self._api,
             data=kwargs
         )
 
     def getReturnOrders(self, **kwargs):
         """Return list of ReturnOrder objects associated with this company"""
-        return inventree.order.ReturnOrder.list(self._api, customer=self.pk, **kwargs)
+        return inventree.return_order.ReturnOrder.list(self._api, customer=self.pk, **kwargs)
 
     def createReturnOrder(self, **kwargs):
         """Create (and return) a new ReturnOrder against this company"""
         kwargs['customer'] = self.pk
 
-        return inventree.order.ReturnOrder.create(self._api, data=kwargs)
+        return inventree.return_order.ReturnOrder.create(self._api, data=kwargs)
 
 
 class SupplierPart(
