@@ -191,3 +191,161 @@ class PartPricing(PricingModelMixin, inventree.base.InventreeObject):
 
     def delete(self):
         self._unsupported('delete')
+
+
+# API version which introduced the StockItemCostEntry and StockItemCost models,
+# and removed the StockItem 'purchase_price' field.
+# Ref: https://github.com/inventree/InvenTree/pull/13294
+STOCK_COST_API_VERSION = 585
+
+
+class CostType:
+    """Category of a StockItemCostEntry - i.e. *what* the cost is for.
+
+    Values match the server-side 'CostType' status codes.
+    The server provides the (translated) labels via StockItemCostEntry.getCostTypes()
+    """
+
+    PURCHASE = 10
+    LANDED = 20
+    FEES = 30
+    MATERIAL = 40
+    MANUFACTURING = 50
+    ADJUSTMENT = 60
+    OTHER = 90
+
+
+class StockItemCostEntry(inventree.base.AuditLogMixin, inventree.base.InventreeObject):
+    """Class representing a single cost entry against a StockItem.
+
+    A StockItem may have any number of cost entries, which are summed
+    (in the default currency) to produce the StockItemCost summary.
+
+    Notes:
+        - All costs are *per unit* of the stock item
+        - Provide 'min_cost' and / or 'max_cost' - if only one is provided, the server sets the other to match
+        - Accessing cost entries requires both the 'pricing' and 'stock' roles
+          (view to read, change to write)
+
+    Ref: https://github.com/inventree/InvenTree/pull/13294
+    """
+
+    URL = 'pricing/stock-cost-entry/'
+    MODEL_TYPE = 'stockitemcostentry'
+    MIN_API_VERSION = STOCK_COST_API_VERSION
+
+    @classmethod
+    def addCost(cls, api, stock_item, cost_type=CostType.PURCHASE, cost=None, min_cost=None, max_cost=None, currency=None, **kwargs):
+        """Create a new cost entry against a StockItem.
+
+        Arguments:
+            api: InvenTreeAPI instance
+            stock_item: StockItem instance or primary key
+            cost_type: Category of the cost (see CostType)
+            cost: A single unit cost - shorthand for min_cost = max_cost = cost
+            min_cost: Minimum unit cost
+            max_cost: Maximum unit cost
+            currency: Currency code (defaults to the server default currency)
+            kwargs: Any other fields (e.g. 'notes', 'source', 'source_data')
+
+        Returns:
+            The created StockItemCostEntry instance
+
+        Raises:
+            ValueError: If no cost is provided, or both 'cost' and 'min_cost' / 'max_cost' are provided
+            NotImplementedError: If the server API version is too old
+        """
+
+        if cost is not None:
+            if min_cost is not None or max_cost is not None:
+                raise ValueError("Provide either 'cost', or 'min_cost' / 'max_cost'")
+
+            min_cost = max_cost = cost
+
+        if min_cost is None and max_cost is None:
+            raise ValueError("A cost value must be provided")
+
+        data = {
+            **kwargs,
+            'stock_item': getattr(stock_item, 'pk', stock_item),
+            'cost_type': int(cost_type),
+        }
+
+        if min_cost is not None:
+            data['min_cost'] = min_cost
+
+        if max_cost is not None:
+            data['max_cost'] = max_cost
+
+        if currency:
+            data['currency'] = currency
+
+        return cls.create(api, data)
+
+    @classmethod
+    def getCostTypes(cls, api):
+        """Return the cost type definitions provided by the server."""
+
+        cls.checkApiVersion(api)
+
+        return api.get(f"{cls.get_url(api)}status/")
+
+    def getStockItem(self):
+        """Return the StockItem associated with this cost entry."""
+
+        from inventree.stock import StockItem
+
+        return StockItem(self._api, pk=self.stock_item)
+
+
+class StockItemCost(inventree.base.InventreeObject):
+    """Class representing the (read-only) cost summary for a StockItem.
+
+    The summary is calculated by the server from the StockItemCostEntry records
+    for the stock item, and cannot be created, edited or deleted directly.
+
+    Notes:
+        - The summary 'pk' is not the same as the StockItem 'pk' - use StockItem.getCost()
+        - 'min_cost' / 'max_cost' are the total unit cost, in the server default 'currency'
+        - 'incomplete' is True if any cost entry could not be included (e.g. no exchange rate available)
+
+    Ref: https://github.com/inventree/InvenTree/pull/13294
+    """
+
+    URL = 'pricing/stock-cost/'
+    MODEL_TYPE = 'stockitemcost'
+    MIN_API_VERSION = STOCK_COST_API_VERSION
+
+    @classmethod
+    def forStockItem(cls, api, stock_item):
+        """Return the cost summary for a StockItem, or None if it has no cost data.
+
+        Arguments:
+            api: InvenTreeAPI instance
+            stock_item: StockItem instance or primary key
+        """
+
+        results = cls.list(api, stock_item=getattr(stock_item, 'pk', stock_item))
+
+        return results[0] if results else None
+
+    def getStockItem(self):
+        """Return the StockItem associated with this cost summary."""
+
+        from inventree.stock import StockItem
+
+        return StockItem(self._api, pk=self.stock_item)
+
+    @classmethod
+    def _unsupported(cls, action):
+        raise NotImplementedError(f"'{action}' is not supported for {cls.__name__} - the cost summary is read-only (use StockItemCostEntry instead)")
+
+    @classmethod
+    def create(cls, api, data, **kwargs):
+        cls._unsupported('create')
+
+    def save(self, data=None, files=None, method='PATCH'):
+        self._unsupported('save')
+
+    def delete(self):
+        self._unsupported('delete')

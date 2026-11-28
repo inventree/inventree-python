@@ -10,7 +10,16 @@ from test_api import InvenTreeTestCase  # noqa: E402
 
 import inventree.part  # noqa: E402
 from inventree.part import Part  # noqa: E402
-from inventree.pricing import InternalPrice, PartPricing, SalePrice  # noqa: E402
+from inventree.pricing import (  # noqa: E402
+    STOCK_COST_API_VERSION,
+    CostType,
+    InternalPrice,
+    PartPricing,
+    SalePrice,
+    StockItemCost,
+    StockItemCostEntry,
+)
+from inventree.stock import StockItem  # noqa: E402
 
 
 class DummyAPI:
@@ -237,3 +246,196 @@ class PartPricingTest(InvenTreeTestCase):
 
         pricing.reload()
         self.assertTrue(pricing.is_valid())
+
+
+class RecordingAPI(DummyAPI):
+    """Stand-in for InvenTreeAPI which records requests, and returns canned responses"""
+
+    def __init__(self, api_version, response=None):
+        super().__init__(api_version)
+        self.response = response
+        self.requests = []
+
+    def get(self, url, params=None, **kwargs):
+        self.requests.append(('GET', url, params))
+        return self.response
+
+    def post(self, url, data, **kwargs):
+        self.requests.append(('POST', url, data))
+        return {'pk': 1, **data}
+
+
+class StockItemCostOfflineTests(unittest.TestCase):
+    """Unit tests for the stock item cost models which do not require a server"""
+
+    VERSION = STOCK_COST_API_VERSION
+
+    def test_api_version(self):
+        """Stock item cost models require the matching server API version"""
+
+        old = RecordingAPI(self.VERSION - 1)
+        new = RecordingAPI(self.VERSION, response=[])
+
+        for cls in [StockItemCostEntry, StockItemCost]:
+            self.assertEqual(cls.MIN_API_VERSION, self.VERSION)
+
+            with self.assertRaises(NotImplementedError):
+                cls.list(old)
+
+            self.assertEqual(cls.list(new), [])
+
+        item = StockItem(old, data={'pk': 5})
+
+        with self.assertRaises(NotImplementedError):
+            item.getCostEntries()
+
+        with self.assertRaises(NotImplementedError):
+            item.getCost()
+
+        with self.assertRaises(NotImplementedError):
+            item.addCostEntry(cost=1)
+
+        with self.assertRaises(NotImplementedError):
+            StockItemCostEntry.getCostTypes(old)
+
+        # No request is made to an unsupported server
+        self.assertEqual(old.requests, [])
+
+    def test_urls(self):
+        """Stock item cost models use the pricing app URLs"""
+
+        api = DummyAPI(self.VERSION)
+
+        self.assertEqual(StockItemCostEntry.get_url(api), 'pricing/stock-cost-entry/')
+        self.assertEqual(StockItemCost.get_url(api), 'pricing/stock-cost/')
+
+    def test_add_cost(self):
+        """Cost entry data is constructed from the provided arguments"""
+
+        api = RecordingAPI(self.VERSION)
+        item = StockItem(api, data={'pk': 5})
+
+        entry = item.addCostEntry(cost='1.5', currency='AUD', notes='Freight')
+
+        self.assertEqual(type(entry), StockItemCostEntry)
+        self.assertEqual(api.requests[-1], ('POST', 'pricing/stock-cost-entry/', {
+            'stock_item': 5,
+            'cost_type': CostType.PURCHASE,
+            'min_cost': '1.5',
+            'max_cost': '1.5',
+            'currency': 'AUD',
+            'notes': 'Freight',
+        }))
+
+        # Cost range, with only a single bound (server fills in the other bound)
+        StockItemCostEntry.addCost(api, 7, CostType.LANDED, min_cost=2)
+
+        self.assertEqual(api.requests[-1], ('POST', 'pricing/stock-cost-entry/', {
+            'stock_item': 7,
+            'cost_type': CostType.LANDED,
+            'min_cost': 2,
+        }))
+
+        with self.assertRaises(ValueError):
+            item.addCostEntry()
+
+        with self.assertRaises(ValueError):
+            item.addCostEntry(cost=1, min_cost=1)
+
+    def test_cost_summary(self):
+        """The cost summary is looked up by stock item, and is read-only"""
+
+        api = RecordingAPI(self.VERSION, response=[])
+        item = StockItem(api, data={'pk': 5})
+
+        # No cost data for this stock item
+        self.assertIsNone(item.getCost())
+        self.assertEqual(api.requests[-1], ('GET', 'pricing/stock-cost/', {'stock_item': 5}))
+
+        api.response = [{'pk': 9, 'stock_item': 5, 'currency': 'USD', 'min_cost': '1.0', 'max_cost': '2.0', 'incomplete': False}]
+
+        summary = item.getCost()
+
+        self.assertEqual(type(summary), StockItemCost)
+        self.assertEqual(summary.pk, 9)
+        self.assertEqual(summary.stock_item, 5)
+
+        with self.assertRaises(NotImplementedError):
+            StockItemCost.create(api, {})
+
+        with self.assertRaises(NotImplementedError):
+            summary.save()
+
+        with self.assertRaises(NotImplementedError):
+            summary.delete()
+
+
+class StockItemCostTest(InvenTreeTestCase):
+    """Test that stock item cost data can be managed via the API"""
+
+    def setUp(self):
+        super().setUp()
+
+        if self.api.api_version < STOCK_COST_API_VERSION:
+            self.skipTest(f"Stock item costs require API version >= {STOCK_COST_API_VERSION}")
+
+    def test_fields(self):
+        """Test field names via OPTIONS request"""
+
+        field_names = StockItemCostEntry.fieldNames(self.api)
+
+        for field in ['stock_item', 'cost_type', 'currency', 'min_cost', 'max_cost', 'notes']:
+            self.assertIn(field, field_names)
+
+    def test_cost_types(self):
+        """Cost type definitions match the values provided by the server"""
+
+        data = StockItemCostEntry.getCostTypes(self.api)
+        values = {v['key']: v['name'] for v in data['values'].values()}
+
+        self.assertEqual(values[CostType.PURCHASE], 'PURCHASE')
+        self.assertEqual(values[CostType.OTHER], 'OTHER')
+
+    def test_stock_item_costs(self):
+        """Cost entries can be created, edited and removed, and are reflected in the summary"""
+
+        item = StockItem.list(self.api, limit=1)[0]
+
+        # Remove any existing cost entries
+        for entry in item.getCostEntries():
+            entry.delete()
+
+        self.assertEqual(len(item.getCostEntries()), 0)
+        self.assertIsNone(item.getCost())
+
+        purchase = item.addCostEntry(cost=10, currency='USD')
+        item.addCostEntry(CostType.LANDED, min_cost=1, max_cost=3, currency='USD', notes='Freight')
+
+        entries = item.getCostEntries()
+        self.assertEqual(len(entries), 2)
+
+        for entry in entries:
+            self.assertEqual(type(entry), StockItemCostEntry)
+            self.assertEqual(entry.stock_item, item.pk)
+            self.assertEqual(entry.getStockItem().pk, item.pk)
+
+        self.assertEqual(len(item.getCostEntries(cost_type=CostType.LANDED)), 1)
+
+        # Edit an existing entry
+        purchase.save({'min_cost': 12, 'max_cost': 12})
+        self.assertEqual(float(purchase.min_cost), 12)
+
+        summary = item.getCost()
+
+        self.assertEqual(type(summary), StockItemCost)
+        self.assertEqual(summary.getStockItem().pk, item.pk)
+
+        if summary.currency == 'USD':
+            self.assertEqual(float(summary.min_cost), 13)
+            self.assertEqual(float(summary.max_cost), 15)
+
+        # Removing all entries removes the summary
+        for entry in item.getCostEntries():
+            entry.delete()
+
+        self.assertIsNone(item.getCost())

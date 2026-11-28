@@ -8,6 +8,7 @@ import inventree.base
 import inventree.company
 import inventree.label
 import inventree.part
+import inventree.pricing
 import inventree.report
 
 logger = logging.getLogger('inventree')
@@ -329,6 +330,33 @@ class StockItem(
             return self.getAuditLog(**kwargs)
 
         return StockItemTracking.list(self._api, item=self.pk, **kwargs)
+
+    def getCostEntries(self, **kwargs):
+        """Return the cost entries associated with this StockItem.
+
+        Requires API version >= 583 (and the 'pricing' view role on the server)
+        """
+
+        return inventree.pricing.StockItemCostEntry.list(self._api, stock_item=self.pk, **kwargs)
+
+    def addCostEntry(self, cost_type=inventree.pricing.CostType.PURCHASE, **kwargs):
+        """Add a new (per unit) cost entry against this StockItem.
+
+        See StockItemCostEntry.addCost for the available arguments.
+
+        Requires API version >= 583 (and the 'pricing' change role on the server)
+        """
+
+        return inventree.pricing.StockItemCostEntry.addCost(self._api, self, cost_type=cost_type, **kwargs)
+
+    def getCost(self):
+        """Return the cost summary (StockItemCost) for this StockItem, or None if it has no cost data.
+
+        Requires API version >= 583 (and the 'pricing' view role on the server).
+        For older servers, the unit cost is available via the 'purchase_price' field.
+        """
+
+        return inventree.pricing.StockItemCost.forStockItem(self._api, self)
 
     def getTestResults(self, **kwargs):
         """ Return all the test results associated with this StockItem """
