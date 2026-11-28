@@ -196,7 +196,7 @@ class PartPricing(PricingModelMixin, inventree.base.InventreeObject):
 # API version which introduced the StockItemCostEntry and StockItemCost models,
 # and removed the StockItem 'purchase_price' field.
 # Ref: https://github.com/inventree/InvenTree/pull/13294
-STOCK_COST_API_VERSION = 583
+STOCK_COST_API_VERSION = 585
 
 
 class CostType:
